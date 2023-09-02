@@ -1,0 +1,8 @@
+dist/
+node_modules/
+.cache/
+.alpackages/
+.snapshots/
+.vscode/
+*.app
+CostGraph/Scripts/index.js
