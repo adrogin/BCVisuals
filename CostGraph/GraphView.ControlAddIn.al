@@ -7,4 +7,6 @@ controladdin "Graph View"
     RequestedHeight = 500;
     StyleSheets = 'CSS\style.css';
     StartupScript = 'Scripts\index.js';
+
+    procedure RenderGraph(Nodes: JsonArray; Edges: JsonArray);
 }
