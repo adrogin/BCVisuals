@@ -26,7 +26,7 @@ page 50100 "Cost Source"
                         if SelectEntry(EntryNo) then begin
                             EntryInfo := FormatEntryInfo(EntryNo);
                             CostSourceTrace.BuildCostSourceGraph(EntryNo, Nodes, Edges);
-                            CurrPage.GraphControl.RenderGraph(Nodes, Edges);
+                            CurrPage.GraphControl.DrawGraph('controlAddIn', Nodes, Edges);
                         end;
                     end;
                 }

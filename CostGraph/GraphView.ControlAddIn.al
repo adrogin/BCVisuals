@@ -6,7 +6,11 @@ controladdin "Graph View"
     HorizontalShrink = true;
     RequestedHeight = 500;
     StyleSheets = 'CSS\style.css';
-    StartupScript = 'Scripts\index.js';
+    Scripts =
+        'https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js',
+        'Scripts\cytograph.js',
+        'Scripts\index.js';
 
-    procedure RenderGraph(Nodes: JsonArray; Edges: JsonArray);
+    procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray);
+    procedure ShowMessage();
 }
