@@ -1,6 +1,6 @@
 codeunit 50100 "Cost Source Trace"
 {
-    procedure GetVisitedEntriesBackward(FromItemLedgEntry: Record "Item Ledger Entry"; var ItemLedgEntryInChain: Record "Item Ledger Entry"; WithinValuationDate: Boolean)
+    procedure GetVisitedEntriesBackward(FromItemLedgEntry: Record "Item Ledger Entry"; WithinValuationDate: Boolean)
     var
         ToItemLedgEntry: Record "Item Ledger Entry";
         DummyItemLedgEntry: Record "Item Ledger Entry";
@@ -15,23 +15,16 @@ codeunit 50100 "Cost Source Trace"
             MaxValuationDate := AvgCostEntryPointHandler.GetMaxValuationDate(FromItemLedgEntry, ValueEntry);
         end;
 
-        ItemLedgEntryInChain.Reset();
-        ItemLedgEntryInChain.DeleteAll();
+        ItemCostFlowBuf.Reset();
+        ItemCostFlowBuf.DeleteAll();
         DummyItemLedgEntry.Init();
         DummyItemLedgEntry."Entry No." := -1;
         TraceCostBackward(FromItemLedgEntry);
-        if TempItemLedgEntryInChainNo.FindSet() then
-            repeat
-                ToItemLedgEntry.Get(TempItemLedgEntryInChainNo.Number);
-                ItemLedgEntryInChain := ToItemLedgEntry;
-                ItemLedgEntryInChain.Insert();
-            until TempItemLedgEntryInChainNo.Next() = 0;
     end;
 
     local procedure TraceCostBackward(FromItemLedgEntry: Record "Item Ledger Entry")
     begin
         TempVisitedItemApplnEntry.DeleteAll();
-        TempItemLedgEntryInChainNo.DeleteAll();
 
         if FromItemLedgEntry.Positive then
             TraceCostBackwardToAppliedOutbnds(FromItemLedgEntry."Entry No.")
@@ -51,7 +44,7 @@ codeunit 50100 "Cost Source Trace"
     var
         ItemApplnEntry: Record "Item Application Entry";
     begin
-        if ItemApplnEntry.AppliedOutbndEntryExists(EntryNo, false, false) then
+        if GetOutboundEntriesTheInbndEntryAppliedTo(ItemApplnEntry, EntryNo) then
             TraceCostBackwardToAppliedEntries(ItemApplnEntry, EntryNo, true);
     end;
 
@@ -59,7 +52,7 @@ codeunit 50100 "Cost Source Trace"
     var
         ItemApplnEntry: Record "Item Application Entry";
     begin
-        if ItemApplnEntry.AppliedInbndEntryExists(EntryNo, false) then
+        if ItemApplnEntry.GetInboundEntriesTheOutbndEntryAppliedTo(EntryNo) then
             TraceCostBackwardToAppliedEntries(ItemApplnEntry, EntryNo, false);
     end;
 
@@ -105,10 +98,8 @@ codeunit 50100 "Cost Source Trace"
                 ToEntryNo := ItemApplnEntry."Inbound Item Entry No.";
 
             if CheckLatestItemLedgEntryValuationDate(ItemApplnEntry."Item Ledger Entry No.", MaxValuationDate) then begin
-                if not TempItemLedgEntryInChainNo.Get(ToEntryNo) then begin
-                    TempItemLedgEntryInChainNo.Number := ToEntryNo;
-                    TempItemLedgEntryInChainNo.Insert();
-                end;
+                // Flow is reversed when inserting into the buffer, since the tracing runs backwards
+                InsertCostFlowBufIfNotExists(ItemCostFlowBuf, ToEntryNo, FromEntryNo);
 
                 TraceCostBackwardToAppliedOutbnds(ToEntryNo);
                 TraceCostBackwardToAppliedInbnds(ToEntryNo);
@@ -121,6 +112,8 @@ codeunit 50100 "Cost Source Trace"
     end;
 
     local procedure TraceCyclicProdCyclicalLoop(ItemLedgEntry: Record "Item Ledger Entry")
+    var
+        ToItemLedgEntryNo: Integer;
     begin
         if ItemLedgEntry."Order Type" <> ItemLedgEntry."Order Type"::Production then
             exit;
@@ -129,6 +122,7 @@ codeunit 50100 "Cost Source Trace"
         if not ItemLedgEntry.Positive then
             exit;
 
+        ToItemLedgEntryNo := ItemLedgEntry."Entry No.";
         ItemLedgEntry.SetCurrentKey("Order Type", "Order No.", "Order Line No.", "Entry Type");
         ItemLedgEntry.SetRange("Order Type", ItemLedgEntry."Order Type");
         ItemLedgEntry.SetRange("Order No.", ItemLedgEntry."Order No.");
@@ -138,10 +132,7 @@ codeunit 50100 "Cost Source Trace"
             ItemLedgEntry.SetRange("Posting Date", 0D, MaxValuationDate);
         if ItemLedgEntry.FindSet() then
             repeat
-                if not TempItemLedgEntryInChainNo.Get(ItemLedgEntry."Entry No.") then begin
-                    TempItemLedgEntryInChainNo.Number := ItemLedgEntry."Entry No.";
-                    TempItemLedgEntryInChainNo.Insert();
-                end;
+                InsertCostFlowBufIfNotExists(ItemCostFlowBuf, ItemLedgEntry."Entry No.", ToItemLedgEntryNo);
 
                 if not ItemLedgEntry.Positive then
                     TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.");
@@ -149,6 +140,8 @@ codeunit 50100 "Cost Source Trace"
     end;
 
     local procedure TraceCyclicAsmCyclicalLoop(ItemLedgEntry: Record "Item Ledger Entry")
+    var
+        ToItemLedgEntryNo: Integer;
     begin
         if ItemLedgEntry."Order Type" <> ItemLedgEntry."Order Type"::Assembly then
             exit;
@@ -157,6 +150,7 @@ codeunit 50100 "Cost Source Trace"
         if not ItemLedgEntry.Positive then
             exit;
 
+        ToItemLedgEntryNo := ItemLedgEntry."Entry No.";
         ItemLedgEntry.SetCurrentKey("Order Type", "Order No.", "Order Line No.", "Entry Type");
         ItemLedgEntry.SetRange("Order Type", ItemLedgEntry."Order Type");
         ItemLedgEntry.SetRange("Order No.", ItemLedgEntry."Order No.");
@@ -165,10 +159,7 @@ codeunit 50100 "Cost Source Trace"
             ItemLedgEntry.SetRange("Posting Date", 0D, MaxValuationDate);
         if ItemLedgEntry.FindSet() then
             repeat
-                if not TempItemLedgEntryInChainNo.Get(ItemLedgEntry."Entry No.") then begin
-                    TempItemLedgEntryInChainNo.Number := ItemLedgEntry."Entry No.";
-                    TempItemLedgEntryInChainNo.Insert();
-                end;
+                InsertCostFlowBufIfNotExists(ItemCostFlowBuf, ToItemLedgEntryNo, ItemLedgEntry."Entry No.");
 
                 if not ItemLedgEntry.Positive then
                     TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.");
@@ -205,24 +196,60 @@ codeunit 50100 "Cost Source Trace"
         exit(ValueEntry."Valuation Date" <= MaxDate);
     end;
 
-    procedure BuildCostSourceGraph(ILENo: Integer; var Nodes: JsonArray; var Edges: JsonArray)
-    var
-        ItemApplicationEntry: Record "Item Application Entry";
+    local procedure InsertCostFlowBufIfNotExists(var ItemCostFlowBuf: Record "Item Cost Flow Buf."; FromEntryNo: Integer; ToEntryNo: Integer)
     begin
-        AddNodeToArray(Nodes, ILENo);
-
-        ItemApplicationEntry.SetLoadFields("Inbound Item Entry No.");
-        ItemApplicationEntry.SetRange("Outbound Item Entry No.", ILENo);
-        if ItemApplicationEntry.FindSet() then
-            repeat
-                AddEdgeToArray(Edges, ItemApplicationEntry."Inbound Item Entry No.", ILENo);
-                BuildCostSourceGraph(ItemApplicationEntry."Inbound Item Entry No.", Nodes, Edges);
-            until ItemApplicationEntry.Next() = 0;
+        ItemCostFlowBuf.Reset();
+        ItemCostFlowBuf.SetRange("From Item Ledg. Entry No.", FromEntryNo);
+        ItemCostFlowBuf.SetRange("To Item Ledg. Entry No.", ToEntryNo);
+        if ItemCostFlowBuf.IsEmpty() then begin
+            ItemCostFlowBuf."Entry No." := GetNextEntryNo();
+            ItemCostFlowBuf."From Item Ledg. Entry No." := FromEntryNo;
+            ItemCostFlowBuf."To Item Ledg. Entry No." := ToEntryNo;
+            ItemCostFlowBuf.Insert();
+        end;
     end;
 
-    local procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Integer)
+    local procedure GetNextEntryNo(): Integer
     begin
+        LastEntryNo += 1;
+        exit(LastEntryNo);
+    end;
+
+    local procedure GetOutboundEntriesTheInbndEntryAppliedTo(ItemApplnEntry: Record "Item Application Entry"; InbndItemLedgEntryNo: Integer): Boolean
+    begin
+        ItemApplnEntry.SetCurrentKey("Outbound Item Entry No.", "Item Ledger Entry No.");
+        ItemApplnEntry.SetRange("Inbound Item Entry No.", InbndItemLedgEntryNo);
+        ItemApplnEntry.SetRange("Item Ledger Entry No.", InbndItemLedgEntryNo);
+        ItemApplnEntry.SetFilter("Outbound Item Entry No.", '<>%1', 0);
+        exit(ItemApplnEntry.FindSet());
+    end;
+
+    procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; var Nodes: JsonArray; var Edges: JsonArray)
+    var
+        FromItemLedgerEntry: Record "Item Ledger Entry";
+        TempDistinctNodes: Record Integer temporary;
+    begin
+        FromItemLedgerEntry.Get(ItemLedgEntryNo);
+        GetVisitedEntriesBackward(FromItemLedgerEntry, false);
+
+        ItemCostFlowBuf.Reset();
+        if ItemCostFlowBuf.FindSet() then
+            repeat
+                AddNodeToArray(Nodes, ItemCostFlowBuf."From Item Ledg. Entry No.", TempDistinctNodes);
+                AddNodeToArray(Nodes, ItemCostFlowBuf."To Item Ledg. Entry No.", TempDistinctNodes);
+                AddEdgeToArray(Edges, ItemCostFlowBuf."From Item Ledg. Entry No.", ItemCostFlowBuf."To Item Ledg. Entry No.");
+            until ItemCostFlowBuf.Next() = 0;
+    end;
+
+    local procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Integer; var DistinctNodes: Record Integer)
+    begin
+        if DistinctNodes.Get(NodeId) then
+            exit;
+
         Nodes.Add(NodeId);
+
+        DistinctNodes.Number := NodeId;
+        DistinctNodes.Insert();
     end;
 
     local procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Integer; TargetNodeId: Integer)
@@ -234,7 +261,8 @@ codeunit 50100 "Cost Source Trace"
     end;
 
     var
-        TempItemLedgEntryInChainNo: Record Integer temporary;
+        ItemCostFlowBuf: Record "Item Cost Flow Buf.";
         TempVisitedItemApplnEntry: Record "Item Application Entry" temporary;
         MaxValuationDate: Date;
+        LastEntryNo: Integer;
 }
