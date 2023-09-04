@@ -30,6 +30,15 @@ page 50100 "Cost Source"
                         end;
                     end;
                 }
+                field(GraphLayoutControl; GraphLayout)
+                {
+                    Caption = 'Graph Layout';
+
+                    trigger OnValidate()
+                    begin
+                        CurrPage.GraphControl.SetLayout(GraphViewController.GraphLayoutEnumToText(GraphLayout));
+                    end;
+                }
             }
             group(Graph)
             {
@@ -42,6 +51,11 @@ page 50100 "Cost Source"
             }
         }
     }
+
+    trigger OnInit()
+    begin
+        GraphLayout := GraphLayout::Circle;
+    end;
 
     local procedure SelectEntry(var NewEntryNo: Integer): Boolean
     var
@@ -65,6 +79,8 @@ page 50100 "Cost Source"
     end;
 
     var
+        GraphViewController: Codeunit "Graph View Controller";
+        GraphLayout: Enum "Graph Layout Name";
         EntryNo: Integer;
         EntryInfo: Text;
 }

@@ -1,5 +1,11 @@
+var cy;
+
 function renderGraph(containerElement, nodes, edges) {
-  var cy = cytoscape({
+  if (cy != null) {
+    cy.destroy();
+  }
+  
+  cy = cytoscape({
     container: containerElement,
 
     elements: {
@@ -45,6 +51,11 @@ function formatNodes(nodeIds) {
   console.log(nodes);
 
   return nodes;
+}
+
+function setGraphLayout(layoutName) {
+  var layout = cy.layout({name: layoutName});
+  layout.run();
 }
 
 function formatEdges(edges) {
