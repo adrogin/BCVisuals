@@ -11,7 +11,7 @@ function renderGraph(containerElement, nodes, edges) {
     elements: {
         nodes: formatNodes(nodes),
         edges: formatEdges(edges)
-	},
+  	},
 
     style: [ 
       {
@@ -37,15 +37,18 @@ function renderGraph(containerElement, nodes, edges) {
       name: 'circle'
     }
   });
-
-  console.log(cy);
 }
 
 function formatNodes(nodeIds) {
   var nodes = [];
 
   nodeIds.forEach(nodeId => {
-    nodes.push({data: {id: nodeId}});
+    nodes.push(
+      {
+        data: {
+          id: nodeId
+        }
+      });
   });
 
   console.log(nodes);
@@ -64,7 +67,14 @@ function formatEdges(edges) {
 
   edges.forEach(edge => {
     const key = Object.keys(edge)[0];
-    edgeObjects.push({ data: {id: key + edge[key], source: key, target: edge[key]} });
+    edgeObjects.push(
+      {
+        data: {
+          id: key + edge[key],
+          source: key,
+          target: edge[key]
+        }
+      });
   });
 
   console.log(edgeObjects);
@@ -74,7 +84,13 @@ function formatEdges(edges) {
 
 function addNodes(cy, nodeIds) {
   nodeIds.forEach(nodeId => {
-    cy.add({group: 'nodes', data: {id: nodeId}});
+    cy.add(
+      {
+        group: 'nodes',
+        data: {
+          id: nodeId
+        }
+      });
   });
 }
 
@@ -83,6 +99,32 @@ function addEdges(cy, edges) {
 
   edges.forEach(edge => {
     const key = Object.keys(edge)[0];
-    cy.add({group: 'edges', data: {id: key + edge[key], source: key, target: edge[key]} });
+    cy.add(
+      {
+        group: 'edges',
+        data: {
+          id: key + edge[key], source: key, target: edge[key]
+      }
+    });
   });
+}
+
+function setNodeTooltip(nodeIndex, popperContent) {
+  let node = cy.nodes()[nodeIndex];
+  let popper = node.popper({
+      content: () => {
+          let div = document.createElement('div');
+          div.innerHTML = popperContent;
+          document.body.appendChild(div);
+      
+          return div;
+        }
+  });
+
+  let update = () => {
+    popper.update();
+  };
+  
+  node.on('position', update);  
+  cy.on('pan zoom resize', update);
 }
