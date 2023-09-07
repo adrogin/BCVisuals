@@ -57,7 +57,7 @@ page 50100 "Cost Source"
 
     trigger OnInit()
     begin
-        GraphLayout := GraphLayout::Circle;
+        GraphLayout := GraphLayout::Breadthfirst;
     end;
 
     local procedure SelectEntry(var NewEntryNo: Integer): Boolean

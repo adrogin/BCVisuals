@@ -34,7 +34,7 @@ function renderGraph(containerElement, nodes, edges) {
     ],
 
     layout: {
-      name: 'circle'
+      name: 'breadthfirst'
     }
   });
 }
