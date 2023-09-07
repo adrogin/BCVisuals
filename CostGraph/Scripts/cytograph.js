@@ -109,7 +109,7 @@ function addEdges(cy, edges) {
   });
 }
 
-function setNodeTooltip(nodeIndex, popperContent) {
+function createNodePopper(nodeIndex, popperContent) {
   let node = cy.nodes()[nodeIndex];
   let popper = node.popper({
       content: () => {
@@ -127,4 +127,54 @@ function setNodeTooltip(nodeIndex, popperContent) {
   
   node.on('position', update);  
   cy.on('pan zoom resize', update);
+}
+
+function setNodeTooltipText(nodeId, tooltipText) {
+  cy.nodes()[nodeId].tooltipText = tooltipText;
+}
+
+function createTooltips() {
+  cy.nodes().forEach(node => {
+    console.log(node);
+    createNodeTooltip(node);
+  });
+}
+
+function createNodeTooltip(node) {
+  let ref = node.popperRef();
+  let dummyDomElement = document.createElement("div");
+
+  let tip = tippy(dummyDomElement, {
+    getReferenceClientRect: ref.getBoundingClientRect,
+    trigger: "manual",
+    placement: "bottom",
+    theme: "light",
+
+    content: () => {
+      let content = document.createElement("div");
+      content.innerHTML = node.tooltipText;
+
+      return content;
+    }
+  });
+
+  node.tip = tip;
+
+  console.log(node);
+}
+
+function bindTooltipEvents() {
+  cy.nodes().unbind("mouseover");
+  cy.nodes().bind("mouseover", event => {
+    if (event.target.tip != null) {
+      event.target.tip.show();
+    }
+  });
+
+  cy.nodes().unbind("mouseout");
+  cy.nodes().bind("mouseout", event => {
+    if (event.target.tip != null) {
+    event.target.tip.hide();
+    }
+  });
 }

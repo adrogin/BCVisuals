@@ -5,4 +5,3 @@ node_modules/
 .snapshots/
 .vscode/
 *.app
-CostGraph/Scripts/index.js

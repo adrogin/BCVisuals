@@ -27,7 +27,9 @@ page 50100 "Cost Source"
                             EntryInfo := FormatEntryInfo(EntryNo);
                             CostSourceTrace.BuildCostSourceGraph(EntryNo, Nodes, Edges);
                             CurrPage.GraphControl.DrawGraph('controlAddIn', Nodes, Edges);
-                            CurrPage.GraphControl.SetTooltipsOnMultipleNodes(GraphViewController.GetNodeTooltipsArray(Nodes));
+                            CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(GraphViewController.GetNodeTooltipsArray(Nodes));
+                            CurrPage.GraphControl.CreateTooltips();
+                            CurrPage.GraphControl.BindTooltipEvents();
                         end;
                     end;
                 }
