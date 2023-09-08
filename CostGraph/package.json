@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "cytoscape-popper": "^2.0.0",
+    "tippy.js": "^6.3.7"
+  }
+}
