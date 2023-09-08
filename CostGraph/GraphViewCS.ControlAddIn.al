@@ -1,4 +1,4 @@
-controladdin "Graph View"
+controladdin "Graph View CS"
 {
     VerticalStretch = true;
     VerticalShrink = true;
@@ -9,7 +9,9 @@ controladdin "Graph View"
 
     StyleSheets =
         'CSS/style.css',
-        'node_modules/tippy.js/dist/tippy.css';
+        'node_modules/tippy.js/dist/tippy.css',
+        'node_modules/tippy.js/themes/light.css',
+        'node_modules/tippy.js/themes/material.css';
 
     Scripts =
         'node_modules/cytoscape/dist/cytoscape.min.js',

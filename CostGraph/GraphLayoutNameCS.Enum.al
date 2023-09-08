@@ -1,4 +1,4 @@
-enum 50100 "Graph Layout Name"
+enum 50100 "Graph Layout Name CS"
 {
     Extensible = true;
 

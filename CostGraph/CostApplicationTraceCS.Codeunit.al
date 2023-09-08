@@ -1,8 +1,7 @@
-codeunit 50100 "Cost Source Trace"
+codeunit 50100 "Cost Application Trace CS"
 {
     procedure GetVisitedEntriesBackward(FromItemLedgEntry: Record "Item Ledger Entry"; WithinValuationDate: Boolean)
     var
-        ToItemLedgEntry: Record "Item Ledger Entry";
         DummyItemLedgEntry: Record "Item Ledger Entry";
         ValueEntry: Record "Value Entry";
         AvgCostEntryPointHandler: Codeunit "Avg. Cost Entry Point Handler";
@@ -99,7 +98,7 @@ codeunit 50100 "Cost Source Trace"
 
             if CheckLatestItemLedgEntryValuationDate(ItemApplnEntry."Item Ledger Entry No.", MaxValuationDate) then begin
                 // Flow is reversed when inserting into the buffer, since the tracing runs backwards
-                InsertCostFlowBufIfNotExists(ItemCostFlowBuf, ToEntryNo, FromEntryNo);
+                InsertCostFlowBufIfNotExists(ToEntryNo, FromEntryNo);
 
                 TraceCostBackwardToAppliedOutbnds(ToEntryNo);
                 TraceCostBackwardToAppliedInbnds(ToEntryNo);
@@ -132,7 +131,7 @@ codeunit 50100 "Cost Source Trace"
             ItemLedgEntry.SetRange("Posting Date", 0D, MaxValuationDate);
         if ItemLedgEntry.FindSet() then
             repeat
-                InsertCostFlowBufIfNotExists(ItemCostFlowBuf, ItemLedgEntry."Entry No.", ToItemLedgEntryNo);
+                InsertCostFlowBufIfNotExists(ItemLedgEntry."Entry No.", ToItemLedgEntryNo);
 
                 if not ItemLedgEntry.Positive then
                     TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.");
@@ -159,7 +158,7 @@ codeunit 50100 "Cost Source Trace"
             ItemLedgEntry.SetRange("Posting Date", 0D, MaxValuationDate);
         if ItemLedgEntry.FindSet() then
             repeat
-                InsertCostFlowBufIfNotExists(ItemCostFlowBuf, ToItemLedgEntryNo, ItemLedgEntry."Entry No.");
+                InsertCostFlowBufIfNotExists(ToItemLedgEntryNo, ItemLedgEntry."Entry No.");
 
                 if not ItemLedgEntry.Positive then
                     TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.");
@@ -168,14 +167,8 @@ codeunit 50100 "Cost Source Trace"
 
     local procedure EntryIsVisited(EntryNo: Integer): Boolean
     begin
-        if TempVisitedItemApplnEntry.Get(EntryNo) then begin
-            // This is to take into account quantity flows from an inbound entry to an inbound transfer
-            if TempVisitedItemApplnEntry.Quantity = 2 then
-                exit(true);
-            TempVisitedItemApplnEntry.Quantity += 1;
-            TempVisitedItemApplnEntry.Modify();
-            exit(false);
-        end;
+        if TempVisitedItemApplnEntry.Get(EntryNo) then
+            exit(true);
 
         TempVisitedItemApplnEntry.Init();
         TempVisitedItemApplnEntry."Entry No." := EntryNo;
@@ -196,12 +189,13 @@ codeunit 50100 "Cost Source Trace"
         exit(ValueEntry."Valuation Date" <= MaxDate);
     end;
 
-    local procedure InsertCostFlowBufIfNotExists(var ItemCostFlowBuf: Record "Item Cost Flow Buf."; FromEntryNo: Integer; ToEntryNo: Integer)
+    local procedure InsertCostFlowBufIfNotExists(FromEntryNo: Integer; ToEntryNo: Integer)
     begin
         ItemCostFlowBuf.Reset();
         ItemCostFlowBuf.SetRange("From Item Ledg. Entry No.", FromEntryNo);
         ItemCostFlowBuf.SetRange("To Item Ledg. Entry No.", ToEntryNo);
         if ItemCostFlowBuf.IsEmpty() then begin
+            ItemCostFlowBuf.Init();
             ItemCostFlowBuf."Entry No." := GetNextEntryNo();
             ItemCostFlowBuf."From Item Ledg. Entry No." := FromEntryNo;
             ItemCostFlowBuf."To Item Ledg. Entry No." := ToEntryNo;
@@ -215,7 +209,7 @@ codeunit 50100 "Cost Source Trace"
         exit(LastEntryNo);
     end;
 
-    local procedure GetOutboundEntriesTheInbndEntryAppliedTo(ItemApplnEntry: Record "Item Application Entry"; InbndItemLedgEntryNo: Integer): Boolean
+    local procedure GetOutboundEntriesTheInbndEntryAppliedTo(var ItemApplnEntry: Record "Item Application Entry"; InbndItemLedgEntryNo: Integer): Boolean
     begin
         ItemApplnEntry.SetCurrentKey("Outbound Item Entry No.", "Item Ledger Entry No.");
         ItemApplnEntry.SetRange("Inbound Item Entry No.", InbndItemLedgEntryNo);
@@ -261,7 +255,7 @@ codeunit 50100 "Cost Source Trace"
     end;
 
     var
-        ItemCostFlowBuf: Record "Item Cost Flow Buf.";
+        ItemCostFlowBuf: Record "Item Cost Flow Buf. CS";
         TempVisitedItemApplnEntry: Record "Item Application Entry" temporary;
         MaxValuationDate: Date;
         LastEntryNo: Integer;

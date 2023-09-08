@@ -1,4 +1,4 @@
-table 50100 "Item Cost Flow Buf."
+table 50100 "Item Cost Flow Buf. CS"
 {
     DataClassification = CustomerContent;
     TableType = Temporary;

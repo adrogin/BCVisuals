@@ -1,6 +1,6 @@
-codeunit 50101 "Graph View Controller"
+codeunit 50101 "Graph View Controller CS"
 {
-    procedure GraphLayoutEnumToText(GraphLayout: Enum "Graph Layout Name"): Text
+    procedure GraphLayoutEnumToText(GraphLayout: Enum "Graph Layout Name CS"): Text
     begin
         case GraphLayout of
             GraphLayout::Grid:
@@ -37,7 +37,9 @@ codeunit 50101 "Graph View Controller"
     end;
 
     local procedure FormatTooltipText(ItemLedgerEntry: Record "Item Ledger Entry"): Text
+    var
+        TooltipFormatTok: Label '%1<br/>%2 %3', Comment = '%1: Entry No.; %2: Document Type; %3: Document No.';
     begin
-        exit(StrSubstNo('%1&#10;%2 %3', ItemLedgerEntry."Entry Type", ItemLedgerEntry."Document Type", ItemLedgerEntry."Document No."));
+        exit(StrSubstNo(TooltipFormatTok, ItemLedgerEntry."Entry Type", ItemLedgerEntry."Document Type", ItemLedgerEntry."Document No."));
     end;
 }

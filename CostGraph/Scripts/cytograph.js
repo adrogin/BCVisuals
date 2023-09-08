@@ -51,8 +51,6 @@ function formatNodes(nodeIds) {
       });
   });
 
-  console.log(nodes);
-
   return nodes;
 }
 
@@ -63,7 +61,6 @@ function setGraphLayout(layoutName) {
 
 function formatEdges(edges) {
   var edgeObjects = [];
-  //var count = 1;
 
   edges.forEach(edge => {
     const key = Object.keys(edge)[0];
@@ -76,8 +73,6 @@ function formatEdges(edges) {
         }
       });
   });
-
-  console.log(edgeObjects);
 
   return edgeObjects;
 }
@@ -95,8 +90,6 @@ function addNodes(cy, nodeIds) {
 }
 
 function addEdges(cy, edges) {
-  var count = 1;
-
   edges.forEach(edge => {
     const key = Object.keys(edge)[0];
     cy.add(
@@ -135,7 +128,6 @@ function setNodeTooltipText(nodeId, tooltipText) {
 
 function createTooltips() {
   cy.nodes().forEach(node => {
-    console.log(node);
     createNodeTooltip(node);
   });
 }
@@ -148,7 +140,8 @@ function createNodeTooltip(node) {
     getReferenceClientRect: ref.getBoundingClientRect,
     trigger: "manual",
     placement: "bottom",
-    theme: "light",
+    theme: "tippy",
+    allowHTML: true,
 
     content: () => {
       let content = document.createElement("div");
@@ -159,8 +152,6 @@ function createNodeTooltip(node) {
   });
 
   node.tip = tip;
-
-  console.log(node);
 }
 
 function bindTooltipEvents() {

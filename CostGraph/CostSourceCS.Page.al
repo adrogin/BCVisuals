@@ -1,5 +1,6 @@
-page 50100 "Cost Source"
+page 50100 "Cost Source CS"
 {
+    Caption = 'Cost Source';
     PageType = Card;
     ApplicationArea = All;
     UsageCategory = Administration;
@@ -15,11 +16,12 @@ page 50100 "Cost Source"
                 field(EntryInfoControl; EntryInfo)
                 {
                     Caption = 'Item Ledger Entry';
+                    ToolTip = 'Select an item ledger entry to trace its cost source.';
                     Editable = false;
 
                     trigger OnAssistEdit()
                     var
-                        CostSourceTrace: Codeunit "Cost Source Trace";
+                        CostSourceTrace: Codeunit "Cost Application Trace CS";
                         Nodes: JsonArray;
                         Edges: JsonArray;
                     begin
@@ -36,6 +38,7 @@ page 50100 "Cost Source"
                 field(GraphLayoutControl; GraphLayout)
                 {
                     Caption = 'Graph Layout';
+                    ToolTip = 'Select the preferred graph layout which will be applied to the cost graph.';
 
                     trigger OnValidate()
                     begin
@@ -47,7 +50,7 @@ page 50100 "Cost Source"
             {
                 Caption = 'Graph';
 
-                usercontrol(GraphControl; "Graph View")
+                usercontrol(GraphControl; "Graph View CS")
                 {
                     ApplicationArea = All;
                 }
@@ -72,18 +75,19 @@ page 50100 "Cost Source"
         exit(false);
     end;
 
-    local procedure FormatEntryInfo(EntryNo: Integer): Text
+    local procedure FormatEntryInfo(ItemLedgEntryNo: Integer): Text
     var
         ItemLedgerEntry: Record "Item Ledger Entry";
+        EntryInfoFormatTok: Label '%1: %2 %3', Comment = '%1: Entry No.; %2: Document Type; %3: Document No.';
     begin
         ItemLedgerEntry.SetLoadFields("Document Type", "Document No.");
-        ItemLedgerEntry.Get(EntryNo);
-        exit(StrSubstNo('%1: %2 %3', EntryNo, ItemLedgerEntry."Document Type", ItemLedgerEntry."Document No."));
+        ItemLedgerEntry.Get(ItemLedgEntryNo);
+        exit(StrSubstNo(EntryInfoFormatTok, ItemLedgEntryNo, ItemLedgerEntry."Document Type", ItemLedgerEntry."Document No."));
     end;
 
     var
-        GraphViewController: Codeunit "Graph View Controller";
-        GraphLayout: Enum "Graph Layout Name";
+        GraphViewController: Codeunit "Graph View Controller CS";
+        GraphLayout: Enum "Graph Layout Name CS";
         EntryNo: Integer;
         EntryInfo: Text;
 }
