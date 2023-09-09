@@ -63,13 +63,12 @@ function formatEdges(edges) {
   var edgeObjects = [];
 
   edges.forEach(edge => {
-    const key = Object.keys(edge)[0];
     edgeObjects.push(
       {
         data: {
-          id: key + edge[key],
-          source: key,
-          target: edge[key]
+          id: edge.source + edge.target,
+          source: edge.source,
+          target: edge.target
         }
       });
   });

@@ -1,6 +1,23 @@
 codeunit 50100 "Cost Application Trace CS"
 {
-    procedure GetVisitedEntriesBackward(FromItemLedgEntry: Record "Item Ledger Entry"; WithinValuationDate: Boolean)
+    procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; var Nodes: JsonArray; var Edges: JsonArray)
+    var
+        FromItemLedgerEntry: Record "Item Ledger Entry";
+        TempDistinctNodes: Record Integer temporary;
+    begin
+        FromItemLedgerEntry.Get(ItemLedgEntryNo);
+        GetVisitedEntriesBackward(FromItemLedgerEntry, false);
+
+        ItemCostFlowBuf.Reset();
+        if ItemCostFlowBuf.FindSet() then
+            repeat
+                AddNodeToArray(Nodes, ItemCostFlowBuf."From Item Ledg. Entry No.", TempDistinctNodes);
+                AddNodeToArray(Nodes, ItemCostFlowBuf."To Item Ledg. Entry No.", TempDistinctNodes);
+                AddEdgeToArray(Edges, ItemCostFlowBuf."From Item Ledg. Entry No.", ItemCostFlowBuf."To Item Ledg. Entry No.");
+            until ItemCostFlowBuf.Next() = 0;
+    end;
+
+    internal procedure GetVisitedEntriesBackward(FromItemLedgEntry: Record "Item Ledger Entry"; WithinValuationDate: Boolean)
     var
         DummyItemLedgEntry: Record "Item Ledger Entry";
         ValueEntry: Record "Value Entry";
@@ -153,12 +170,12 @@ codeunit 50100 "Cost Application Trace CS"
         ItemLedgEntry.SetCurrentKey("Order Type", "Order No.", "Order Line No.", "Entry Type");
         ItemLedgEntry.SetRange("Order Type", ItemLedgEntry."Order Type");
         ItemLedgEntry.SetRange("Order No.", ItemLedgEntry."Order No.");
-        ItemLedgEntry.SetRange("Entry Type", ItemLedgEntry."Entry Type"::"Assembly Output");
+        ItemLedgEntry.SetRange("Entry Type", ItemLedgEntry."Entry Type"::"Assembly Consumption");
         if MaxValuationDate <> 0D then
             ItemLedgEntry.SetRange("Posting Date", 0D, MaxValuationDate);
         if ItemLedgEntry.FindSet() then
             repeat
-                InsertCostFlowBufIfNotExists(ToItemLedgEntryNo, ItemLedgEntry."Entry No.");
+                InsertCostFlowBufIfNotExists(ItemLedgEntry."Entry No.", ToItemLedgEntryNo);
 
                 if not ItemLedgEntry.Positive then
                     TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.");
@@ -218,23 +235,6 @@ codeunit 50100 "Cost Application Trace CS"
         exit(ItemApplnEntry.FindSet());
     end;
 
-    procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; var Nodes: JsonArray; var Edges: JsonArray)
-    var
-        FromItemLedgerEntry: Record "Item Ledger Entry";
-        TempDistinctNodes: Record Integer temporary;
-    begin
-        FromItemLedgerEntry.Get(ItemLedgEntryNo);
-        GetVisitedEntriesBackward(FromItemLedgerEntry, false);
-
-        ItemCostFlowBuf.Reset();
-        if ItemCostFlowBuf.FindSet() then
-            repeat
-                AddNodeToArray(Nodes, ItemCostFlowBuf."From Item Ledg. Entry No.", TempDistinctNodes);
-                AddNodeToArray(Nodes, ItemCostFlowBuf."To Item Ledg. Entry No.", TempDistinctNodes);
-                AddEdgeToArray(Edges, ItemCostFlowBuf."From Item Ledg. Entry No.", ItemCostFlowBuf."To Item Ledg. Entry No.");
-            until ItemCostFlowBuf.Next() = 0;
-    end;
-
     local procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Integer; var DistinctNodes: Record Integer)
     begin
         if DistinctNodes.Get(NodeId) then
@@ -250,7 +250,8 @@ codeunit 50100 "Cost Application Trace CS"
     var
         Edge: JsonObject;
     begin
-        Edge.Add(Format(SourceNodeId), Format(TargetNodeId));
+        Edge.Add('source', Format(SourceNodeId));
+        Edge.Add('target', Format(TargetNodeId));
         Edges.Add(Edge);
     end;
 
