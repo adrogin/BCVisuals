@@ -27,4 +27,6 @@ controladdin "Graph View CS"
     procedure SetTooltipTextOnMultipleNodes(Tooltips: JsonArray);
     procedure BindTooltipEvents();
     procedure CreateTooltips();
+
+    event OnNodeClick(NodeId: Text);
 }

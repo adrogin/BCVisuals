@@ -53,6 +53,14 @@ page 50100 "Cost Source CS"
                 usercontrol(GraphControl; "Graph View CS")
                 {
                     ApplicationArea = All;
+
+                    trigger OnNodeClick(NodeId: Text)
+                    var
+                        ItemLedgerEntry: Record "Item Ledger Entry";
+                    begin
+                        ItemLedgerEntry.Get(GraphViewController.NodeId2ItemLedgEntryNo(NodeId));
+                        Page.Run(Page::"Item Ledger Entries", ItemLedgerEntry);
+                    end;
                 }
             }
         }

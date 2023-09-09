@@ -37,6 +37,12 @@ function renderGraph(containerElement, nodes, edges) {
       name: 'breadthfirst'
     }
   });
+
+  cy.nodes().bind("click",
+    (event) => {
+      Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]);
+    }
+  );
 }
 
 function formatNodes(nodeIds) {

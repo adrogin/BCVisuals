@@ -14,6 +14,16 @@ codeunit 50101 "Graph View Controller CS"
         end;
     end;
 
+    procedure ItemLedgEntryNo2NodeId(ItemLedgEntryNo: Integer): Text
+    begin
+        exit(Format(ItemLedgEntryNo));
+    end;
+
+    procedure NodeId2ItemLedgEntryNo(NodeId: Text) ItemLedgerEntryNo: Integer
+    begin
+        Evaluate(ItemLedgerEntryNo, NodeId);
+    end;
+
     procedure GetNodeTooltipsArray(Nodes: JsonArray): JsonArray
     var
         TooltipsArray: JsonArray;
@@ -31,7 +41,7 @@ codeunit 50101 "Graph View Controller CS"
         Tooltip: JsonObject;
     begin
         ItemLedgerEntry.Get(ItemLedgEntryNo);
-        Tooltip.Add('nodeId', Format(ItemLedgEntryNo));
+        Tooltip.Add('nodeId', ItemLedgEntryNo2NodeId(ItemLedgEntryNo));
         Tooltip.Add('content', FormatTooltipText(ItemLedgerEntry));
         exit(Tooltip);
     end;
