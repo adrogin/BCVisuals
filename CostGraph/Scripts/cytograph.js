@@ -101,7 +101,9 @@ function addEdges(cy, edges) {
       {
         group: 'edges',
         data: {
-          id: key + edge[key], source: key, target: edge[key]
+          id: edge.source + edge.target,
+          source: edge.source,
+          target: edge.target
       }
     });
   });
