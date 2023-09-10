@@ -1,10 +1,14 @@
 var cy;
 
-function renderGraph(containerElement, nodes, edges) {
+function renderGraph(containerElement, nodes, edges, styles) {
   if (cy != null) {
     cy.destroy();
   }
-  
+
+  if (styles === undefined) {
+    styles = getDefaultElementStyles();
+  }
+
   cy = cytoscape({
     container: containerElement,
 
@@ -13,7 +17,22 @@ function renderGraph(containerElement, nodes, edges) {
         edges: formatEdges(edges)
   	},
 
-    style: [ 
+    style: styles,
+
+    layout: {
+      name: 'breadthfirst'
+    }
+  });
+
+  cy.nodes().bind("click",
+    (event) => {
+      Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]);
+    }
+  );
+}
+
+function getDefaultElementStyles() {
+  return [ 
       {
         selector: 'node',
         css: {
@@ -31,18 +50,7 @@ function renderGraph(containerElement, nodes, edges) {
           'curve-style': 'bezier'
         }
       }
-    ],
-
-    layout: {
-      name: 'breadthfirst'
-    }
-  });
-
-  cy.nodes().bind("click",
-    (event) => {
-      Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]);
-    }
-  );
+    ]
 }
 
 function formatNodes(nodeIds) {
@@ -58,11 +66,6 @@ function formatNodes(nodeIds) {
   });
 
   return nodes;
-}
-
-function setGraphLayout(layoutName) {
-  var layout = cy.layout({name: layoutName});
-  layout.run();
 }
 
 function formatEdges(edges) {
@@ -105,6 +108,11 @@ function addEdges(cy, edges) {
       }
     });
   });
+}
+
+function setGraphLayout(layoutName) {
+  var layout = cy.layout({name: layoutName});
+  layout.run();
 }
 
 function createNodePopper(nodeIndex, popperContent) {
