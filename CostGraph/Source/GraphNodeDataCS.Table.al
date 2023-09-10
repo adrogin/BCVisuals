@@ -16,44 +16,73 @@ table 50101 "Graph Node Data CS"
         {
             Caption = 'Table Name';
             FieldClass = FlowField;
-            CalcFormula = lookup(AllObjWithCaption."Object Caption" where("Object Type" = const(Table), "Object ID" = field("Table No.")));
+            CalcFormula = lookup(AllObjWithCaption."Object Name" where("Object Type" = const(Table), "Object ID" = field("Table No.")));
+            Editable = false;
         }
-        field(4; "Field Name"; Text[80])
+        field(4; "Table Caption"; Text[249])
+        {
+            Caption = 'Table Caption';
+            FieldClass = FlowField;
+            CalcFormula = lookup(AllObjWithCaption."Object Caption" where("Object Type" = const(Table), "Object ID" = field("Table No.")));
+            Editable = false;
+        }
+        field(5; "Field Name"; Text[80])
         {
             Caption = 'Field Name';
             FieldClass = FlowField;
-            CalcFormula = lookup(Field."Field Caption" where(TableNo = field("Table No."), "No." = field("Field No.")));
+            CalcFormula = lookup(Field.FieldName where(TableNo = field("Table No."), "No." = field("Field No.")));
+            Editable = false;
+
+            trigger OnValidate()
+            var
+                GraphViewController: Codeunit "Graph View Controller CS";
+            begin
+                "JSON Field Name" := CopyStr(GraphViewController.ConverFieldNameToJsonToken(Rec), 1, MaxStrLen("JSON Field Name"));
+            end;
         }
-        field(5; "Include in Node Data"; Boolean)
+        field(6; "Field Caption"; Text[80])
+        {
+            Caption = 'Field Caption';
+            FieldClass = FlowField;
+            CalcFormula = lookup(Field."Field Caption" where(TableNo = field("Table No."), "No." = field("Field No.")));
+            Editable = false;
+
+        }
+        field(7; "JSON Field Name"; Text[80])
+        {
+            Caption = 'JSON Field Name';
+        }
+        field(8; "Include in Node Data"; Boolean)
         {
             Caption = 'Include in Node Data';
 
             trigger OnValidate()
             var
+                GraphViewController: Codeunit "Graph View Controller CS";
                 CannotRemoveEntryNoErr: Label 'Entry No. field cannot be removed from node data.';
             begin
                 if "Include in Node Data" then
                     exit;
 
-                if ("Table No." = Database::"Item Ledger Entry") and ("Field No." = 1) then
+                if GraphViewController.IsEntryNoField(Rec) then
                     Error(CannotRemoveEntryNoErr);
 
-                "Show in Node Data" := false;
+                "Show in Node Label" := false;
                 "Show in Static Text" := false;
                 "Show in Tooltip" := false;
                 // TODO: Reset style selectors
             end;
         }
-        field(6; "Show in Node Data"; Boolean)
+        field(9; "Show in Node Label"; Boolean)
         {
-            Caption = 'Show in Node Data';
+            Caption = 'Show in Node Label';
 
             trigger OnValidate()
             begin
                 ValidateShowField();
             end;
         }
-        field(7; "Show in Static Text"; Boolean)
+        field(10; "Show in Static Text"; Boolean)
         {
             Caption = 'Show in Static Text';
 
@@ -62,7 +91,7 @@ table 50101 "Graph Node Data CS"
                 ValidateShowField();
             end;
         }
-        field(8; "Show in Tooltip"; Boolean)
+        field(11; "Show in Tooltip"; Boolean)
         {
             Caption = 'Show in Tooltip';
 
@@ -71,7 +100,7 @@ table 50101 "Graph Node Data CS"
                 ValidateShowField();
             end;
         }
-        field(9; Delimiter; Option)
+        field(12; Delimiter; Option)
         {
             Caption = 'Delimiter';
             OptionMembers = "None","Space","New Line";
@@ -89,7 +118,7 @@ table 50101 "Graph Node Data CS"
 
     local procedure ValidateShowField()
     begin
-        if "Show in Node Data" and not "Include in Node Data" then
+        if "Show in Node Label" or "Show in Static Text" or "Show in Tooltip" and not "Include in Node Data" then
             "Include in Node Data" := true;
     end;
 }

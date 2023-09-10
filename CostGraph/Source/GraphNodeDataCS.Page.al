@@ -27,7 +27,7 @@ page 50101 "Graph Node Data CS"
                 {
                     ApplicationArea = All;
                 }
-                field("Show in Node Data"; Rec."Show in Node Data")
+                field("Show in Node Data"; Rec."Show in Node Label")
                 {
                     ApplicationArea = All;
                 }

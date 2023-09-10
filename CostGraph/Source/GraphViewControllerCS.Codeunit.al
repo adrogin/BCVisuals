@@ -1,5 +1,54 @@
 codeunit 50101 "Graph View Controller CS"
 {
+    procedure AddNodesDisplayContent(var Nodes: JsonArray)
+    var
+        Node: JsonToken;
+        NodeId: JsonToken;
+    begin
+        foreach Node in Nodes do begin
+            Node.AsObject().Get('nodeId', NodeId);
+            Node.AsObject().Add(
+                'labelProperties', FormatItemLedgEntryLabelPreperties(NodeId2ItemLedgEntryNo(NodeId.AsValue().AsText())));
+            Node.AsObject().Add(
+                'popperProperties', FormatItemLedgEntryPopperPreperties(NodeId2ItemLedgEntryNo(NodeId.AsValue().AsText())));
+            Node.AsObject().Add(
+                'tooltipProperties', FormatItemLedgEntryTooltipPreperties(NodeId2ItemLedgEntryNo(NodeId.AsValue().AsText())));
+        end;
+    end;
+
+    procedure ConverFieldNameToJsonToken(GraphNodeData: Record "Graph Node Data CS") ConvertedName: Text
+    var
+        I: Integer;
+    begin
+        if IsEntryNoField(GraphNodeData) then
+            exit('nodeId');
+
+        GraphNodeData.CalcFields("Field Name");
+
+        for I := 1 to StrLen(GraphNodeData."Field Name") do
+            if IsSymbolAllowedInPropertyName(GraphNodeData."Field Name"[I]) then
+                ConvertedName := ConvertedName + GraphNodeData."Field Name"[I]
+            else
+                ConvertedName := ConvertedName + '_';
+    end;
+
+    local procedure IsSymbolAllowedInPropertyName(Symbol: Char): Boolean
+    begin
+        if (Symbol >= 'a') and (Symbol <= 'z') then
+            exit(true);
+
+        if (Symbol >= 'A') and (Symbol <= 'Z') then
+            exit(true);
+
+        if (Symbol >= '0') and (Symbol <= '9') then
+            exit(true);
+
+        if Symbol = '$' then
+            exit(true);
+
+        exit(false);
+    end;
+
     procedure GraphLayoutEnumToText(GraphLayout: Enum "Graph Layout Name CS"): Text
     begin
         case GraphLayout of
@@ -12,6 +61,59 @@ codeunit 50101 "Graph View Controller CS"
             GraphLayout::Breadthfirst:
                 exit('breadthfirst');
         end;
+    end;
+
+    local procedure FormatItemLedgEntryLabelPreperties(ItemLedgEntryNo: Integer): JsonArray
+    var
+        GraphNodeData: Record "Graph Node Data CS";
+    begin
+        GraphNodeData.SetRange("Show in Node Label", true);
+        exit(FormatItemLedgEntryDisplayPreperties(GraphNodeData, ItemLedgEntryNo));
+    end;
+
+    local procedure FormatItemLedgEntryPopperPreperties(ItemLedgEntryNo: Integer): JsonArray
+    var
+        GraphNodeData: Record "Graph Node Data CS";
+    begin
+        GraphNodeData.SetRange("Show in Static Text", true);
+        exit(FormatItemLedgEntryDisplayPreperties(GraphNodeData, ItemLedgEntryNo));
+    end;
+
+    local procedure FormatItemLedgEntryTooltipPreperties(ItemLedgEntryNo: Integer): JsonArray
+    var
+        GraphNodeData: Record "Graph Node Data CS";
+    begin
+        GraphNodeData.SetRange("Show in Tooltip", true);
+        exit(FormatItemLedgEntryDisplayPreperties(GraphNodeData, ItemLedgEntryNo));
+    end;
+
+    local procedure FormatItemLedgEntryDisplayPreperties(var GraphNodeData: Record "Graph Node Data CS"; ItemLedgEntryNo: Integer): JsonArray
+    var
+        ItemLedgerEntry: Record "Item Ledger Entry";
+        RecRef: RecordRef;
+        TableFieldRef: FieldRef;
+        NodeData: JsonObject;
+    begin
+        GraphNodeData.SetRange("Table No.", Database::"Item Ledger Entry");
+        GraphNodeData.SetRange("Include in Node Data", true);
+
+        ItemLedgerEntry.Get(ItemLedgEntryNo);
+        RecRef.GetTable(ItemLedgerEntry);
+
+        // Not checking the return value here, since at least the Entry No. must be included
+        GraphNodeData.FindSet();
+        repeat
+            TableFieldRef := RecRef.Field(GraphNodeData."Field No.");
+            if TableFieldRef.Class = FieldClass::FlowField then
+                TableFieldRef.CalcField();
+
+            NodeData.Add(GraphNodeData."JSON Field Name", Format(TableFieldRef.Value));
+        until GraphNodeData.Next() = 0;
+    end;
+
+    procedure IsEntryNoField(GraphNodeData: Record "Graph Node Data CS"): Boolean
+    begin
+        exit((GraphNodeData."Table No." = Database::"Item Ledger Entry") and (GraphNodeData."Field No." = 1));
     end;
 
     procedure ItemLedgEntryNo2NodeId(ItemLedgEntryNo: Integer): Text

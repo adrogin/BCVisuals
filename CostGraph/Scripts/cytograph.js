@@ -5,9 +5,7 @@ function renderGraph(containerElement, nodes, edges, styles) {
     cy.destroy();
   }
 
-  if (styles === undefined) {
-    styles = getDefaultElementStyles();
-  }
+  styles = styles.concat(getDefaultElementStyles());
 
   cy = cytoscape({
     container: containerElement,
@@ -99,7 +97,6 @@ function addNodes(cy, nodeIds) {
 
 function addEdges(cy, edges) {
   edges.forEach(edge => {
-    const key = Object.keys(edge)[0];
     cy.add(
       {
         group: 'edges',
