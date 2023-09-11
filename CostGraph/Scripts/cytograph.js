@@ -158,7 +158,7 @@ function createNodeTooltip(node) {
     content: () => {
       let content = document.createElement("div");
       content.innerHTML = node.tooltipText;
-
+      
       return content;
     }
   });
@@ -180,4 +180,9 @@ function bindTooltipEvents() {
     event.target.tip.hide();
     }
   });
+}
+
+function CreateTextElements() {
+  createTooltips();
+  bindTooltipEvents();
 }

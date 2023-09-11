@@ -32,13 +32,6 @@ table 50101 "Graph Node Data CS"
             FieldClass = FlowField;
             CalcFormula = lookup(Field.FieldName where(TableNo = field("Table No."), "No." = field("Field No.")));
             Editable = false;
-
-            trigger OnValidate()
-            var
-                GraphViewController: Codeunit "Graph View Controller CS";
-            begin
-                "JSON Field Name" := CopyStr(GraphViewController.ConverFieldNameToJsonToken(Rec), 1, MaxStrLen("JSON Field Name"));
-            end;
         }
         field(6; "Field Caption"; Text[80])
         {
@@ -47,10 +40,6 @@ table 50101 "Graph Node Data CS"
             CalcFormula = lookup(Field."Field Caption" where(TableNo = field("Table No."), "No." = field("Field No.")));
             Editable = false;
 
-        }
-        field(7; "JSON Field Name"; Text[80])
-        {
-            Caption = 'JSON Field Name';
         }
         field(8; "Include in Node Data"; Boolean)
         {

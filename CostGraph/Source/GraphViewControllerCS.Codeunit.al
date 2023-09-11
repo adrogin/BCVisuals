@@ -7,12 +7,7 @@ codeunit 50101 "Graph View Controller CS"
     begin
         foreach Node in Nodes do begin
             Node.AsObject().Get('nodeId', NodeId);
-            Node.AsObject().Add(
-                'labelProperties', FormatItemLedgEntryLabelPreperties(NodeId2ItemLedgEntryNo(NodeId.AsValue().AsText())));
-            Node.AsObject().Add(
-                'popperProperties', FormatItemLedgEntryPopperPreperties(NodeId2ItemLedgEntryNo(NodeId.AsValue().AsText())));
-            Node.AsObject().Add(
-                'tooltipProperties', FormatItemLedgEntryTooltipPreperties(NodeId2ItemLedgEntryNo(NodeId.AsValue().AsText())));
+            Node.AsObject().Add('content', FormatItemLedgEntryDisplayProperties(NodeId2ItemLedgEntryNo(NodeId.AsValue().AsText())));
         end;
     end;
 
@@ -43,7 +38,7 @@ codeunit 50101 "Graph View Controller CS"
         if (Symbol >= '0') and (Symbol <= '9') then
             exit(true);
 
-        if Symbol = '$' then
+        if Symbol = '_' then
             exit(true);
 
         exit(false);
@@ -63,36 +58,14 @@ codeunit 50101 "Graph View Controller CS"
         end;
     end;
 
-    local procedure FormatItemLedgEntryLabelPreperties(ItemLedgEntryNo: Integer): JsonArray
+    local procedure FormatItemLedgEntryDisplayProperties(ItemLedgEntryNo: Integer): JsonArray
     var
         GraphNodeData: Record "Graph Node Data CS";
-    begin
-        GraphNodeData.SetRange("Show in Node Label", true);
-        exit(FormatItemLedgEntryDisplayPreperties(GraphNodeData, ItemLedgEntryNo));
-    end;
-
-    local procedure FormatItemLedgEntryPopperPreperties(ItemLedgEntryNo: Integer): JsonArray
-    var
-        GraphNodeData: Record "Graph Node Data CS";
-    begin
-        GraphNodeData.SetRange("Show in Static Text", true);
-        exit(FormatItemLedgEntryDisplayPreperties(GraphNodeData, ItemLedgEntryNo));
-    end;
-
-    local procedure FormatItemLedgEntryTooltipPreperties(ItemLedgEntryNo: Integer): JsonArray
-    var
-        GraphNodeData: Record "Graph Node Data CS";
-    begin
-        GraphNodeData.SetRange("Show in Tooltip", true);
-        exit(FormatItemLedgEntryDisplayPreperties(GraphNodeData, ItemLedgEntryNo));
-    end;
-
-    local procedure FormatItemLedgEntryDisplayPreperties(var GraphNodeData: Record "Graph Node Data CS"; ItemLedgEntryNo: Integer): JsonArray
-    var
         ItemLedgerEntry: Record "Item Ledger Entry";
         RecRef: RecordRef;
         TableFieldRef: FieldRef;
-        NodeData: JsonObject;
+        NodeDataField: JsonObject;
+        NodeData: JsonArray;
     begin
         GraphNodeData.SetRange("Table No.", Database::"Item Ledger Entry");
         GraphNodeData.SetRange("Include in Node Data", true);
@@ -107,8 +80,17 @@ codeunit 50101 "Graph View Controller CS"
             if TableFieldRef.Class = FieldClass::FlowField then
                 TableFieldRef.CalcField();
 
-            NodeData.Add(GraphNodeData."JSON Field Name", Format(TableFieldRef.Value));
+            GraphNodeData.CalcFields("Field Name");
+            NodeDataField.Add('name', GraphNodeData."Field Name");
+            NodeDataField.Add('value', Format(TableFieldRef.Value));
+            NodeDataField.Add('showInLabel', GraphNodeData."Show in Node Label");
+            NodeDataField.Add('showInStaticText', GraphNodeData."Show in Static Text");
+            NodeDataField.Add('showInTooltip', GraphNodeData."Show in Tooltip");
+
+            NodeData.Add(NodeDataField);
         until GraphNodeData.Next() = 0;
+
+        exit(NodeData);
     end;
 
     procedure IsEntryNoField(GraphNodeData: Record "Graph Node Data CS"): Boolean
