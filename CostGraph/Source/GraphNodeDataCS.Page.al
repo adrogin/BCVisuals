@@ -2,7 +2,7 @@ page 50101 "Graph Node Data CS"
 {
     PageType = List;
     ApplicationArea = All;
-    UsageCategory = Lists;
+    UsageCategory = Administration;
     SourceTable = "Graph Node Data CS";
     InsertAllowed = false;
     DeleteAllowed = false;
@@ -27,18 +27,21 @@ page 50101 "Graph Node Data CS"
                 {
                     ApplicationArea = All;
                 }
-                field("Show in Node Data"; Rec."Show in Node Label")
-                {
-                    ApplicationArea = All;
-                }
-                field("Show in Static Text"; Rec."Show in Static Text")
-                {
-                    ApplicationArea = All;
-                }
-                field("Show in Tooltip"; Rec."Show in Tooltip")
-                {
-                    ApplicationArea = All;
-                }
+            }
+        }
+    }
+
+    actions
+    {
+        area(Navigation)
+        {
+            action(TooltipFields)
+            {
+                Caption = 'Tooltip Fields';
+                ApplicationArea = All;
+                ToolTip = 'Select table fields which will be displayed in node tooltips';
+                RunObject = page "Node Tooltip Fields CS";
+                Image = SelectField;
             }
         }
     }

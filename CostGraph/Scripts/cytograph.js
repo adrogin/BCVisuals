@@ -5,7 +5,8 @@ function renderGraph(containerElement, nodes, edges, styles) {
     cy.destroy();
   }
 
-  styles = styles.concat(getDefaultElementStyles());
+  defaultStyles = getDefaultElementStyles();
+  styles === undefined ? styles = defaultStyles : styles = defaultStyles.concat(styles);
 
   cy = cytoscape({
     container: containerElement,
@@ -21,6 +22,8 @@ function renderGraph(containerElement, nodes, edges, styles) {
       name: 'breadthfirst'
     }
   });
+
+  createTextElements(nodes);
 
   cy.nodes().bind("click",
     (event) => {
@@ -51,15 +54,13 @@ function getDefaultElementStyles() {
     ]
 }
 
-function formatNodes(nodeIds) {
+function formatNodes(nodeData) {
   var nodes = [];
 
-  nodeIds.forEach(nodeId => {
+  nodeData.forEach(node => {
     nodes.push(
       {
-        data: {
-          id: nodeId
-        }
+        data: node
       });
   });
 
@@ -83,16 +84,17 @@ function formatEdges(edges) {
   return edgeObjects;
 }
 
-function addNodes(cy, nodeIds) {
-  nodeIds.forEach(nodeId => {
-    cy.add(
+function addNodes(cy, nodeData) {
+  var nodes = [];
+
+  nodeData.forEach(node => {
+    nodes.push(
       {
-        group: 'nodes',
-        data: {
-          id: nodeId
-        }
+        data: node
       });
   });
+
+  cy.add({ group: 'nodes', nodes });
 }
 
 function addEdges(cy, edges) {
@@ -145,6 +147,10 @@ function createTooltips() {
 }
 
 function createNodeTooltip(node) {
+  if (node.tooltipText == '') {
+    return;
+  }
+
   let ref = node.popperRef();
   let dummyDomElement = document.createElement("div");
 
@@ -182,7 +188,7 @@ function bindTooltipEvents() {
   });
 }
 
-function CreateTextElements() {
+function createTextElements() {
   createTooltips();
   bindTooltipEvents();
 }

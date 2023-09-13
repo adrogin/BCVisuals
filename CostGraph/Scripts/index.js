@@ -1,5 +1,5 @@
-function DrawGraph(containerElementName, nodes, edges) {
-    renderGraph(document.getElementById(containerElementName), nodes, edges);
+function DrawGraph(containerElementName, nodes, edges, styles) {
+    renderGraph(document.getElementById(containerElementName), nodes, edges, styles);
 };
 
 function SetLayout(layoutName) {

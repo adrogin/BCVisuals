@@ -236,11 +236,14 @@ codeunit 50100 "Cost Application Trace CS"
     end;
 
     local procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Integer; var DistinctNodes: Record Integer)
+    var
+        Node: JsonObject;
     begin
         if DistinctNodes.Get(NodeId) then
             exit;
 
-        Nodes.Add(NodeId);
+        Node.Add('id', NodeId);
+        Nodes.Add(Node);
 
         DistinctNodes.Number := NodeId;
         DistinctNodes.Insert();

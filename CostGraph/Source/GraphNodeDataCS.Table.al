@@ -1,6 +1,8 @@
 table 50101 "Graph Node Data CS"
 {
+    Caption = 'Graph Node Data';
     DataClassification = CustomerContent;
+    LookupPageId = "Graph Node Data CS";
 
     fields
     {
@@ -11,6 +13,13 @@ table 50101 "Graph Node Data CS"
         field(2; "Field No."; Integer)
         {
             Caption = 'Field No.';
+
+            trigger OnValidate()
+            var
+                GraphViewController: Codeunit "Graph View Controller CS";
+            begin
+                "Json Property Name" := GraphViewController.ConverFieldNameToJsonToken(Rec);
+            end;
         }
         field(3; "Table Name"; Text[249])
         {
@@ -41,6 +50,10 @@ table 50101 "Graph Node Data CS"
             Editable = false;
 
         }
+        field(7; "Json Property Name"; Text[80])
+        {
+            Caption = 'JSON Property Name';
+        }
         field(8; "Include in Node Data"; Boolean)
         {
             Caption = 'Include in Node Data';
@@ -56,44 +69,8 @@ table 50101 "Graph Node Data CS"
                 if GraphViewController.IsEntryNoField(Rec) then
                     Error(CannotRemoveEntryNoErr);
 
-                "Show in Node Label" := false;
-                "Show in Static Text" := false;
-                "Show in Tooltip" := false;
                 // TODO: Reset style selectors
             end;
-        }
-        field(9; "Show in Node Label"; Boolean)
-        {
-            Caption = 'Show in Node Label';
-
-            trigger OnValidate()
-            begin
-                ValidateShowField();
-            end;
-        }
-        field(10; "Show in Static Text"; Boolean)
-        {
-            Caption = 'Show in Static Text';
-
-            trigger OnValidate()
-            begin
-                ValidateShowField();
-            end;
-        }
-        field(11; "Show in Tooltip"; Boolean)
-        {
-            Caption = 'Show in Tooltip';
-
-            trigger OnValidate()
-            begin
-                ValidateShowField();
-            end;
-        }
-        field(12; Delimiter; Option)
-        {
-            Caption = 'Delimiter';
-            OptionMembers = "None","Space","New Line";
-            OptionCaption = 'None,Space,New Line';
         }
     }
 
@@ -105,9 +82,8 @@ table 50101 "Graph Node Data CS"
         }
     }
 
-    local procedure ValidateShowField()
-    begin
-        if "Show in Node Label" or "Show in Static Text" or "Show in Tooltip" and not "Include in Node Data" then
-            "Include in Node Data" := true;
-    end;
+    fieldgroups
+    {
+        fieldgroup(DropDown; "Field No.", "Field Caption") { }
+    }
 }

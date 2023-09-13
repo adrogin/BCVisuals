@@ -28,12 +28,10 @@ page 50100 "Cost Source CS"
                         if SelectEntry(EntryNo) then begin
                             EntryInfo := FormatEntryInfo(EntryNo);
                             CostSourceTrace.BuildCostSourceGraph(EntryNo, Nodes, Edges);
-                            GraphViewController.AddNodesDisplayContent(Nodes);
+                            GraphViewController.SetNodesData(Nodes);
                             CurrPage.GraphControl.DrawGraph('controlAddIn', Nodes, Edges);
+                            CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(GraphViewController.GetNodeTooltipsArray(Nodes));
                             CurrPage.GraphControl.CreateTooltips();
-                            //CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(GraphViewController.GetNodeTooltipsArray(Nodes));
-                            //CurrPage.GraphControl.CreateTooltips();
-                            //CurrPage.GraphControl.BindTooltipEvents();
                         end;
                     end;
                 }
