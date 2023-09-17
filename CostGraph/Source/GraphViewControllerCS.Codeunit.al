@@ -52,7 +52,6 @@ codeunit 50101 "Graph View Controller CS"
         ItemLedgerEntry: Record "Item Ledger Entry";
         RecRef: RecordRef;
         TableFieldRef: FieldRef;
-        FieldValue: Decimal;
     begin
         GraphNodeData.SetRange("Table No.", Database::"Item Ledger Entry");
         GraphNodeData.SetRange("Include in Node Data", true);
@@ -68,13 +67,36 @@ codeunit 50101 "Graph View Controller CS"
                 TableFieldRef.CalcField();
 
             if not IsEntryNoField(GraphNodeData) then  // Entry No. is always enabled by default as the node ID
-                if TableFieldRef.Type in [TableFieldRef.Type::Integer, TableFieldRef.Type::BigInteger, TableFieldRef.Type::Decimal] then begin
-                    FieldValue := TableFieldRef.Value;
-                    Node.AsObject().Add(GraphNodeData."Json Property Name", FieldValue);
-                end
-                else
-                    Node.AsObject().Add(GraphNodeData."Json Property Name", Format(TableFieldRef.Value));
+                AddFieldValueConvertedToFieldType(Node, GraphNodeData."Json Property Name", TableFieldRef);
         until GraphNodeData.Next() = 0;
+    end;
+
+    local procedure AddFieldValueConvertedToFieldType(var Node: JsonToken; PropertyName: Text; ValueFieldRef: FieldRef)
+    begin
+        if ValueFieldRef.Type in [ValueFieldRef.Type::Integer, ValueFieldRef.Type::BigInteger, ValueFieldRef.Type::Decimal] then
+            AddFieldValueAsNumeric(Node, PropertyName, ValueFieldRef.Value)
+        else
+            if ValueFieldRef.Type = ValueFieldRef.Type::Boolean then
+                AddFieldValueAsBoolean(Node, PropertyName, ValueFieldRef.Value)
+            else
+                Node.AsObject().Add(PropertyName, Format(ValueFieldRef.Value));
+
+    end;
+
+    local procedure AddFieldValueAsNumeric(var Node: JsonToken; PropertyName: Text; Value: Variant)
+    var
+        FieldValue: Decimal;
+    begin
+        FieldValue := Value;
+        Node.AsObject().Add(PropertyName, FieldValue);
+    end;
+
+    local procedure AddFieldValueAsBoolean(var Node: JsonToken; PropertyName: Text; Value: Variant)
+    var
+        FieldValue: Boolean;
+    begin
+        FieldValue := Value;
+        Node.AsObject().Add(PropertyName, FieldValue);
     end;
 
     local procedure FormatNodeTooltipText(NodeId: Integer): Text
@@ -149,5 +171,44 @@ codeunit 50101 "Graph View Controller CS"
         Tooltip.Add('nodeId', ItemLedgEntryNo);
         Tooltip.Add('content', FormatNodeTooltipText(ItemLedgEntryNo));
         exit(Tooltip);
+    end;
+
+    procedure FormatSelectorText(SelectorCode: Code[20]): Text
+    var
+        SelectorFilter: Record "Selector Filter CS";
+        GraphNodeData: Record "Graph Node Data CS";
+        Filters: Text;
+    begin
+        Filters := 'node';
+        SelectorFilter.SetRange("Selector Code", SelectorCode);
+        if SelectorFilter.FindSet() then
+            repeat
+                GraphNodeData.Get(Database::"Item Ledger Entry", SelectorFilter."Field No.");
+                Filters := Filters + '[' + GraphNodeData."Json Property Name" + SelectorFilter."Field Filter" + ']';
+            until SelectorFilter.Next() = 0;
+
+        exit(Filters);
+    end;
+
+    procedure GetStylesAsJson(): JsonArray
+    var
+        Style: Record "Style CS";
+        StyleDef: JsonObject;
+        StyleSheet: JsonObject;
+        StylesArr: JsonArray;
+        CouldNotReadStyleErr: Label 'Could not read style description %1. Make sure that the style is correctly defined.', Comment = '%1: Style code';
+    begin
+        if Style.FindSet() then
+            repeat
+                if not StyleSheet.ReadFrom(Style.ReadStyleSheetText()) then
+                    Error(CouldNotReadStyleErr, Style.Code);
+
+                Clear(StyleDef);
+                StyleDef.Add('selector', Style."Selector Text");
+                StyleDef.Add('css', StyleSheet);
+                StylesArr.Add(StyleDef);
+            until Style.Next() = 0;
+
+        exit(StylesArr);
     end;
 }

@@ -22,6 +22,7 @@ controladdin "Graph View CS"
         'Scripts/index.js';
 
     procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray);
+    procedure DrawGraphWithStyles(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; Styles: JsonArray);
     procedure SetLayout(LayoutName: Text);
     procedure SetNodeTooltipText(NodeId: Text; TooltipText: Text);
     procedure SetTooltipTextOnMultipleNodes(Tooltips: JsonArray);
