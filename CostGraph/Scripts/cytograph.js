@@ -1,10 +1,13 @@
 var cy;
 
-function renderGraph(containerElement, nodes, edges) {
+function renderGraph(containerElement, nodes, edges, styles) {
   if (cy != null) {
     cy.destroy();
   }
-  
+
+  defaultStyles = getDefaultElementStyles();
+  styles === undefined ? styles = defaultStyles : styles = defaultStyles.concat(styles);
+
   cy = cytoscape({
     container: containerElement,
 
@@ -13,7 +16,24 @@ function renderGraph(containerElement, nodes, edges) {
         edges: formatEdges(edges)
   	},
 
-    style: [ 
+    style: styles,
+
+    layout: {
+      name: 'breadthfirst'
+    }
+  });
+
+  createTextElements(nodes);
+
+  cy.nodes().bind("click",
+    (event) => {
+      Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]);
+    }
+  );
+}
+
+function getDefaultElementStyles() {
+  return [ 
       {
         selector: 'node',
         css: {
@@ -31,38 +51,20 @@ function renderGraph(containerElement, nodes, edges) {
           'curve-style': 'bezier'
         }
       }
-    ],
-
-    layout: {
-      name: 'breadthfirst'
-    }
-  });
-
-  cy.nodes().bind("click",
-    (event) => {
-      Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]);
-    }
-  );
+    ]
 }
 
-function formatNodes(nodeIds) {
+function formatNodes(nodeData) {
   var nodes = [];
 
-  nodeIds.forEach(nodeId => {
+  nodeData.forEach(node => {
     nodes.push(
       {
-        data: {
-          id: nodeId
-        }
+        data: node
       });
   });
 
   return nodes;
-}
-
-function setGraphLayout(layoutName) {
-  var layout = cy.layout({name: layoutName});
-  layout.run();
 }
 
 function formatEdges(edges) {
@@ -82,21 +84,21 @@ function formatEdges(edges) {
   return edgeObjects;
 }
 
-function addNodes(cy, nodeIds) {
-  nodeIds.forEach(nodeId => {
-    cy.add(
+function addNodes(cy, nodeData) {
+  var nodes = [];
+
+  nodeData.forEach(node => {
+    nodes.push(
       {
-        group: 'nodes',
-        data: {
-          id: nodeId
-        }
+        data: node
       });
   });
+
+  cy.add({ group: 'nodes', nodes });
 }
 
 function addEdges(cy, edges) {
   edges.forEach(edge => {
-    const key = Object.keys(edge)[0];
     cy.add(
       {
         group: 'edges',
@@ -107,6 +109,11 @@ function addEdges(cy, edges) {
       }
     });
   });
+}
+
+function setGraphLayout(layoutName) {
+  var layout = cy.layout({name: layoutName});
+  layout.run();
 }
 
 function createNodePopper(nodeIndex, popperContent) {
@@ -140,6 +147,10 @@ function createTooltips() {
 }
 
 function createNodeTooltip(node) {
+  if (node.tooltipText == '') {
+    return;
+  }
+
   let ref = node.popperRef();
   let dummyDomElement = document.createElement("div");
 
@@ -153,7 +164,7 @@ function createNodeTooltip(node) {
     content: () => {
       let content = document.createElement("div");
       content.innerHTML = node.tooltipText;
-
+      
       return content;
     }
   });
@@ -175,4 +186,9 @@ function bindTooltipEvents() {
     event.target.tip.hide();
     }
   });
+}
+
+function createTextElements() {
+  createTooltips();
+  bindTooltipEvents();
 }

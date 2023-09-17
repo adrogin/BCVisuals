@@ -2,7 +2,7 @@ page 50100 "Cost Source CS"
 {
     Caption = 'Cost Source';
     PageType = Card;
-    ApplicationArea = All;
+    ApplicationArea = Basic, Suite;
     UsageCategory = Administration;
 
     layout
@@ -28,10 +28,10 @@ page 50100 "Cost Source CS"
                         if SelectEntry(EntryNo) then begin
                             EntryInfo := FormatEntryInfo(EntryNo);
                             CostSourceTrace.BuildCostSourceGraph(EntryNo, Nodes, Edges);
-                            CurrPage.GraphControl.DrawGraph('controlAddIn', Nodes, Edges);
+                            GraphViewController.SetNodesData(Nodes);
+                            CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson());
                             CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(GraphViewController.GetNodeTooltipsArray(Nodes));
                             CurrPage.GraphControl.CreateTooltips();
-                            CurrPage.GraphControl.BindTooltipEvents();
                         end;
                     end;
                 }
@@ -52,7 +52,7 @@ page 50100 "Cost Source CS"
 
                 usercontrol(GraphControl; "Graph View CS")
                 {
-                    ApplicationArea = All;
+                    ApplicationArea = Basic, Suite;
 
                     trigger OnNodeClick(NodeId: Text)
                     var
@@ -63,6 +63,34 @@ page 50100 "Cost Source CS"
                     end;
                 }
             }
+        }
+    }
+
+    actions
+    {
+        area(Navigation)
+        {
+            action(NodeData)
+            {
+                Caption = 'Node Data';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Select table fields to be displayed in node labels and tooltips.';
+                Image = Comment;
+                RunObject = page "Graph Node Data CS";
+            }
+            action(Styles)
+            {
+                Caption = 'Styles';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Configure distinct styles for different graph nodes.';
+                Image = StyleSheet;
+                RunObject = page "Styles List CS";
+            }
+        }
+        area(Promoted)
+        {
+            actionref(PromotedNodeData; NodeData) { }
+            actionref(PromotedStyles; Styles) { }
         }
     }
 
