@@ -13,6 +13,7 @@ codeunit 50102 "Graph Setup - Initialize"
         TableField.SetRange(TableNo, Database::"Item Ledger Entry");
         TableField.SetFilter(Type, '<>%1&<>%2', TableField.Type::BLOB, TableField.Type::DateFormula);
         TableField.SetFilter(Class, '<>%1', TableField.Class::FlowFilter);
+        TableField.SetFilter(ObsoleteState, '<>%1', TableField.ObsoleteState::Removed);
         TableField.FindSet();
         repeat
             GraphNodeData.Init();
