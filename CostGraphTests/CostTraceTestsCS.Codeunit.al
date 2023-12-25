@@ -1,4 +1,4 @@
-codeunit 50150 "Cost Trace Tests CS"
+codeunit 60150 "Cost Trace Tests CS"
 {
     Subtype = Test;
 
@@ -306,6 +306,14 @@ codeunit 50150 "Cost Trace Tests CS"
         ProdOrderLine.FindFirst();
     end;
 
+    local procedure GetNodeId(Node: JsonObject): Integer
+    var
+        NodeId: JsonToken;
+    begin
+        Node.Get('id', NodeId);
+        exit(NodeId.AsValue().AsInteger());
+    end;
+
     local procedure GetPostedAssemblyNo(OrderNo: Code[20]): Code[20]
     var
         PostedAsmHeader: Record "Posted Assembly Header";
@@ -364,7 +372,7 @@ codeunit 50150 "Cost Trace Tests CS"
 
         for I := 0 to ExpectedNodes.Count() - 1 do begin
             Nodes.Get(I, Node);
-            LibraryAssert.IsTrue(ExpectedNodes.Contains(Node.AsValue().AsInteger()), ItemLedgEntryMissingInNodeListErr);
+            LibraryAssert.IsTrue(ExpectedNodes.Contains(GetNodeId(Node.AsObject())), ItemLedgEntryMissingInNodeListErr);
         end;
     end;
 }

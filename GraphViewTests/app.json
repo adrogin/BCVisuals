@@ -1,6 +1,6 @@
 {
-  "id": "fecf3098-71a8-4a7c-a2cb-c9f57e14010a",
-  "name": "CostGraphTests",
+  "id": "c409250f-2d9c-4512-982c-f92511ef9497",
+  "name": "Graph View Tests",
   "publisher": "ADR",
   "version": "2.0.0.0",
   "brief": "",
@@ -12,8 +12,8 @@
   "logo": "",
   "dependencies": [
     {
-      "id": "4f759f87-5734-4d67-beba-8e769592b4ce",
-      "name": "CostGraph",
+      "id": "55ab618a-8619-41bd-84b5-ea53a62ee07b",
+      "name": "Graph View Control",
       "publisher": "ADR",
       "version": "1.0.0.0"    
     },
@@ -21,40 +21,34 @@
       "id": "9856ae4f-d1a7-46ef-89bb-6ef056398228",
       "publisher": "Microsoft",
       "name": "System Application Test Library",
-      "version": "22.0.0.0"
+      "version": "23.0.0.0"
     },
     {
       "id": "dd0be2ea-f733-4d65-bb34-a28f4624fb14",
       "publisher": "Microsoft",
       "name": "Library Assert",
-      "version": "22.0.0.0"
+      "version": "23.0.0.0"
     },
     {
       "id": "5d86850b-0d76-4eca-bd7b-951ad998e997",
       "publisher": "Microsoft",
        "name": "Tests-TestLibraries",
-       "version": "22.0.0.0"
+       "version": "23.0.0.0"
     },
     {
       "id": "5095f467-0a01-4b99-99d1-9ff1237d286f",
       "publisher": "Microsoft",
        "name": "Library Variable Storage",
-       "version": "22.0.0.0"
-    },    
-    {
-      "id": "e7320ebb-08b3-4406-b1ec-b4927d3e280b",
-      "publisher": "Microsoft",
-      "name": "Any",
-      "version": "22.0.0.0"
+       "version": "23.0.0.0"
     }
   ],
   "screenshots": [],
   "platform": "1.0.0.0",
-  "application": "22.0.0.0",
+  "application": "23.0.0.0",
   "idRanges": [
     {
-      "from": 60150,
-      "to": 60159
+      "from": 60100,
+      "to": 60149
     }
   ],
   "resourceExposurePolicy": {
@@ -62,7 +56,7 @@
     "allowDownloadingSource": true,
     "includeSourceInSymbolFile": true
   },
-  "runtime": "11.0",
+  "runtime": "12.0",
   "features": [
     "NoImplicitWith"
   ]

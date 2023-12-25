@@ -1,11 +1,23 @@
-var cy;
+import cytoscape from "cytoscape";
+import popper from 'cytoscape-popper';
+import edgehandles from "cytoscape-edgehandles";
+import tippy from "tippy.js";
+import contextMenus from "cytoscape-context-menus";
+import { initializeContextMenu } from "./cycontextmenu";
 
-function renderGraph(containerElement, nodes, edges, styles) {
+cytoscape.use(popper);
+cytoscape.use(edgehandles);
+cytoscape.use(contextMenus);
+
+var cy;  // Global Cytoscape instance
+var eh;  // EdgeHandles instance
+
+export function renderGraph(containerElement, nodes, edges, styles) {
   if (cy != null) {
     cy.destroy();
   }
 
-  defaultStyles = getDefaultElementStyles();
+  const defaultStyles = getDefaultElementStyles();
   styles === undefined ? styles = defaultStyles : styles = defaultStyles.concat(styles);
 
   cy = cytoscape({
@@ -84,7 +96,7 @@ function formatEdges(edges) {
   return edgeObjects;
 }
 
-function addNodes(cy, nodeData) {
+export function addNodes(cy, nodeData) {
   var nodes = [];
 
   nodeData.forEach(node => {
@@ -97,7 +109,7 @@ function addNodes(cy, nodeData) {
   cy.add({ group: 'nodes', nodes });
 }
 
-function addEdges(cy, edges) {
+export function addEdges(cy, edges) {
   edges.forEach(edge => {
     cy.add(
       {
@@ -111,12 +123,12 @@ function addEdges(cy, edges) {
   });
 }
 
-function setGraphLayout(layoutName) {
+export function setGraphLayout(layoutName) {
   var layout = cy.layout({name: layoutName});
   layout.run();
 }
 
-function createNodePopper(nodeIndex, popperContent) {
+export function createNodePopper(nodeIndex, popperContent) {
   let node = cy.nodes()[nodeIndex];
   let popper = node.popper({
       content: () => {
@@ -136,11 +148,11 @@ function createNodePopper(nodeIndex, popperContent) {
   cy.on('pan zoom resize', update);
 }
 
-function setNodeTooltipText(nodeId, tooltipText) {
+export function setNodeTooltipText(nodeId, tooltipText) {
   cy.nodes()[nodeId].tooltipText = tooltipText;
 }
 
-function createTooltips() {
+export function createTooltips() {
   cy.nodes().forEach(node => {
     createNodeTooltip(node);
   });
@@ -172,7 +184,7 @@ function createNodeTooltip(node) {
   node.tip = tip;
 }
 
-function bindTooltipEvents() {
+export function bindTooltipEvents() {
   cy.nodes().unbind("mouseover");
   cy.nodes().bind("mouseover", event => {
     if (event.target.tip != null) {
@@ -183,7 +195,7 @@ function bindTooltipEvents() {
   cy.nodes().unbind("mouseout");
   cy.nodes().bind("mouseout", event => {
     if (event.target.tip != null) {
-    event.target.tip.hide();
+      event.target.tip.hide();
     }
   });
 }
@@ -191,4 +203,52 @@ function bindTooltipEvents() {
 function createTextElements() {
   createTooltips();
   bindTooltipEvents();
+}
+
+export function initEdgeHandles() {
+  let defaults = {
+    canConnect: function(sourceNode, targetNode){
+      return !sourceNode.same(targetNode);
+    },
+    edgeParams: function(sourceNode, targetNode){
+      return {};
+    },
+    hoverDelay: 150,
+    snap: true,
+    snapThreshold: 50,
+    snapFrequency: 15,
+    noEdgeEventsInDraw: true,
+    disableBrowserGestures: true
+  };
+  
+  eh = cy.edgehandles(defaults);
+}
+
+export function setEditModeEnabled(isEnabled) {
+  isEnabled ? eh.enableDrawMode() : eh.disableDrawMode();
+}
+
+export function initializeDefaultContextMenu() {
+  initializeContextMenu(cy);  
+}
+
+export function destroyContextMenu() {
+  cy.contextMenu.destroy();
+}
+
+export function sendGraphElementsToCaller() {
+  var nodes = [];
+  var edges = [];
+  
+  if (cy != null) {
+    cy.nodes().forEach(node => {
+      nodes.push({id: node.data().id});
+    });
+
+    cy.edges().forEach(edge => {
+      edges.push({ id: edge.data().id, source: edge.data().source, target: edge.data().target });
+    });
+  }
+
+  Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnGraphDataReceived', [nodes, edges]);
 }

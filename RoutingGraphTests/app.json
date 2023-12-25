@@ -1,6 +1,6 @@
 {
-  "id": "fecf3098-71a8-4a7c-a2cb-c9f57e14010a",
-  "name": "CostGraphTests",
+  "id": "46513f69-bf2b-46c9-b75e-cc9102da2464",
+  "name": "Routing Graph - Tests",
   "publisher": "ADR",
   "version": "2.0.0.0",
   "brief": "",
@@ -12,16 +12,10 @@
   "logo": "",
   "dependencies": [
     {
-      "id": "4f759f87-5734-4d67-beba-8e769592b4ce",
-      "name": "CostGraph",
+      "id": "eaf8323a-6866-4936-8d94-d1ff922306ce",
+      "name": "Routing Graph",
       "publisher": "ADR",
-      "version": "1.0.0.0"    
-    },
-    {
-      "id": "9856ae4f-d1a7-46ef-89bb-6ef056398228",
-      "publisher": "Microsoft",
-      "name": "System Application Test Library",
-      "version": "22.0.0.0"
+      "version": "1.0.0.0"  
     },
     {
       "id": "dd0be2ea-f733-4d65-bb34-a28f4624fb14",
@@ -36,12 +30,6 @@
        "version": "22.0.0.0"
     },
     {
-      "id": "5095f467-0a01-4b99-99d1-9ff1237d286f",
-      "publisher": "Microsoft",
-       "name": "Library Variable Storage",
-       "version": "22.0.0.0"
-    },    
-    {
       "id": "e7320ebb-08b3-4406-b1ec-b4927d3e280b",
       "publisher": "Microsoft",
       "name": "Any",
@@ -50,11 +38,11 @@
   ],
   "screenshots": [],
   "platform": "1.0.0.0",
-  "application": "22.0.0.0",
+  "application": "23.0.0.0",
   "idRanges": [
     {
-      "from": 60150,
-      "to": 60159
+      "from": 60250,
+      "to": 60299
     }
   ],
   "resourceExposurePolicy": {
@@ -62,7 +50,7 @@
     "allowDownloadingSource": true,
     "includeSourceInSymbolFile": true
   },
-  "runtime": "11.0",
+  "runtime": "12.0",
   "features": [
     "NoImplicitWith"
   ]

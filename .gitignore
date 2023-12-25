@@ -1,7 +1,8 @@
-dist/
-node_modules/
-.cache/
-.alpackages/
-.snapshots/
-.vscode/
 *.app
+*.flf
+.alPackages/
+.alcache/
+.altemplates/
+.vscode/
+node_modules/
+GraphViewControl/Scripts/dist/

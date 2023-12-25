@@ -1,18 +1,18 @@
-page 50107 "Styles List CS"
+page 50103 "Style Card"
 {
-    PageType = List;
+    PageType = Card;
     ApplicationArea = Basic, Suite;
-    UsageCategory = Lists;
     SourceTable = "Style CS";
-    Caption = 'Styles';
-    CardPageId = "Style Card";
+    Caption = 'Style';
 
     layout
     {
         area(Content)
         {
-            repeater(GroupName)
+            group(General)
             {
+                Caption = 'General';
+
                 field(Code; Rec.Code)
                 {
                     ApplicationArea = Basic, Suite;
@@ -27,39 +27,38 @@ page 50107 "Styles List CS"
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'The code of the selector which will be applied to graph elements. The style will be assigned to the elements satisfying the selector.';
-
-                    trigger OnLookup(var Text: Text): Boolean
-                    begin
-                        LookupSelector();
-                    end;
                 }
                 field(SelectorText; Rec."Selector Text")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Selector filters which will be applied to graph elements. The style will be assigned to the elements satisfying the selector.';
+                }
+            }
+            group(StyleSheetEditor)
+            {
+                Caption = 'StyleSheet';
 
-                    trigger OnLookup(var Text: Text): Boolean
+                field(StyleSheet; StyleText)
+                {
+                    ApplicationArea = Basic, Suite;
+                    MultiLine = true;
+                    RowSpan = 6;
+                    ShowCaption = false;
+
+                    trigger OnValidate()
                     begin
-                        LookupSelector();
+                        Rec.WriteStyleSheetText(StyleText);
                     end;
                 }
             }
         }
     }
 
-    local procedure LookupSelector()
-    var
-        Selector: Record "Selector CS";
-        SelectorsPage: Page "Selectors CS";
+    trigger OnAfterGetRecord()
     begin
-        if Rec."Selector Code" <> '' then
-            Selector.Get(Rec."Selector Code");
-
-        SelectorsPage.LookupMode(true);
-        SelectorsPage.SetTableView(Selector);
-        if SelectorsPage.RunModal() = Action::LookupOK then begin
-            SelectorsPage.GetRecord(Selector);
-            Rec.Validate("Selector Code", Selector.Code);
-        end;
+        StyleText := Rec.ReadStyleSheetText();
     end;
+
+    var
+        StyleText: Text;
 }

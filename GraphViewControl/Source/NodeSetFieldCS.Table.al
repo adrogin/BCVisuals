@@ -1,16 +1,22 @@
-table 50101 "Graph Node Data CS"
+table 50101 "Node Set Field CS"
 {
-    Caption = 'Graph Node Data';
+    Caption = 'Node Set Field';
     DataClassification = CustomerContent;
-    LookupPageId = "Graph Node Data CS";
+    LookupPageId = "Node Set Fields CS";
 
     fields
     {
-        field(1; "Table No."; Integer)
+        field(1; "Node Set Code"; Code[20])
+        {
+            Caption = 'Node Set Code';
+            TableRelation = "Node Set CS";
+        }
+        field(2; "Table No."; Integer)
         {
             Caption = 'Table No.';
+            TableRelation = AllObjWithCaption."Object ID" where("Object Type" = const(Table));
         }
-        field(2; "Field No."; Integer)
+        field(3; "Field No."; Integer)
         {
             Caption = 'Field No.';
 
@@ -21,28 +27,14 @@ table 50101 "Graph Node Data CS"
                 "Json Property Name" := GraphViewController.ConverFieldNameToJsonToken(Rec);
             end;
         }
-        field(3; "Table Name"; Text[249])
-        {
-            Caption = 'Table Name';
-            FieldClass = FlowField;
-            CalcFormula = lookup(AllObjWithCaption."Object Name" where("Object Type" = const(Table), "Object ID" = field("Table No.")));
-            Editable = false;
-        }
-        field(4; "Table Caption"; Text[249])
-        {
-            Caption = 'Table Caption';
-            FieldClass = FlowField;
-            CalcFormula = lookup(AllObjWithCaption."Object Caption" where("Object Type" = const(Table), "Object ID" = field("Table No.")));
-            Editable = false;
-        }
-        field(5; "Field Name"; Text[80])
+        field(6; "Field Name"; Text[80])
         {
             Caption = 'Field Name';
             FieldClass = FlowField;
             CalcFormula = lookup(Field.FieldName where(TableNo = field("Table No."), "No." = field("Field No.")));
             Editable = false;
         }
-        field(6; "Field Caption"; Text[80])
+        field(7; "Field Caption"; Text[80])
         {
             Caption = 'Field Caption';
             FieldClass = FlowField;
@@ -50,11 +42,11 @@ table 50101 "Graph Node Data CS"
             Editable = false;
 
         }
-        field(7; "Json Property Name"; Text[80])
+        field(8; "Json Property Name"; Text[80])
         {
             Caption = 'JSON Property Name';
         }
-        field(8; "Include in Node Data"; Boolean)
+        field(9; "Include in Node Data"; Boolean)
         {
             Caption = 'Include in Node Data';
 
@@ -66,7 +58,7 @@ table 50101 "Graph Node Data CS"
                 if "Include in Node Data" then
                     exit;
 
-                if GraphViewController.IsEntryNoField(Rec) then
+                if GraphViewController.IsMandatoryField(Rec) then
                     Error(CannotRemoveEntryNoErr);
 
                 // TODO: Reset style selectors
@@ -76,7 +68,7 @@ table 50101 "Graph Node Data CS"
 
     keys
     {
-        key(PK; "Table No.", "Field No.")
+        key(PK; "Node Set Code", "Field No.")
         {
             Clustered = true;
         }
@@ -86,4 +78,13 @@ table 50101 "Graph Node Data CS"
     {
         fieldgroup(DropDown; "Field No.", "Field Caption") { }
     }
+
+    trigger OnDelete()
+    var
+        NodeTooltipField: Record "Node Tooltip Field CS";
+    begin
+        NodeTooltipField.SetRange("Node Set Code", "Node Set Code");
+        NodeTooltipField.SetRange("Field No.", "Field No.");
+        NodeTooltipField.DeleteAll(true);
+    end;
 }

@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": ".\\GraphViewControl"
+		},
+		{
+			"path": ".\\GraphViewTests"
+		},
+		{
+			"path": ".\\CostGraph"
+		},
+		{
+			"path": ".\\CostGraphTests"
+		},
+		{
+			"path": ".\\RoutingGraph"
+		},
+		{
+			"path": ".\\RoutingGraphTests"
+		}
+    ]
+}

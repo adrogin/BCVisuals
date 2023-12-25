@@ -13,13 +13,7 @@ controladdin "Graph View CS"
         'node_modules/tippy.js/themes/light.css',
         'node_modules/tippy.js/themes/material.css';
 
-    Scripts =
-        'node_modules/cytoscape/dist/cytoscape.min.js',
-        'node_modules/@popperjs/core/dist/umd/popper.js',
-        'node_modules/cytoscape-popper/cytoscape-popper.js',
-        'node_modules/tippy.js/dist/tippy-bundle.umd.min.js',
-        'Scripts/cytograph.js',
-        'Scripts/index.js';
+    Scripts = 'Scripts/dist/main.js';
 
     procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray);
     procedure DrawGraphWithStyles(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; Styles: JsonArray);
@@ -29,6 +23,12 @@ controladdin "Graph View CS"
     procedure BindTooltipEvents();
     procedure CreateTooltips();
     procedure CreateTextElements();
+    procedure InitializeEdgeHandles();
+    procedure SetEditModeEnabled(IsEnabled: Boolean);
+    procedure InitializeDefaultContextMenu();
+    procedure DestroyContextMenu();
+    procedure RequestGraphData();
 
     event OnNodeClick(NodeId: Text);
+    event OnGraphDataReceived(Nodes: JsonArray; Edges: JsonArray);
 }

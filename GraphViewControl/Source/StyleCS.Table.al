@@ -6,15 +6,22 @@ table 50105 "Style CS"
 
     fields
     {
-        field(1; Code; Code[20])
+        field(1; "Style Set"; Code[20])
+        {
+            Caption = 'Style Set';
+            TableRelation = "Style Set CS";
+            NotBlank = true;
+        }
+        field(2; Code; Code[20])
         {
             Caption = 'Code';
+            NotBlank = true;
         }
-        field(2; Description; Text[100])
+        field(3; Description; Text[100])
         {
             Caption = 'Description';
         }
-        field(3; "Selector Code"; Code[20])
+        field(4; "Selector Code"; Code[20])
         {
             Caption = 'Selector';
             TableRelation = "Selector CS";
@@ -27,7 +34,7 @@ table 50105 "Style CS"
                 "Selector Text" := Selector."Selector Text";
             end;
         }
-        field(4; "Selector Text"; Text[1024])
+        field(5; "Selector Text"; Text[1024])
         {
             Caption = 'Selector Text';
 
@@ -36,7 +43,7 @@ table 50105 "Style CS"
                 "Selector Code" := '';
             end;
         }
-        field(5; StyleSheet; Blob)
+        field(6; StyleSheet; Blob)
         {
             Caption = 'StyleSheet';
         }
@@ -44,7 +51,7 @@ table 50105 "Style CS"
 
     keys
     {
-        key(PK; Code)
+        key(PK; "Style Set", Code)
         {
             Clustered = true;
         }

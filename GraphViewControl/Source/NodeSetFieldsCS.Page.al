@@ -1,10 +1,9 @@
-page 50101 "Graph Node Data CS"
+page 50101 "Node Set Fields CS"
 {
     PageType = List;
     ApplicationArea = Basic, Suite;
-    UsageCategory = Administration;
     Caption = 'Graph Node Data';
-    SourceTable = "Graph Node Data CS";
+    SourceTable = "Node Set Field CS";
     InsertAllowed = false;
     DeleteAllowed = false;
 
@@ -32,6 +31,7 @@ page 50101 "Graph Node Data CS"
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Select this value if you want the field to be included in the node data structure. Selected fields can be used in style selectors.';
+                    Editable = CanExcludeField;
                 }
             }
         }
@@ -47,6 +47,7 @@ page 50101 "Graph Node Data CS"
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Select table fields which will be displayed in node tooltips';
                 RunObject = page "Node Tooltip Fields CS";
+                RunPageLink = "Node Set Code" = field("Node Set Code");
                 Image = SelectField;
             }
         }
@@ -55,4 +56,13 @@ page 50101 "Graph Node Data CS"
             actionref(PromotedTooltipFields; TooltipFields) { }
         }
     }
+
+    trigger OnAfterGetRecord()
+    begin
+        CanExcludeField := GraphNodeDataMgt.CanRemoveFieldFromNodeData(Rec."Node Set Code", Rec."Field No.");
+    end;
+
+    var
+        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        CanExcludeField: Boolean;
 }

@@ -1,4 +1,4 @@
-codeunit 50100 "Cost Application Trace CS"
+codeunit 50150 "Cost Application Trace CS"
 {
     procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; var Nodes: JsonArray; var Edges: JsonArray)
     var

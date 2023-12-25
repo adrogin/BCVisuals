@@ -14,7 +14,7 @@ table 50104 "Selector Filter CS"
         field(2; "Field No."; Integer)
         {
             Caption = 'No.';
-            TableRelation = "Graph Node Data CS"."Field No." where("Include in Node Data" = const(true));
+            TableRelation = "Node Set Field CS"."Field No." where("Include in Node Data" = const(true));
         }
         field(3; "Field Name"; Text[30])
         {

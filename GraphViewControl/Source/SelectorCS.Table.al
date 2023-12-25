@@ -18,6 +18,11 @@ table 50103 "Selector CS"
         {
             Caption = 'Selector Text';
         }
+        field(4; "Table No."; Integer)
+        {
+            Caption = 'Table No.';
+            TableRelation = AllObjWithCaption."Object ID" where("Object Type" = const(Table));
+        }
     }
 
     keys

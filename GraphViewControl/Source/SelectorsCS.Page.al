@@ -23,6 +23,22 @@ page 50104 "Selectors CS"
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'A text description of the selector explaining its purpose.';
                 }
+                field("Table No."; Rec."Table No.")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'The ID of the table this selector applies to.';
+
+                    trigger OnValidate()
+                    begin
+                        TableName := GetTableName(Rec."Table No.");
+                    end;
+                }
+                field(TableName; TableName)
+                {
+                    Caption = 'Table Name';
+                    ToolTip = 'The name of the table this selector applies to.';
+                    Editable = false;
+                }
                 field("Selector Text"; Rec."Selector Text")
                 {
                     ApplicationArea = Basic, Suite;
@@ -41,4 +57,23 @@ page 50104 "Selectors CS"
             }
         }
     }
+
+    trigger OnAfterGetRecord()
+    begin
+        TableName := GetTableName(Rec."Table No.");
+    end;
+
+    local procedure GetTableName(TableNo: Integer): Text
+    var
+        AllObjWithCaption: Record AllObjWithCaption;
+    begin
+        if TableNo = 0 then
+            exit('');
+
+        AllObjWithCaption.Get(AllObjWithCaption."Object Type"::Table, TableNo);
+        exit(AllObjWithCaption."Object Caption");
+    end;
+
+    var
+        TableName: Text;
 }

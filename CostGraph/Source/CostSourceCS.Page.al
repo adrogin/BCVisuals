@@ -1,4 +1,4 @@
-page 50100 "Cost Source CS"
+page 50150 "Cost Source CS"
 {
     Caption = 'Cost Source';
     PageType = Card;
@@ -28,9 +28,9 @@ page 50100 "Cost Source CS"
                         if SelectEntry(EntryNo) then begin
                             EntryInfo := FormatEntryInfo(EntryNo);
                             CostSourceTrace.BuildCostSourceGraph(EntryNo, Nodes, Edges);
-                            GraphViewController.SetNodesData(Nodes);
-                            CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson());
-                            CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(GraphViewController.GetNodeTooltipsArray(Nodes));
+                            CostViewController.SetNodesData(Nodes);
+                            CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultStyleSet()));
+                            CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
                             CurrPage.GraphControl.CreateTooltips();
                         end;
                     end;
@@ -58,7 +58,7 @@ page 50100 "Cost Source CS"
                     var
                         ItemLedgerEntry: Record "Item Ledger Entry";
                     begin
-                        ItemLedgerEntry.Get(GraphViewController.NodeId2ItemLedgEntryNo(NodeId));
+                        ItemLedgerEntry.Get(CostViewController.NodeId2ItemLedgEntryNo(NodeId));
                         Page.Run(Page::"Item Ledger Entries", ItemLedgerEntry);
                     end;
                 }
@@ -70,13 +70,13 @@ page 50100 "Cost Source CS"
     {
         area(Navigation)
         {
-            action(NodeData)
+            action(NodeSets)
             {
-                Caption = 'Node Data';
+                Caption = 'Node Sets';
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Select table fields to be displayed in node labels and tooltips.';
                 Image = Comment;
-                RunObject = page "Graph Node Data CS";
+                RunObject = page "Node Sets CS";
             }
             action(Styles)
             {
@@ -84,13 +84,20 @@ page 50100 "Cost Source CS"
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Configure distinct styles for different graph nodes.';
                 Image = StyleSheet;
-                RunObject = page "Styles List CS";
+                RunObject = page "Style Sets CS";
+            }
+            action(GraphViewSetup)
+            {
+                Caption = 'Graph View Setup';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Configure the graph presentation parameters, such as node labels, tooltips, and graph element styles.';
+                Image = Setup;
+                RunObject = page "Graph View Setup CS";
             }
         }
         area(Promoted)
         {
-            actionref(PromotedNodeData; NodeData) { }
-            actionref(PromotedStyles; Styles) { }
+            actionref(PromotedGraphViewSetup; GraphViewSetup) { }
         }
     }
 
@@ -123,6 +130,7 @@ page 50100 "Cost Source CS"
 
     var
         GraphViewController: Codeunit "Graph View Controller CS";
+        CostViewController: Codeunit "Cost View Controller CS";
         GraphLayout: Enum "Graph Layout Name CS";
         EntryNo: Integer;
         EntryInfo: Text;
