@@ -3,7 +3,7 @@ import popper from 'cytoscape-popper';
 import edgehandles from "cytoscape-edgehandles";
 import tippy from "tippy.js";
 import contextMenus from "cytoscape-context-menus";
-import { initializeContextMenu } from "./cycontextmenu";
+import { initializeContextMenu } from "./cycontextmenu.js";
 
 cytoscape.use(popper);
 cytoscape.use(edgehandles);
