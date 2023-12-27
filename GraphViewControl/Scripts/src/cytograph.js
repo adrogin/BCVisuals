@@ -12,21 +12,21 @@ cytoscape.use(contextMenus);
 var cy;  // Global Cytoscape instance
 var eh;  // EdgeHandles instance
 
-export function renderGraph(containerElement, nodes, edges, styles) {
+export function renderGraph(containerElement, nodes, edges, styles, onClickEventCallback) {
   if (cy != null) {
     cy.destroy();
   }
 
   const defaultStyles = getDefaultElementStyles();
-  styles === undefined ? styles = defaultStyles : styles = defaultStyles.concat(styles);
+  styles = styles === undefined ? defaultStyles : styles = defaultStyles.concat(styles);
 
   cy = cytoscape({
     container: containerElement,
 
     elements: {
-        nodes: formatNodes(nodes),
-        edges: formatEdges(edges)
-  	},
+      nodes: formatNodes(nodes),
+      edges: formatEdges(edges)
+    },
 
     style: styles,
 
@@ -37,33 +37,37 @@ export function renderGraph(containerElement, nodes, edges, styles) {
 
   createTextElements(nodes);
 
-  cy.nodes().bind("click",
+  cy.nodes().bind("click", onClickEventCallback);
+}
+
+export function renderGraphWithNavExtensibilityBinding(containerElement, nodes, edges, styles) {
+  renderGraph(
+    containerElement, nodes, edges, styles,
     (event) => {
-      Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]);
-    }
-  );
+      Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()])
+    });
 }
 
 function getDefaultElementStyles() {
-  return [ 
-      {
-        selector: 'node',
-        css: {
-          'background-color':'#61bffc',
-          'content': 'data(id)'
-        }
-      },
-      {
-        selector: 'edge',
-        css: {
-          'width': 2,
-          'line-color': '#ccc',
-          'target-arrow-color': '#ccc',
-          'target-arrow-shape': 'triangle',
-          'curve-style': 'bezier'
-        }
+  return [
+    {
+      selector: 'node',
+      css: {
+        'background-color':'#61bffc',
+        'content': 'data(id)'
       }
-    ]
+    },
+    {
+      selector: 'edge',
+      css: {
+        'width': 2,
+        'line-color': '#ccc',
+        'target-arrow-color': '#ccc',
+        'target-arrow-shape': 'triangle',
+        'curve-style': 'bezier'
+      }
+    }
+  ]
 }
 
 function formatNodes(nodeData) {
@@ -236,7 +240,7 @@ export function destroyContextMenu() {
   cy.contextMenu.destroy();
 }
 
-export function sendGraphElementsToCaller() {
+export function sendGraphElementsToCaller(eventCallback) {
   var nodes = [];
   var edges = [];
   
@@ -250,5 +254,11 @@ export function sendGraphElementsToCaller() {
     });
   }
 
-  Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnGraphDataReceived', [nodes, edges]);
+  eventCallback(nodes, edges);
+}
+
+export function sendGraphElementsToNavExtensibilityCaller() {
+  sendGraphElementsToCaller(
+    (nodes, edges) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnGraphDataReceived', [nodes, edges]) }
+  );
 }

@@ -1,16 +1,16 @@
 import {
-    renderGraph, setGraphLayout, setNodeTooltipText, bindTooltipEvents, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
-    destroyContextMenu, sendGraphElementsToCaller
+    renderGraphWithNavExtensibilityBinding, setGraphLayout, setNodeTooltipText, bindTooltipEvents, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
+    destroyContextMenu, sendGraphElementsToNavExtensibilityCaller
 } from "./cytograph.js";
 
 /**
  * Create and render the graph object with default styles.
- * @param {String} containerElementName - The name of the HTML element where the graph will embedded.
+ * @param {String} containerElementName - The name of the HTML element where the graph will embedded. For Business Central controls this should be "controlAddIn".
  * @param {Object[]} nodes - Array of Node elements.
  * @param {Object[]} edges - Array of Edge elements.
  */
 export function DrawGraph(containerElementName, nodes, edges) {
-    renderGraph(document.getElementById(containerElementName), nodes, edges);
+    renderGraphWithNavExtensibilityBinding(document.getElementById(containerElementName), nodes, edges);
 };
 
 /**
@@ -21,7 +21,7 @@ export function DrawGraph(containerElementName, nodes, edges) {
  * @param {Object[]} styles - Array of element styles with selectors.
  */
 export function DrawGraphWithStyles(containerElementName, nodes, edges, styles) {
-    renderGraph(document.getElementById(containerElementName), nodes, edges, styles);
+    renderGraphWithNavExtensibilityBinding(document.getElementById(containerElementName), nodes, edges, styles);
 };
 
 /**
@@ -102,5 +102,5 @@ export function DestroyContextMenu() {
  * This method invokes the callback method OnGraphDataReceived, passing the nodes and edges of the graph back to the caller.
  */
 export function RequestGraphData() {
-    sendGraphElementsToCaller();
+    sendGraphElementsToNavExtensibilityCaller();
 }
