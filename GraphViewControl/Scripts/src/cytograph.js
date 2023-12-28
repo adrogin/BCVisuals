@@ -18,7 +18,7 @@ export function renderGraph(containerElement, nodes, edges, styles, onClickEvent
   }
 
   const defaultStyles = getDefaultElementStyles();
-  styles = styles === undefined ? defaultStyles : styles = defaultStyles.concat(styles);
+  styles = styles === undefined ? defaultStyles : defaultStyles.concat(styles);
 
   cy = cytoscape({
     container: containerElement,
@@ -261,4 +261,8 @@ export function sendGraphElementsToNavExtensibilityCaller() {
   sendGraphElementsToCaller(
     (nodes, edges) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnGraphDataReceived', [nodes, edges]) }
   );
+}
+
+export function getGraphElements() {
+  return cy.elements();
 }

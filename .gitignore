@@ -1,5 +1,6 @@
 *.app
 *.flf
+package-lock.json
 .alPackages/
 .alcache/
 .altemplates/
