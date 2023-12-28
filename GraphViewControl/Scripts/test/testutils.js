@@ -9,3 +9,17 @@ export function getSampleGraphElementArrays() {
             ]
         });
 };
+
+export function getSampleGraphElementArraysWithTooltips() {
+    return({
+            nodes: [
+                {'id': 'A', 'tooltip': 'TooltipA'},
+                {'id': 'B'},
+                {'id': 'C', 'tooltip': 'TooltipC'}
+            ],
+            edges: [
+                {'source': 'A', target: 'B'},
+                {'source': 'A', target: 'C'}
+            ]
+        });
+};

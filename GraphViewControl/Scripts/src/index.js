@@ -1,6 +1,6 @@
 import {
     renderGraphWithNavExtensibilityBinding, setGraphLayout, setNodeTooltipText, bindTooltipEvents, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
-    destroyContextMenu, sendGraphElementsToNavExtensibilityCaller
+    destroyContextMenu, sendGraphElementsToNavExtensibilityCaller, setNodeTooltipTextOnNodeIndex
 } from "./cytograph.js";
 
 /**
@@ -50,7 +50,7 @@ export function SetTooltipTextOnMultipleNodes(tooltips) {
     let index = 0;
 
     tooltips.forEach(tooltip => {
-        SetNodeTooltipText(index++, tooltip.content);
+        setNodeTooltipTextOnNodeIndex(index++, tooltip.content);
     });
 };
 

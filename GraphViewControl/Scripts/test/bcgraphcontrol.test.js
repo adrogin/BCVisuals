@@ -1,5 +1,5 @@
 import { renderGraph, getGraphElements } from "../src/cytograph";
-import { getSampleGraphElementArrays } from "./testutils";
+import { getSampleGraphElementArrays, getSampleGraphElementArraysWithTooltips } from "./testutils";
 
 test('Build graph from nodes and edges arrays in format provided by BC', () => {
     const graphDefinition = getSampleGraphElementArrays();
@@ -29,5 +29,21 @@ test('Graph nodes must not have tooltips if the initial dataset does not provide
 
     getGraphElements().filter(e => e._private.group == 'nodes').forEach(node => {
         expect(node.tip).toBeUndefined();
+        expect(node.tooltipText).toBeUndefined();
     });
+});
+
+test('Node tooltips must be initialized from the node dataset that contains tooltip info', () => {
+    const graphDefinition = getSampleGraphElementArraysWithTooltips();
+
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+
+    let nodeElements = getGraphElements().filter(e => e._private.group == 'nodes');
+    expect(nodeElements.filter(e => e._private.data.id == 'A')[0].tooltipText).toBe('TooltipA');
+    expect(nodeElements.filter(e => e._private.data.id == 'B')[0].tooltipText).toBeUndefined();
+    expect(nodeElements.filter(e => e._private.data.id == 'C')[0].tooltipText).toBe('TooltipC');
+
+    expect(nodeElements.filter(e => e._private.data.id == 'A')[0].tip.popper._tippy.props.content.innerHTML).toContain('TooltipA');
+    expect(nodeElements.filter(e => e._private.data.id == 'B')[0].tip).toBeUndefined();
+    expect(nodeElements.filter(e => e._private.data.id == 'C')[0].tip.popper._tippy.props.content.innerHTML).toContain('TooltipC');
 });

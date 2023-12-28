@@ -152,13 +152,18 @@ export function createNodePopper(nodeIndex, popperContent) {
   cy.on('pan zoom resize', update);
 }
 
-export function setNodeTooltipText(nodeId, tooltipText) {
-  cy.nodes()[nodeId].tooltipText = tooltipText;
+export function setNodeTooltipText(nodeId, tooltipText) {  
+  cy.getElementById(nodeId).tooltipText = tooltipText;
+}
+
+export function setNodeTooltipTextOnNodeIndex(nodeIndex, tooltipText) {  
+  cy.nodes()[nodeIndex].tooltipText = tooltipText;
 }
 
 export function createTooltips() {
   cy.nodes().forEach(node => {
-    createNodeTooltip(node);
+    if (typeof node.tooltipText !== 'undefined')
+      createNodeTooltip(node);
   });
 }
 
@@ -204,7 +209,12 @@ export function bindTooltipEvents() {
   });
 }
 
-function createTextElements() {
+function createTextElements(nodeDefs) {
+  nodeDefs.forEach(nodeDef => {
+    if (typeof nodeDef.tooltip !== 'undefined')
+      setNodeTooltipText(nodeDef.id, nodeDef.tooltip);
+  });
+
   createTooltips();
   bindTooltipEvents();
 }
