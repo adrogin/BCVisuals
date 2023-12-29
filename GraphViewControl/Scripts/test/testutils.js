@@ -1,3 +1,23 @@
+export function graphNodesFilter(e) {
+    return (e._private.group == 'nodes');
+};
+
+export function graphEdgesFilter(e) {
+    return (e._private.group == 'edges');
+};
+
+export function nodeIdFilter(nodeId) {
+    return function(e) {
+        return (e._private.data.id == nodeId);
+    };
+};
+
+export function edgeNodesFilter(source, target) {
+    return function(e) {
+        return (e._private.data.source == source && e._private.data.target == target);
+    }
+}
+
 export function getSampleGraphElementArrays() {
     return({
             nodes: [
@@ -23,3 +43,11 @@ export function getSampleGraphElementArraysWithTooltips() {
             ]
         });
 };
+
+export function getSampleNodeTooltipsArray() {
+    return([
+        {'nodeId': 'A', 'content': 'TooltipA'},
+        {'nodeId': 'B', 'content': 'TooltipB'},
+        {'nodeId': 'C', 'content': 'TooltipC'}
+    ]);
+}

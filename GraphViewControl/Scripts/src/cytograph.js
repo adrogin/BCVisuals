@@ -12,7 +12,7 @@ cytoscape.use(contextMenus);
 var cy;  // Global Cytoscape instance
 var eh;  // EdgeHandles instance
 
-export function renderGraph(containerElement, nodes, edges, styles, onClickEventCallback) {
+function renderGraph(containerElement, nodes, edges, styles, onClickEventCallback) {
   if (cy != null) {
     cy.destroy();
   }
@@ -40,7 +40,7 @@ export function renderGraph(containerElement, nodes, edges, styles, onClickEvent
   cy.nodes().bind("click", onClickEventCallback);
 }
 
-export function renderGraphWithNavExtensibilityBinding(containerElement, nodes, edges, styles) {
+function renderGraphWithNavExtensibilityBinding(containerElement, nodes, edges, styles) {
   renderGraph(
     containerElement, nodes, edges, styles,
     (event) => {
@@ -100,7 +100,7 @@ function formatEdges(edges) {
   return edgeObjects;
 }
 
-export function addNodes(cy, nodeData) {
+function addNodes(cy, nodeData) {
   var nodes = [];
 
   nodeData.forEach(node => {
@@ -113,7 +113,7 @@ export function addNodes(cy, nodeData) {
   cy.add({ group: 'nodes', nodes });
 }
 
-export function addEdges(cy, edges) {
+function addEdges(cy, edges) {
   edges.forEach(edge => {
     cy.add(
       {
@@ -127,12 +127,12 @@ export function addEdges(cy, edges) {
   });
 }
 
-export function setGraphLayout(layoutName) {
+function setGraphLayout(layoutName) {
   var layout = cy.layout({name: layoutName});
   layout.run();
 }
 
-export function createNodePopper(nodeIndex, popperContent) {
+function createNodePopper(nodeIndex, popperContent) {
   let node = cy.nodes()[nodeIndex];
   let popper = node.popper({
       content: () => {
@@ -152,15 +152,23 @@ export function createNodePopper(nodeIndex, popperContent) {
   cy.on('pan zoom resize', update);
 }
 
-export function setNodeTooltipText(nodeId, tooltipText) {  
+function setNodeTooltipText(nodeId, tooltipText) {  
   cy.getElementById(nodeId).tooltipText = tooltipText;
 }
 
-export function setNodeTooltipTextOnNodeIndex(nodeIndex, tooltipText) {  
+function setNodeTooltipsOnAllNodes(tooltips) {
+  let index = 0;
+
+  tooltips.forEach(tooltip => {
+      setNodeTooltipTextOnNodeIndex(index++, tooltip.content);
+  });
+}
+
+function setNodeTooltipTextOnNodeIndex(nodeIndex, tooltipText) {  
   cy.nodes()[nodeIndex].tooltipText = tooltipText;
 }
 
-export function createTooltips() {
+function createTooltips() {
   cy.nodes().forEach(node => {
     if (typeof node.tooltipText !== 'undefined')
       createNodeTooltip(node);
@@ -193,7 +201,7 @@ function createNodeTooltip(node) {
   node.tip = tip;
 }
 
-export function bindTooltipEvents() {
+function bindTooltipEvents() {
   cy.nodes().unbind("mouseover");
   cy.nodes().bind("mouseover", event => {
     if (event.target.tip != null) {
@@ -219,7 +227,7 @@ function createTextElements(nodeDefs) {
   bindTooltipEvents();
 }
 
-export function initEdgeHandles() {
+function initEdgeHandles() {
   let defaults = {
     canConnect: function(sourceNode, targetNode){
       return !sourceNode.same(targetNode);
@@ -238,19 +246,19 @@ export function initEdgeHandles() {
   eh = cy.edgehandles(defaults);
 }
 
-export function setEditModeEnabled(isEnabled) {
+function setEditModeEnabled(isEnabled) {
   isEnabled ? eh.enableDrawMode() : eh.disableDrawMode();
 }
 
-export function initializeDefaultContextMenu() {
+function initializeDefaultContextMenu() {
   initializeContextMenu(cy);  
 }
 
-export function destroyContextMenu() {
+function destroyContextMenu() {
   cy.contextMenu.destroy();
 }
 
-export function sendGraphElementsToCaller(eventCallback) {
+function sendGraphElementsToCaller(eventCallback) {
   var nodes = [];
   var edges = [];
   
@@ -267,12 +275,31 @@ export function sendGraphElementsToCaller(eventCallback) {
   eventCallback(nodes, edges);
 }
 
-export function sendGraphElementsToNavExtensibilityCaller() {
+function sendGraphElementsToNavExtensibilityCaller() {
   sendGraphElementsToCaller(
     (nodes, edges) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnGraphDataReceived', [nodes, edges]) }
   );
 }
 
-export function getGraphElements() {
+function getGraphElements() {
   return cy.elements();
+}
+
+export {
+  renderGraph,
+  renderGraphWithNavExtensibilityBinding,
+  addNodes,
+  addEdges,
+  setGraphLayout,
+  createNodePopper,
+  setNodeTooltipText,
+  createTooltips,
+  setNodeTooltipsOnAllNodes,
+  initEdgeHandles,
+  setEditModeEnabled,
+  initializeDefaultContextMenu,
+  destroyContextMenu,
+  sendGraphElementsToCaller,
+  sendGraphElementsToNavExtensibilityCaller,
+  getGraphElements
 }
