@@ -1,5 +1,5 @@
 import {
-    renderGraphWithNavExtensibilityBinding, setGraphLayout, setNodeTooltipText, bindTooltipEvents, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
+    renderGraphWithNavExtensibilityBinding, setGraphLayout, setNodeTooltipText, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
     destroyContextMenu, sendGraphElementsToNavExtensibilityCaller, setNodeTooltipsOnAllNodes
 } from "./cytograph.js";
 
@@ -48,13 +48,6 @@ export function SetNodeTooltipText(nodeId, tooltipText) {
  */
 export function SetTooltipTextOnMultipleNodes(tooltips) {
     setNodeTooltipsOnAllNodes(tooltips);
-};
-
-/**
- * Bind event listeners on nodes' "mouseover" and "mouseout" events to enable the tooltip functionality
- */
-export function BindTooltipEvents() {
-    bindTooltipEvents();
 };
 
 /**

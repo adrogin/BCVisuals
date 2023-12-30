@@ -1,6 +1,7 @@
 import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAllNodes, createTooltips } from "../src/cytograph";
 import {
-    graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithTooltips, getSampleNodeTooltipsArray, nodeIdFilter, edgeNodesFilter
+    graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithTooltips, getSampleNodeTooltipsArray,
+    nodeIdFilter, edgeNodesFilter
 } from "./testutils";
 
 test('Build graph from nodes and edges arrays in format provided by BC', () => {
@@ -76,7 +77,7 @@ test('Tooltip can be set on a single node after creating a graph instance', () =
     expect(getGraphElements().filter(graphNodesFilter).filter(nodeIdFilter('B'))[0].tooltipText).toBe('TooltipB');
     
     createTooltips();
-    expect(getGraphElements().filter(graphNodesFilter).filter(nodeIdFilter('A'))[0].tip).toBeUndefined();
-    expect(getGraphElements().filter(graphNodesFilter).filter(nodeIdFilter('B'))[0].tip.popper._tippy.props.content.innerHTML).toContain('TooltipB');
-    expect(getGraphElements().filter(graphNodesFilter).filter(nodeIdFilter('C'))[0].tip).toBeUndefined();
+    expect(getGraphElements().filter(nodeIdFilter('A'))[0].tip).toBeUndefined();
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].tip.popper._tippy.props.content.innerHTML).toContain('TooltipB');
+    expect(getGraphElements().filter(nodeIdFilter('C'))[0].tip).toBeUndefined();
 })

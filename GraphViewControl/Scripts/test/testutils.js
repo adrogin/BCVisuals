@@ -1,20 +1,20 @@
 export function graphNodesFilter(e) {
-    return (e._private.group == 'nodes');
+    return (e.json().group == 'nodes');
 };
 
 export function graphEdgesFilter(e) {
-    return (e._private.group == 'edges');
+    return (e.json().group == 'edges');
 };
 
 export function nodeIdFilter(nodeId) {
     return function(e) {
-        return (e._private.data.id == nodeId);
+        return (e.json().data.id == nodeId);
     };
 };
 
 export function edgeNodesFilter(source, target) {
     return function(e) {
-        return (e._private.data.source == source && e._private.data.target == target);
+        return (e.json().data.source == source && e.json().data.target == target);
     }
 }
 

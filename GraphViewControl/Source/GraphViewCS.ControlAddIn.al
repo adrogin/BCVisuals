@@ -20,7 +20,6 @@ controladdin "Graph View CS"
     procedure SetLayout(LayoutName: Text);
     procedure SetNodeTooltipText(NodeId: Text; TooltipText: Text);
     procedure SetTooltipTextOnMultipleNodes(Tooltips: JsonArray);
-    procedure BindTooltipEvents();
     procedure CreateTooltips();
     procedure CreateTextElements();
     procedure InitializeEdgeHandles();

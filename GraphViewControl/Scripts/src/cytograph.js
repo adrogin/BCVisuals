@@ -173,6 +173,8 @@ function createTooltips() {
     if (typeof node.tooltipText !== 'undefined')
       createNodeTooltip(node);
   });
+
+  bindTooltipEvents();
 }
 
 function createNodeTooltip(node) {
@@ -224,7 +226,6 @@ function createTextElements(nodeDefs) {
   });
 
   createTooltips();
-  bindTooltipEvents();
 }
 
 function initEdgeHandles() {
