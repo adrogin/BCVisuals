@@ -1,4 +1,4 @@
-import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAllNodes, createTooltips } from "../src/cytograph";
+import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAllNodes, createTooltips, setGraphLayout } from "../src/cytograph";
 import {
     graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithTooltips, getSampleNodeTooltipsArray,
     nodeIdFilter, edgeNodesFilter
@@ -81,3 +81,16 @@ test('Tooltip can be set on a single node after creating a graph instance', () =
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].tip.popper._tippy.props.content.innerHTML).toContain('TooltipB');
     expect(getGraphElements().filter(nodeIdFilter('C'))[0].tip).toBeUndefined();
 })
+
+test('Default graph layout can be changed after creating an instance', () => {
+    const graphDefinition = getSampleGraphElementArrays();
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.x).toBeCloseTo(-0.38, 1);
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.y).toBeCloseTo(3.38, 1);
+
+    setGraphLayout('circle');
+
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.x).toBeCloseTo(1.38, 1);
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.y).toBeCloseTo(1.01, 1);
+});
