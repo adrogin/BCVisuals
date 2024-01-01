@@ -1,11 +1,5 @@
 codeunit 60102 "Library - Graph View CS"
 {
-    procedure CreateNodeSet(var NodeSet: Record "Node Set CS")
-    begin
-        NodeSet.Validate(Code, LibraryUtility.GenerateGUID());
-        NodeSet.Insert(true);
-    end;
-
     procedure AddFieldToNodeSet(NodeSetCode: Code[20]; FieldNo: Integer; IncludeInNodeData: Boolean)
     var
         NodeSet: Record "Node Set CS";
@@ -18,6 +12,74 @@ codeunit 60102 "Library - Graph View CS"
         NodeSetField.Validate("Field No.", FieldNo);
         NodeSetField.Validate("Include in Node Data", IncludeInNodeData);
         NodeSetField.Insert(true);
+    end;
+
+    procedure AddNodeTooltipField(NodeSetCode: Code[20]; SequenceNo: Integer; FieldNo: Integer)
+    var
+        NodeTooltipField: Record "Node Tooltip Field CS";
+    begin
+        NodeTooltipField.Validate("Node Set Code", NodeSetCode);
+        NodeTooltipField.Validate("Sequence No.", SequenceNo);
+        NodeTooltipField.Validate("Field No.", FieldNo);
+        NodeTooltipField.Insert(true);
+    end;
+
+    procedure AddStyleToNodeSet(NodeSetCode: Code[20]; StyleCode: Code[20])
+    var
+        StyleSet: Record "Style Set CS";
+    begin
+        StyleSet.Validate("Node Set Code", NodeSetCode);
+        StyleSet.Validate("Style Code", StyleCode);
+        StyleSet.Insert(true);
+    end;
+
+    procedure CreateNodeSet(var NodeSet: Record "Node Set CS")
+    begin
+        NodeSet.Validate(Code, LibraryUtility.GenerateGUID());
+        NodeSet.Insert(true);
+    end;
+
+    procedure CreateNodeSet(var NodeSet: Record "Node Set CS"; TableNo: Integer)
+    begin
+        NodeSet.Validate(Code, LibraryUtility.GenerateGUID());
+        NodeSet.Validate("Table No.", TableNo);
+        NodeSet.Insert(true);
+    end;
+
+    procedure CreateSelector(var Selector: Record "Selector CS"; TableNo: Integer)
+    begin
+        Selector.Validate(Code, LibraryUtility.GenerateGUID());
+        Selector.Validate("Table No.", TableNo);
+        Selector.Insert(true);
+    end;
+
+    procedure CreateSelectorFilter(SelectorCode: Code[20]; FieldNo: Integer)
+    var
+        SelectorFilter: Record "Selector Filter CS";
+    begin
+        SelectorFilter.Validate("Selector Code", SelectorCode);
+        SelectorFilter.Validate("Field No.", FieldNo);
+        SelectorFilter.Insert(true);
+    end;
+
+    procedure CreateStyle(SelectorCode: Code[20]): Code[20]
+    var
+        Style: Record "Style CS";
+    begin
+        Style.Validate(Code, LibraryUtility.GenerateGUID());
+        Style.Validate("Selector Code", SelectorCode);
+        Style.Insert(true);
+
+        exit(Style.Code);
+    end;
+
+    procedure CreateStyleWithSelector(SelectorTableNo: Integer; SelectorFieldNo: Integer): Code[20]
+    var
+        Selector: Record "Selector CS";
+    begin
+        CreateSelector(Selector, SelectorTableNo);
+        CreateSelectorFilter(Selector.Code, SelectorFieldNo);
+        exit(CreateStyle(Selector.Code));
     end;
 
     procedure UpdateNodeSetTableNo(var NodeSet: Record "Node Set CS"; TableNo: Integer)

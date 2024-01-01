@@ -30,12 +30,26 @@ export function getSampleGraphElementArrays() {
         });
 };
 
-export function getSampleGraphElementArraysWithTooltips() {
+export function getSampleGraphElementArraysWithData() {
     return({
             nodes: [
-                {'id': 'A', 'tooltip': 'TooltipA'},
-                {'id': 'B'},
-                {'id': 'C', 'tooltip': 'TooltipC'}
+                {
+                    'id': 'A',
+                    'tooltip': 'TooltipA',
+                    'text_data_field': 'TextA',
+                    'numeric_data_field': 100
+                },
+                {
+                    'id': 'B',
+                    'text_data_field': 'TextB',
+                    'numeric_data_field': 200
+                },
+                {
+                    'id': 'C',
+                    'tooltip': 'TooltipC',
+                    'text_data_field': 'TextC',
+                    'numeric_data_field': 300
+                }
             ],
             edges: [
                 {'source': 'A', target: 'B'},
@@ -50,4 +64,4 @@ export function getSampleNodeTooltipsArray() {
         {'nodeId': 'B', 'content': 'TooltipB'},
         {'nodeId': 'C', 'content': 'TooltipC'}
     ]);
-}
+};

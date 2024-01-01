@@ -1,6 +1,6 @@
 import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAllNodes, createTooltips, setGraphLayout } from "../src/cytograph";
 import {
-    graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithTooltips, getSampleNodeTooltipsArray,
+    graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithData, getSampleNodeTooltipsArray,
     nodeIdFilter, edgeNodesFilter
 } from "./testutils";
 
@@ -37,7 +37,7 @@ test('Graph nodes must not have tooltips if the initial dataset does not provide
 });
 
 test('Node tooltips must be initialized from the node dataset that contains tooltip info', () => {
-    const graphDefinition = getSampleGraphElementArraysWithTooltips();
+    const graphDefinition = getSampleGraphElementArraysWithData();
 
     renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
 
@@ -93,4 +93,17 @@ test('Default graph layout can be changed after creating an instance', () => {
 
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.x).toBeCloseTo(1.38, 1);
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.y).toBeCloseTo(1.01, 1);
+});
+
+test('Graph nodes contain additional data provided in node info on instantiation', () => {
+    const graphDefinition = getSampleGraphElementArraysWithData();
+
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+
+    expect(getGraphElements().filter(nodeIdFilter('A'))[0].json().data.text_data_field).toBe('TextA');
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().data.text_data_field).toBe('TextB');
+    expect(getGraphElements().filter(nodeIdFilter('C'))[0].json().data.text_data_field).toBe('TextC');
+    expect(getGraphElements().filter(nodeIdFilter('A'))[0].json().data.numeric_data_field).toBe(100);
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().data.numeric_data_field).toBe(200);
+    expect(getGraphElements().filter(nodeIdFilter('C'))[0].json().data.numeric_data_field).toBe(300);
 });

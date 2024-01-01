@@ -120,6 +120,7 @@ codeunit 60100 "Node Data Mgt. Tests CS"
     var
         NodeSet: Record "Node Set CS";
     begin
+        // [SCENARIO] Modification of the node set description doesn't require confimation
         LibraryGraphView.CreateNodeSet(NodeSet);
         NodeSet.Validate(Description, LibraryUtility.GenerateRandomText(MaxStrLen(NodeSet.Description)));
         NodeSet.Modify(true);
@@ -151,7 +152,7 @@ codeunit 60100 "Node Data Mgt. Tests CS"
     begin
         LibraryGraphView.CreateNodeSet(NodeSet);
         LibraryGraphView.AddFieldToNodeSet(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
-        AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
 
         // [WHEN]
         NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
@@ -163,14 +164,92 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         LibraryAssert.RecordIsEmpty(NodeTooltipField);
     end;
 
-    local procedure AddNodeTooltipField(NodeSetCode: Code[20]; SequenceNo: Integer; FieldNo: Integer)
+    [Test]
+    procedure FieldSelectedInTooltipIncludedInNodeData()
     var
+        NodeSet: Record "Node Set CS";
+        NodeSetField: Record "Node Set Field CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
         NodeTooltipField: Record "Node Tooltip Field CS";
     begin
-        NodeTooltipField.Validate("Node Set Code", NodeSetCode);
-        NodeTooltipField.Validate("Sequence No.", SequenceNo);
-        NodeTooltipField.Validate("Field No.", FieldNo);
-        NodeTooltipField.Insert(true);
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+
+        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+
+        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
+
+        NodeTooltipField.SetRange("Node Set Code", NodeSet.Code);
+        NodeTooltipField.DeleteAll(true);
+
+        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryAssert.IsFalse(NodeSetField."Include in Node Data", FieldMustBeRemovedFromNodeDataErr);
+    end;
+
+    [Test]
+    procedure AssignStyleIncludeInNodeDataEnabledForFilterFields()
+    var
+        NodeSet: Record "Node Set CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+        NodeSetField: Record "Node Set Field CS";
+        SelectorFilter: Record "Selector Filter CS";
+        StyleCode: Code[20];
+    begin
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+        StyleCode := LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field"));
+
+        LibraryGraphView.AddStyleToNodeSet(NodeSet.Code, StyleCode);
+
+        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
+
+        SelectorFilter.Get(StyleCode, NodeDataTestTable.FieldNo("Code Field"));
+        SelectorFilter.Delete(true);
+
+        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryAssert.IsFalse(NodeSetField."Include in Node Data", FieldMustBeRemovedFromNodeDataErr);
+    end;
+
+    [Test]
+    procedure AddFieldToSelectorFilterIncludeInNodeDataEnabled()
+    var
+        NodeSet: Record "Node Set CS";
+        Style: Record "Style CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+        NodeSetField: Record "Node Set Field CS";
+    begin
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+        Style.Get(LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field")));
+        LibraryGraphView.AddStyleToNodeSet(NodeSet.Code, Style.Code);
+
+        LibraryGraphView.AddFieldToNodeSet(NodeSet.Code, NodeDataTestTable."Decimal Field", false);
+        LibraryGraphView.CreateSelectorFilter(Style."Selector Code", NodeDataTestTable.FieldNo("Decimal Field"));
+
+        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
+    end;
+
+    [Test]
+    procedure RemoveFieldFromTooltipFieldRemainsInDataIfPresentInFilter()
+    var
+        NodeSet: Record "Node Set CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+        NodeSetField: Record "Node Set Field CS";
+        NodeTooltipField: Record "Node Tooltip Field CS";
+    begin
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+
+        LibraryGraphView.AddStyleToNodeSet(
+            NodeSet.Code,
+            LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field")));
+
+        NodeTooltipField.SetRange("Node Set Code", NodeSet.Code);
+        NodeTooltipField.DeleteAll(true);
+
+        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
     end;
 
     local procedure GetFieldNoByName(TableNo: Integer; FieldName: Text[30]): Integer
@@ -217,7 +296,6 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         RecRef: RecordRef;
         PKRef: KeyRef;
         I: Integer;
-        FieldMustBeinNodeDataErr: Label 'Primary key fields must be included in node data.';
     begin
         NodeSet.Get(NodeSetCode);
         NodeSetField.SetRange("Node Set Code", NodeSetCode);
@@ -243,4 +321,6 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         LibraryAssert: Codeunit "Library Assert";
         LibraryVariableStorage: Codeunit "Library - Variable Storage";
         LibraryGraphView: Codeunit "Library - Graph View CS";
+        FieldMustbeInNodeDataErr: Label 'Field  must be included in node data';
+        FieldMustBeRemovedFromNodeDataErr: Label 'Field must be removed from node data';
 }

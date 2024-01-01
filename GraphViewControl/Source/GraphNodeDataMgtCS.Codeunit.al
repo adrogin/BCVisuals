@@ -20,6 +20,17 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         exit(false);
     end;
 
+    procedure CanRemoveFieldFromNodeData(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
+    var
+        NodeSet: Record "Node Set CS";
+        CanRemove: Boolean;
+    begin
+        NodeSet.Get(NodeSetCode);
+        CanRemove := not IsPrimaryKeyField(NodeSet."Table No.", FieldNo);
+
+        exit(CanRemove);
+    end;
+
     local procedure RemoveNonEligibleFielfdFromNodeData(NodeSetCode: Code[20]; TableNo: Integer)
     var
         NodeSetField: Record "Node Set Field CS";
@@ -61,7 +72,7 @@ codeunit 50100 "Graph Node Data Mgt. CS"
             until Field.Next() = 0;
     end;
 
-    local procedure FilterTableFieldsForNodeData(var Field: Record Field; TableNo: Integer)
+    procedure FilterTableFieldsForNodeData(var Field: Record Field; TableNo: Integer)
     begin
         Field.SetRange(TableNo, TableNo);
         Field.SetFilter(
