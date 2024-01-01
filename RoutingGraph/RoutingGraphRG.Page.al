@@ -94,7 +94,7 @@ page 50250 "Routing Graph RG"
     trigger OnOpenPage()
     begin
         RoutingGraph.SetNodesData(Nodes, RoutingNo, VersionCode);
-        CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(RoutingGraph.GetDefaultStyleSet()));
+        CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(RoutingGraph.GetDefaultNodeSet()));
         CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(RoutingGraph.GetNodeTooltipsArray(Nodes, RoutingNo, VersionCode));
         CurrPage.GraphControl.CreateTooltips();
         CurrPage.GraphControl.InitializeEdgeHandles();  // Initialize necessary components to support edit mode

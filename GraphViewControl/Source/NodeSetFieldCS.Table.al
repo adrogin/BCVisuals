@@ -49,20 +49,7 @@ table 50101 "Node Set Field CS"
         field(9; "Include in Node Data"; Boolean)
         {
             Caption = 'Include in Node Data';
-
-            trigger OnValidate()
-            var
-                GraphViewController: Codeunit "Graph View Controller CS";
-                CannotRemoveEntryNoErr: Label 'Entry No. field cannot be removed from node data.';
-            begin
-                if "Include in Node Data" then
-                    exit;
-
-                if GraphViewController.IsMandatoryField(Rec) then
-                    Error(CannotRemoveEntryNoErr);
-
-                // TODO: Reset style selectors
-            end;
+            Editable = false;
         }
     }
 

@@ -1,8 +1,8 @@
 page 50102 "Node Tooltip Fields CS"
 {
-    PageType = List;
+    PageType = ListPart;
     SourceTable = "Node Tooltip Field CS";
-    Caption = 'Node Tooltip Fields';
+    Caption = 'Tooltip Fields';
     AutoSplitKey = true;
 
     layout

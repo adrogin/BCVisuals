@@ -1,24 +1,26 @@
 table 50107 "Style Set CS"
 {
     DataClassification = CustomerContent;
-    LookupPageId = "Style Sets CS";
 
     fields
     {
-        field(1; Code; Code[20])
+        field(1; "Node Set Code"; Code[20])
         {
-            Caption = 'Style Set';
+            Caption = 'Node Set Code';
+            TableRelation = "Node Set CS".Code;
             NotBlank = true;
         }
-        field(2; Desciption; Text[100])
+        field(2; "Style Code"; Code[20])
         {
-            Caption = 'Description';
+            Caption = 'Style Code';
+            TableRelation = "Style CS".Code;
+            NotBlank = true;
         }
     }
 
     keys
     {
-        key(PK; Code)
+        key(PK; "Node Set Code", "Style Code")
         {
             Clustered = true;
         }

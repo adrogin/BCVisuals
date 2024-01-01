@@ -16,7 +16,7 @@ page 50105 "Graph View Setup CS"
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Select table fields to be displayed in node labels and tooltips.';
                 Image = Comment;
-                RunObject = page "Node Sets CS";
+                RunObject = page "Node Sets List CS";
             }
             action(Styles)
             {

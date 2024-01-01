@@ -27,12 +27,6 @@ page 50101 "Node Set Fields CS"
                     ToolTip = 'The name of the field.';
                     Editable = false;
                 }
-                field("Include in Node Data"; Rec."Include in Node Data")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Select this value if you want the field to be included in the node data structure. Selected fields can be used in style selectors.';
-                    Editable = CanExcludeField;
-                }
             }
         }
     }
@@ -56,13 +50,4 @@ page 50101 "Node Set Fields CS"
             actionref(PromotedTooltipFields; TooltipFields) { }
         }
     }
-
-    trigger OnAfterGetRecord()
-    begin
-        CanExcludeField := GraphNodeDataMgt.CanRemoveFieldFromNodeData(Rec."Node Set Code", Rec."Field No.");
-    end;
-
-    var
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
-        CanExcludeField: Boolean;
 }

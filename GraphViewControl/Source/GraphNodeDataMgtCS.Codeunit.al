@@ -6,16 +6,18 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         AddTableFieldsToNodeSet(NodeSetCode, TableNo);
     end;
 
-    procedure CanRemoveFieldFromNodeData(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
-    var
-        NodeSet: Record "Node Set CS";
-        CanRemove: Boolean;
+    procedure IsFieldRequiredinNodeData(NodeSet: Record "Node Set CS"; FieldNo: Integer): Boolean
     begin
-        NodeSet.Get(NodeSetCode);
-        CanRemove := not IsPrimaryKeyField(NodeSet."Table No.", FieldNo);
+        if IsPrimaryKeyField(NodeSet."Table No.", FieldNo) then
+            exit(true);
 
-        OnCanRemoveFieldFromNodeData(NodeSetCode, FieldNo, CanRemove);
-        exit(CanRemove);
+        if IsFieldRequiredInTooltips(NodeSet.Code, FieldNo) then
+            exit(true);
+
+        if IsFieldRequiredInSelectorFilters(NodeSet.Code, FieldNo) then
+            exit(true);
+
+        exit(false);
     end;
 
     local procedure RemoveNonEligibleFielfdFromNodeData(NodeSetCode: Code[20]; TableNo: Integer)
@@ -92,6 +94,37 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         exit(IsFieldInDefaultSet);
     end;
 
+    local procedure IsFieldRequiredInTooltips(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
+    var
+        NodeTooltipField: Record "Node Tooltip Field CS";
+    begin
+        NodeTooltipField.SetRange("Node Set Code", NodeSetCode);
+        NodeTooltipField.SetRange("Field No.", FieldNo);
+        exit(not NodeTooltipField.IsEmpty());
+    end;
+
+    local procedure IsFieldRequiredInSelectorFilters(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
+    var
+        StyleSet: Record "Style Set CS";
+        Style: Record "Style CS";
+        Selector: Record "Selector CS";
+        SelectorFilter: Record "Selector Filter CS";
+    begin
+        StyleSet.SetRange("Node Set Code", NodeSetCode);
+        if StyleSet.FindSet() then
+            repeat
+                Style.Get(StyleSet."Style Code");
+                if Selector.Get(Style."Selector Code") then begin
+                    SelectorFilter.SetRange("Selector Code", Selector.Code);
+                    SelectorFilter.SetRange("Field No.", FieldNo);
+                    if not SelectorFilter.IsEmpty() then
+                        exit(true);
+                end;
+            until StyleSet.Next() = 0;
+
+        exit(false);
+    end;
+
     procedure IsPrimaryKeyField(TableNo: Integer; FieldNo: Integer): Boolean
     var
         RecRef: RecordRef;
@@ -117,11 +150,6 @@ codeunit 50100 "Graph Node Data Mgt. CS"
 
     [IntegrationEvent(false, false)]
     local procedure OnFieldIsInDefaultSet(TableNo: Integer; FieldNo: Integer; var IncludeInDefaultSet: Boolean)
-    begin
-    end;
-
-    [IntegrationEvent(false, false)]
-    local procedure OnCanRemoveFieldFromNodeData(NodeSetCode: Code[20]; FieldNo: Integer; var CanRemove: Boolean)
     begin
     end;
 }

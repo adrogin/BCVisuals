@@ -149,20 +149,22 @@ codeunit 50101 "Graph View Controller CS"
         exit(Filters);
     end;
 
-    procedure GetStylesAsJson(StyleSetCode: Code[20]): JsonArray
+    procedure GetStylesAsJson(NodeSetCode: Code[20]): JsonArray
     var
+        StyleSet: Record "Style Set CS";
         Style: Record "Style CS";
         StyleDef: JsonObject;
         StyleSheet: JsonObject;
         StylesArr: JsonArray;
         CouldNotReadStyleErr: Label 'Could not read style description %1. Make sure that the style is correctly defined.', Comment = '%1: Style code';
     begin
-        if StyleSetCode = '' then
-            exit(StylesArr);  // Returning an empty array if the style set code is blank
+        if NodeSetCode = '' then
+            exit(StylesArr);  // Returning an empty array if the style set is undefined
 
-        Style.SetRange("Style Set", StyleSetCode);
-        if Style.FindSet() then
+        StyleSet.SetRange("Node Set Code", NodeSetCode);
+        if StyleSet.FindSet() then
             repeat
+                Style.Get(StyleSet."Style Code");
                 if not StyleSheet.ReadFrom(Style.ReadStyleSheetText()) then
                     Error(CouldNotReadStyleErr, Style.Code);
 
@@ -170,7 +172,7 @@ codeunit 50101 "Graph View Controller CS"
                 StyleDef.Add('selector', Style."Selector Text");
                 StyleDef.Add('css', StyleSheet);
                 StylesArr.Add(StyleDef);
-            until Style.Next() = 0;
+            until StyleSet.Next() = 0;
 
         exit(StylesArr);
     end;

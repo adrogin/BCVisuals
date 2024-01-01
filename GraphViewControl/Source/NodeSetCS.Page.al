@@ -1,17 +1,15 @@
-page 50100 "Node Sets CS"
+page 50109 "Node Set CS"
 {
-    PageType = List;
-    ApplicationArea = Basic, Suite;
-    UsageCategory = Administration;
+    PageType = Card;
+    ApplicationArea = All;
     SourceTable = "Node Set CS";
-    Caption = 'Graph Node Sets';
-    AboutText = 'Set up graph node parameters for any table that can be displayed in a graph. Node configuration includes visualisation styles, staic node text, and tooltips.';
+    Caption = 'Node Set';
 
     layout
     {
         area(Content)
         {
-            repeater(NodeSet)
+            group(General)
             {
                 field(Code; Rec.Code)
                 {
@@ -34,27 +32,20 @@ page 50100 "Node Sets CS"
                     ToolTip = 'The text caption of the table associated with the node set.';
                 }
             }
-        }
-    }
-
-    actions
-    {
-        area(Navigation)
-        {
-            action(NodeData)
+            part(TooltipFields; "Node Tooltip Fields CS")
             {
                 ApplicationArea = Basic, Suite;
-                Caption = 'Node Data';
-                ToolTip = 'Set up node texts and tooltips, and node visualisation styles.';
-                Image = DataEntry;
-                RunObject = page "Node Set Fields CS";
-                RunPageLink = "Node Set Code" = field(Code);
+                SubPageLink = "Node Set Code" = field(Code);
+            }
+            part(NodeSetStyles; "Node Set Styles CS")
+            {
+                ApplicationArea = Basic, Suite;
             }
         }
-
-        area(Promoted)
-        {
-            actionref(PromotedNodeData; NodeData) { }
-        }
     }
+
+    trigger OnOpenPage()
+    begin
+        CurrPage.NodeSetStyles.Page.SetNodeSetCode(Rec.Code);
+    end;
 }

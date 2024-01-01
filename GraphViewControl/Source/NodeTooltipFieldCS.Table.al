@@ -16,7 +16,7 @@ table 50102 "Node Tooltip Field CS"
         field(3; "Field No."; Integer)
         {
             Caption = 'Field No.';
-            TableRelation = "Node Set Field CS"."Field No." where("Node Set Code" = field("Node Set Code"), "Include in Node Data" = const(true));
+            TableRelation = "Node Set Field CS"."Field No." where("Node Set Code" = field("Node Set Code"));
         }
         field(4; "Field Caption"; Text[80])
         {
@@ -51,4 +51,9 @@ table 50102 "Node Tooltip Field CS"
             Clustered = true;
         }
     }
+
+    trigger OnModify()
+    begin
+        // Update "Include in Node Data"
+    end;
 }

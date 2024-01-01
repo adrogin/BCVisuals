@@ -18,7 +18,7 @@ permissionset 50100 CostGraph
         page "Selectors CS" = X,
         tabledata "Node Set CS" = RIMD,
         table "Node Set CS" = X,
-        page "Node Sets CS" = X,
+        page "Node Sets List CS" = X,
         page "Selector Filters CS" = X,
         page "Style Card" = X,
         page "Styles List CS" = X,

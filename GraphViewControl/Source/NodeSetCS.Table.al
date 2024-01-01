@@ -2,7 +2,7 @@ table 50100 "Node Set CS"
 {
     DataClassification = CustomerContent;
     Caption = 'Node Set';
-    LookupPageId = "Node Sets CS";
+    LookupPageId = "Node Sets List CS";
 
     fields
     {

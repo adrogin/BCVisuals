@@ -6,12 +6,6 @@ table 50105 "Style CS"
 
     fields
     {
-        field(1; "Style Set"; Code[20])
-        {
-            Caption = 'Style Set';
-            TableRelation = "Style Set CS";
-            NotBlank = true;
-        }
         field(2; Code; Code[20])
         {
             Caption = 'Code';
@@ -51,7 +45,7 @@ table 50105 "Style CS"
 
     keys
     {
-        key(PK; "Style Set", Code)
+        key(PK; Code)
         {
             Clustered = true;
         }

@@ -29,7 +29,7 @@ page 50150 "Cost Source CS"
                             EntryInfo := FormatEntryInfo(EntryNo);
                             CostSourceTrace.BuildCostSourceGraph(EntryNo, Nodes, Edges);
                             CostViewController.SetNodesData(Nodes);
-                            CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultStyleSet()));
+                            CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()));
                             CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
                             CurrPage.GraphControl.CreateTooltips();
                         end;
@@ -76,15 +76,7 @@ page 50150 "Cost Source CS"
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Select table fields to be displayed in node labels and tooltips.';
                 Image = Comment;
-                RunObject = page "Node Sets CS";
-            }
-            action(Styles)
-            {
-                Caption = 'Styles';
-                ApplicationArea = Basic, Suite;
-                ToolTip = 'Configure distinct styles for different graph nodes.';
-                Image = StyleSheet;
-                RunObject = page "Style Sets CS";
+                RunObject = page "Node Sets List CS";
             }
             action(GraphViewSetup)
             {
