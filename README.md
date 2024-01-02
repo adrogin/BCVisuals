@@ -44,7 +44,7 @@ To use this functionality:
 - Select the routing you want to edit and open the routing card
 - From the routing card, run *Routing -> View as Graph*
 - By default, the graph layout opens in a view-only mode. Click **Edit** to enable editing (Note: certified routings cannot be edited. Routing must be in the New or Under Development status to enable editing)
-- In the Edit mode, drag and drop actions create new graph edges connecting routing operations. You can delete a node by right-clicking on it.
+- In the Edit mode, drag and drop actions create new graph edges connecting routing operations. You can delete an edge by right-clicking on it.
 - Once all edits are done, push **Save** and close the page
 
   ![image](https://github.com/adrogin/BCVisuals/assets/42849285/e2f2100b-2a05-4290-ba5b-82ddb4295ab1)
