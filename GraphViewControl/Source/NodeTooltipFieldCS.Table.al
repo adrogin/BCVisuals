@@ -4,7 +4,7 @@ table 50102 "Node Tooltip Field CS"
 
     fields
     {
-        field(1; "Node Set Code"; code[20])
+        field(1; "Node Set Code"; Code[20])
         {
             Caption = 'Node Set Code';
             TableRelation = "Node Set CS";
@@ -52,8 +52,46 @@ table 50102 "Node Tooltip Field CS"
         }
     }
 
-    trigger OnModify()
+    trigger OnInsert()
     begin
-        // Update "Include in Node Data"
+        if Rec."Field No." <> 0 then
+            UpdateNodeSetField(Rec, true);
     end;
+
+    trigger OnModify()
+    var
+        xNodeTooltipField: Record "Node Tooltip Field CS";
+    begin
+        xNodeTooltipField.SetLoadFields("Field No.");
+        xNodeTooltipField.Get(Rec."Node Set Code", Rec."Sequence No.");
+        if xNodeTooltipField."Field No." <> Rec."Field No." then begin
+            if Rec."Field No." <> 0 then
+                UpdateNodeSetField(Rec, true);
+
+            if GraphNodeDataMgt.CanRemoveFieldFromNodeData(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.") and
+               not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.")
+            then
+                UpdateNodeSetField(xNodeTooltipField, false);
+        end;
+    end;
+
+    trigger OnDelete()
+    begin
+        if GraphNodeDataMgt.CanRemoveFieldFromNodeData(Rec."Node Set Code", Rec."Field No.") and
+           not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(Rec."Node Set Code", Rec."Field No.")
+        then
+            UpdateNodeSetField(Rec, false);
+    end;
+
+    local procedure UpdateNodeSetField(NodeTooltipField: Record "Node Tooltip Field CS"; IncludeInDataset: Boolean)
+    var
+        NodeSetField: Record "Node Set Field CS";
+    begin
+        NodeSetField.Get(NodeTooltipField."Node Set Code", NodeTooltipField."Field No.");
+        NodeSetField.Validate("Include in Node Data", IncludeInDataset);
+        NodeSetField.Modify(true);
+    end;
+
+    var
+        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
 }

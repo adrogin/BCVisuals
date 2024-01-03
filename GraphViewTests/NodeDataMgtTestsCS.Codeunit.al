@@ -151,6 +151,7 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         NodeTooltipField: Record "Node Tooltip Field CS";
     begin
         LibraryGraphView.CreateNodeSet(NodeSet);
+        LibraryGraphView.UpdateNodeSetTableNo(NodeSet, Database::"Node Data Test Table CS");
         LibraryGraphView.AddFieldToNodeSet(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
         LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
 
@@ -175,7 +176,7 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
 
         LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 2, NodeDataTestTable.FieldNo("Code Field"));
 
         NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
         LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
@@ -185,6 +186,28 @@ codeunit 60100 "Node Data Mgt. Tests CS"
 
         NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
         LibraryAssert.IsFalse(NodeSetField."Include in Node Data", FieldMustBeRemovedFromNodeDataErr);
+    end;
+
+    [Test]
+    procedure ChangeTooltipFieldInludeInNodeDataUpdated()
+    var
+        NodeSet: Record "Node Set CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeSetField: Record "Node Set Field CS";
+    begin
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+
+        NodeTooltipField.Get(NodeSet.Code, 1);
+        NodeTooltipField.Validate("Field No.", NodeDataTestTable.FieldNo("Decimal Field"));
+        NodeTooltipField.Modify(true);
+
+        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryAssert.IsFalse(NodeSetField."Include in Node Data", FieldMustBeRemovedFromNodeDataErr);
+
+        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Decimal Field"));
+        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
     end;
 
     [Test]

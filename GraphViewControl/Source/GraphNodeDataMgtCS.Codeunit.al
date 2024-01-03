@@ -6,20 +6,6 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         AddTableFieldsToNodeSet(NodeSetCode, TableNo);
     end;
 
-    procedure IsFieldRequiredinNodeData(NodeSet: Record "Node Set CS"; FieldNo: Integer): Boolean
-    begin
-        if IsPrimaryKeyField(NodeSet."Table No.", FieldNo) then
-            exit(true);
-
-        if IsFieldRequiredInTooltips(NodeSet.Code, FieldNo) then
-            exit(true);
-
-        if IsFieldRequiredInSelectorFilters(NodeSet.Code, FieldNo) then
-            exit(true);
-
-        exit(false);
-    end;
-
     procedure CanRemoveFieldFromNodeData(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
     var
         NodeSet: Record "Node Set CS";
@@ -105,7 +91,7 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         exit(IsFieldInDefaultSet);
     end;
 
-    local procedure IsFieldRequiredInTooltips(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
+    procedure IsFieldRequiredInTooltips(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
     var
         NodeTooltipField: Record "Node Tooltip Field CS";
     begin
@@ -114,7 +100,7 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         exit(not NodeTooltipField.IsEmpty());
     end;
 
-    local procedure IsFieldRequiredInSelectorFilters(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
+    procedure IsFieldRequiredInSelectorFilters(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
     var
         StyleSet: Record "Style Set CS";
         Style: Record "Style CS";
