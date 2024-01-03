@@ -169,7 +169,6 @@ codeunit 60100 "Node Data Mgt. Tests CS"
     procedure FieldSelectedInTooltipIncludedInNodeData()
     var
         NodeSet: Record "Node Set CS";
-        NodeSetField: Record "Node Set Field CS";
         NodeDataTestTable: Record "Node Data Test Table CS";
         NodeTooltipField: Record "Node Tooltip Field CS";
     begin
@@ -178,14 +177,12 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
         LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 2, NodeDataTestTable.FieldNo("Code Field"));
 
-        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
 
         NodeTooltipField.SetRange("Node Set Code", NodeSet.Code);
         NodeTooltipField.DeleteAll(true);
 
-        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryAssert.IsFalse(NodeSetField."Include in Node Data", FieldMustBeRemovedFromNodeDataErr);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), false);
     end;
 
     [Test]
@@ -194,7 +191,6 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         NodeSet: Record "Node Set CS";
         NodeDataTestTable: Record "Node Data Test Table CS";
         NodeTooltipField: Record "Node Tooltip Field CS";
-        NodeSetField: Record "Node Set Field CS";
     begin
         LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
         LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
@@ -203,54 +199,92 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         NodeTooltipField.Validate("Field No.", NodeDataTestTable.FieldNo("Decimal Field"));
         NodeTooltipField.Modify(true);
 
-        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryAssert.IsFalse(NodeSetField."Include in Node Data", FieldMustBeRemovedFromNodeDataErr);
-
-        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Decimal Field"));
-        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
-    end;
-
-    [Test]
-    procedure AssignStyleIncludeInNodeDataEnabledForFilterFields()
-    var
-        NodeSet: Record "Node Set CS";
-        NodeDataTestTable: Record "Node Data Test Table CS";
-        NodeSetField: Record "Node Set Field CS";
-        SelectorFilter: Record "Selector Filter CS";
-        StyleCode: Code[20];
-    begin
-        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
-        StyleCode := LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field"));
-
-        LibraryGraphView.AddStyleToNodeSet(NodeSet.Code, StyleCode);
-
-        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
-
-        SelectorFilter.Get(StyleCode, NodeDataTestTable.FieldNo("Code Field"));
-        SelectorFilter.Delete(true);
-
-        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryAssert.IsFalse(NodeSetField."Include in Node Data", FieldMustBeRemovedFromNodeDataErr);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), false);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Decimal Field"), true);
     end;
 
     [Test]
     procedure AddFieldToSelectorFilterIncludeInNodeDataEnabled()
     var
-        NodeSet: Record "Node Set CS";
+        NodeSets: array[3] of Record "Node Set CS";
         Style: Record "Style CS";
         NodeDataTestTable: Record "Node Data Test Table CS";
-        NodeSetField: Record "Node Set Field CS";
+        I: Integer;
+    begin
+        Style.Get(LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field")));
+
+        for I := 1 to ArrayLen(NodeSets) do begin
+            LibraryGraphView.CreateNodeSet(NodeSets[I], Database::"Node Data Test Table CS");
+            LibraryGraphView.AddStyleToNodeSet(NodeSets[I].Code, Style.Code);
+        end;
+
+        LibraryGraphView.CreateSelectorFilter(Style."Selector Code", NodeDataTestTable.FieldNo("Decimal Field"));
+
+        for I := 1 to ArrayLen(NodeSets) do begin
+            VerifyFieldInNodeData(NodeSets[I].Code, NodeDataTestTable.FieldNo("Code Field"), true);
+            VerifyFieldInNodeData(NodeSets[I].Code, NodeDataTestTable.FieldNo("Decimal Field"), true);
+        end;
+    end;
+
+    [Test]
+    procedure DeleteSelectorFilterIncludeInNodeDataDisabledForFilterField()
+    var
+        NodeSet: Record "Node Set CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+        SelectorFilter: Record "Selector Filter CS";
+        Style: Record "Style CS";
     begin
         LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
         Style.Get(LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field")));
         LibraryGraphView.AddStyleToNodeSet(NodeSet.Code, Style.Code);
 
-        LibraryGraphView.AddFieldToNodeSet(NodeSet.Code, NodeDataTestTable."Decimal Field", false);
         LibraryGraphView.CreateSelectorFilter(Style."Selector Code", NodeDataTestTable.FieldNo("Decimal Field"));
 
-        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Decimal Field"), true);
+
+        SelectorFilter.Get(Style."Selector Code", NodeDataTestTable.FieldNo("Code Field"));
+        SelectorFilter.Delete(true);
+
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), false);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Decimal Field"), true);
+    end;
+
+    [Test]
+    procedure ModifyFieldInSelectorFilterNodeDataUpdated()
+    var
+        NodeSet: Record "Node Set CS";
+        Style: Record "Style CS";
+        SelectorFilter: Record "Selector Filter CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+    begin
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+        Style.Get(LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field")));
+        LibraryGraphView.AddStyleToNodeSet(NodeSet.Code, Style.Code);
+
+        SelectorFilter.Get(Style."Selector Code", NodeDataTestTable.FieldNo("Code Field"));
+        SelectorFilter.Rename(SelectorFilter."Selector Code", NodeDataTestTable.FieldNo("Decimal Field"));
+
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), false);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Decimal Field"), true);
+    end;
+
+    [Test]
+    procedure RemoveStyleFromNodeSetIncludeInDataOnFilterFieldsDeselected()
+    var
+        NodeSet: Record "Node Set CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+        StyleCode: Code[20];
+    begin
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+        StyleCode := LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field"));
+        LibraryGraphView.AddStyleToNodeSet(NodeSet.Code, StyleCode);
+
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
+
+        LibraryGraphView.RemoveStyleFromNodeSet(NodeSet.Code, StyleCode);
+
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), false);
     end;
 
     [Test]
@@ -258,7 +292,6 @@ codeunit 60100 "Node Data Mgt. Tests CS"
     var
         NodeSet: Record "Node Set CS";
         NodeDataTestTable: Record "Node Data Test Table CS";
-        NodeSetField: Record "Node Set Field CS";
         NodeTooltipField: Record "Node Tooltip Field CS";
     begin
         LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
@@ -271,8 +304,7 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         NodeTooltipField.SetRange("Node Set Code", NodeSet.Code);
         NodeTooltipField.DeleteAll(true);
 
-        NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr);
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
     end;
 
     local procedure GetFieldNoByName(TableNo: Integer; FieldName: Text[30]): Integer
@@ -283,6 +315,18 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         Field.SetRange(FieldName, FieldName);
         Field.FindFirst();
         exit(Field."No.");
+    end;
+
+    local procedure VerifyFieldInNodeData(NodeSetCode: Code[20]; FieldNo: Integer; IsExpectedInNodeData: Boolean)
+    var
+        NodeSetField: Record "Node Set Field CS";
+    begin
+        NodeSetField.Get(NodeSetCode, FieldNo);
+
+        if IsExpectedInNodeData then
+            LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustbeInNodeDataErr)
+        else
+            LibraryAssert.IsFalse(NodeSetField."Include in Node Data", FieldMustBeRemovedFromNodeDataErr);
     end;
 
     local procedure VerifyFieldInNodeSet(NodeSetCode: Code[20]; FieldNo: Integer)
@@ -314,21 +358,16 @@ codeunit 60100 "Node Data Mgt. Tests CS"
 
     local procedure VerifyPrimaryKeyFieldsIncludedInNodeData(NodeSetCode: Code[20])
     var
-        NodeSetField: Record "Node Set Field CS";
         NodeSet: Record "Node Set CS";
         RecRef: RecordRef;
         PKRef: KeyRef;
         I: Integer;
     begin
         NodeSet.Get(NodeSetCode);
-        NodeSetField.SetRange("Node Set Code", NodeSetCode);
-
         RecRef.Open(NodeSet."Table No.");
         PKRef := RecRef.KeyIndex(1);
-        for I := 1 to PKRef.FieldCount do begin
-            NodeSetField.Get(NodeSetCode, PKRef.FieldIndex(I).Number);
-            LibraryAssert.IsTrue(NodeSetField."Include in Node Data", FieldMustBeinNodeDataErr);
-        end;
+        for I := 1 to PKRef.FieldCount do
+            VerifyFieldInNodeData(NodeSetCode, PKRef.FieldIndex(I).Number, true);
     end;
 
     [ConfirmHandler]

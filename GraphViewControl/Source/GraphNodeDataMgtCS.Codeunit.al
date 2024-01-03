@@ -100,7 +100,7 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         exit(not NodeTooltipField.IsEmpty());
     end;
 
-    procedure IsFieldRequiredInSelectorFilters(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
+    procedure IsFieldRequiredInSelectorFilters(NodeSetCode: Code[20]; FieldNo: Integer; SelectorCodeToExclude: Code[20]): Boolean
     var
         StyleSet: Record "Style Set CS";
         Style: Record "Style CS";
@@ -111,12 +111,13 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         if StyleSet.FindSet() then
             repeat
                 Style.Get(StyleSet."Style Code");
-                if Selector.Get(Style."Selector Code") then begin
-                    SelectorFilter.SetRange("Selector Code", Selector.Code);
-                    SelectorFilter.SetRange("Field No.", FieldNo);
-                    if not SelectorFilter.IsEmpty() then
-                        exit(true);
-                end;
+                if (SelectorCodeToExclude = '') or (Style."Selector Code" <> SelectorCodeToExclude) then
+                    if Selector.Get(Style."Selector Code") then begin
+                        SelectorFilter.SetRange("Selector Code", Selector.Code);
+                        SelectorFilter.SetRange("Field No.", FieldNo);
+                        if not SelectorFilter.IsEmpty() then
+                            exit(true);
+                    end;
             until StyleSet.Next() = 0;
 
         exit(false);
@@ -138,6 +139,15 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         end;
 
         exit(false);
+    end;
+
+    procedure UpdateNodeSetFieldInData(NodeSetCode: Code[20]; FieldNo: Integer; IncludeInDataset: Boolean)
+    var
+        NodeSetField: Record "Node Set Field CS";
+    begin
+        NodeSetField.Get(NodeSetCode, FieldNo);
+        NodeSetField.Validate("Include in Node Data", IncludeInDataset);
+        NodeSetField.Modify(true);
     end;
 
     [IntegrationEvent(false, false)]

@@ -55,7 +55,7 @@ table 50102 "Node Tooltip Field CS"
     trigger OnInsert()
     begin
         if Rec."Field No." <> 0 then
-            UpdateNodeSetField(Rec, true);
+            GraphNodeDataMgt.UpdateNodeSetFieldInData("Node Set Code", "Field No.", true);
     end;
 
     trigger OnModify()
@@ -66,30 +66,19 @@ table 50102 "Node Tooltip Field CS"
         xNodeTooltipField.Get(Rec."Node Set Code", Rec."Sequence No.");
         if xNodeTooltipField."Field No." <> Rec."Field No." then begin
             if Rec."Field No." <> 0 then
-                UpdateNodeSetField(Rec, true);
+                GraphNodeDataMgt.UpdateNodeSetFieldInData("Node Set Code", "Field No.", true);
 
-            if GraphNodeDataMgt.CanRemoveFieldFromNodeData(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.") and
-               not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.")
-            then
-                UpdateNodeSetField(xNodeTooltipField, false);
+            if GraphNodeDataMgt.CanRemoveFieldFromNodeData(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.") then
+                if not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.", '') then
+                    GraphNodeDataMgt.UpdateNodeSetFieldInData(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.", false);
         end;
     end;
 
     trigger OnDelete()
     begin
-        if GraphNodeDataMgt.CanRemoveFieldFromNodeData(Rec."Node Set Code", Rec."Field No.") and
-           not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(Rec."Node Set Code", Rec."Field No.")
-        then
-            UpdateNodeSetField(Rec, false);
-    end;
-
-    local procedure UpdateNodeSetField(NodeTooltipField: Record "Node Tooltip Field CS"; IncludeInDataset: Boolean)
-    var
-        NodeSetField: Record "Node Set Field CS";
-    begin
-        NodeSetField.Get(NodeTooltipField."Node Set Code", NodeTooltipField."Field No.");
-        NodeSetField.Validate("Include in Node Data", IncludeInDataset);
-        NodeSetField.Modify(true);
+        if GraphNodeDataMgt.CanRemoveFieldFromNodeData(Rec."Node Set Code", Rec."Field No.") then
+            if not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(Rec."Node Set Code", Rec."Field No.", '') then
+                GraphNodeDataMgt.UpdateNodeSetFieldInData("Node Set Code", "Field No.", false);
     end;
 
     var

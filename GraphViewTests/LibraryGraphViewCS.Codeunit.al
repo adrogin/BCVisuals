@@ -82,6 +82,15 @@ codeunit 60102 "Library - Graph View CS"
         exit(CreateStyle(Selector.Code));
     end;
 
+    procedure RemoveStyleFromNodeSet(NodeSetCode: Code[20]; StyleCode: Code[20])
+    var
+        StyleSet: Record "Style Set CS";
+    begin
+        StyleSet.SetRange("Node Set Code", NodeSetCode);
+        StyleSet.SetRange("Style Code", StyleCode);
+        StyleSet.DeleteAll(true);
+    end;
+
     procedure UpdateNodeSetTableNo(var NodeSet: Record "Node Set CS"; TableNo: Integer)
     begin
         NodeSet."Table No." := TableNo;

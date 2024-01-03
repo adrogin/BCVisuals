@@ -73,4 +73,72 @@ table 50104 "Selector Filter CS"
             Clustered = true;
         }
     }
+
+    trigger OnInsert()
+    var
+        Style: Record "Style CS";
+        StyleSet: Record "Style Set CS";
+    begin
+        if "Field No." = 0 then
+            exit;
+
+        Style.SetRange("Selector Code", Rec."Selector Code");
+        if Style.FindSet() then
+            repeat
+                StyleSet.SetRange("Style Code", Style.Code);
+                if StyleSet.FindSet() then
+                    repeat
+                        GraphNodeDataMgt.UpdateNodeSetFieldInData(StyleSet."Node Set Code", "Field No.", true);
+                    until StyleSet.Next() = 0;
+            until Style.Next() = 0;
+    end;
+
+    trigger OnRename()
+    var
+        Style: Record "Style CS";
+        StyleSet: Record "Style Set CS";
+    begin
+        Style.SetRange("Selector Code", Rec."Selector Code");
+        if Style.FindSet() then
+            repeat
+                StyleSet.SetRange("Style Code", Style.Code);
+                if StyleSet.FindSet() then
+                    repeat
+                        GraphNodeDataMgt.UpdateNodeSetFieldInData(StyleSet."Node Set Code", Rec."Field No.", true);
+                        RemoveFieldFromNodeDataIfNotRequired(StyleSet."Node Set Code", xRec."Field No.", "Selector Code");
+                    until StyleSet.Next() = 0;
+            until Style.Next() = 0;
+    end;
+
+    trigger OnDelete()
+    var
+        Style: Record "Style CS";
+        StyleSet: Record "Style Set CS";
+    begin
+        if "Field No." = 0 then
+            exit;
+
+        Style.SetRange("Selector Code", Rec."Selector Code");
+        if Style.FindSet() then
+            repeat
+                StyleSet.SetRange("Style Code", Style.Code);
+                if StyleSet.FindSet() then
+                    repeat
+                        RemoveFieldFromNodeDataIfNotRequired(StyleSet."Node Set Code", "Field No.", "Selector Code");
+                    until StyleSet.Next() = 0;
+            until Style.Next() = 0;
+
+    end;
+
+    local procedure RemoveFieldFromNodeDataIfNotRequired(NodeSetCode: Code[20]; FieldNo: Integer; SelectorCodeToExclude: Code[20])
+    begin
+        if GraphNodeDataMgt.CanRemoveFieldFromNodeData(NodeSetCode, FieldNo) then
+            if not GraphNodeDataMgt.IsFieldRequiredInTooltips(NodeSetCode, FieldNo) then
+                if not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(NodeSetCode, FieldNo, SelectorCodeToExclude) then
+                    GraphNodeDataMgt.UpdateNodeSetFieldInData(NodeSetCode, FieldNo, false);
+
+    end;
+
+    var
+        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
 }
