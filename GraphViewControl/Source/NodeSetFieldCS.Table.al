@@ -24,7 +24,7 @@ table 50101 "Node Set Field CS"
             var
                 GraphViewController: Codeunit "Graph View Controller CS";
             begin
-                "Json Property Name" := GraphViewController.ConverFieldNameToJsonToken(Rec);
+                "Json Property Name" := GraphViewController.ConvertFieldNameToJsonToken(Rec);
             end;
         }
         field(6; "Field Name"; Text[80])

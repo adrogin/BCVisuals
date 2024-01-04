@@ -71,16 +71,16 @@ codeunit 50151 "Cost View Controller CS"
             if TableFieldRef.Class = FieldClass::FlowField then
                 TableFieldRef.CalcField();
 
-            if not IsEntryNoField(NodeSetField) then  // Entry No. is always enabled by default as the node ID
+            if not IsEntryNoField(NodeSetField."Table No.", NodeSetField."Field No.") then  // Entry No. is always enabled by default as the node ID
                 GraphViewController.AddFieldValueConvertedToFieldType(Node, NodeSetField."Json Property Name", TableFieldRef);
         until NodeSetField.Next() = 0;
     end;
 
-    local procedure IsEntryNoField(NodeSetField: Record "Node Set Field CS"): Boolean
+    local procedure IsEntryNoField(TableNo: Integer; FieldNo: Integer): Boolean
     var
         ItemLedgerEntry: Record "Item Ledger Entry";
     begin
-        exit((NodeSetField."Table No." = Database::"Item Ledger Entry") and (NodeSetField."Field No." = ItemLedgerEntry.FieldNo("Entry No.")));
+        exit((TableNo = Database::"Item Ledger Entry") and (FieldNo = ItemLedgerEntry.FieldNo("Entry No.")));
     end;
 
     procedure NodeId2ItemLedgEntryNo(NodeId: Text) ItemLedgerEntryNo: Integer
@@ -88,11 +88,11 @@ codeunit 50151 "Cost View Controller CS"
         Evaluate(ItemLedgerEntryNo, NodeId);
     end;
 
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Graph View Controller CS", 'OnBeforeIsMandatoryField', '', false, false)]
-    local procedure IsMandatoryField(NodeSetField: Record "Node Set Field CS"; var IsHandled: Boolean; var IsMandatory: Boolean)
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Graph View Controller CS", 'OnBeforeIsIdField', '', false, false)]
+    local procedure IsIdField(TableNo: Integer; FieldNo: Integer; var IsHandled: Boolean; var IsId: Boolean)
     begin
         IsHandled := true;
-        IsMandatory := IsEntryNoField(NodeSetField);
+        IsId := IsEntryNoField(TableNo, FieldNo);
     end;
 
     var

@@ -1,16 +1,33 @@
 codeunit 50101 "Graph View Controller CS"
 {
-    procedure ConverFieldNameToJsonToken(NodeSetField: Record "Node Set Field CS") ConvertedName: Text[80]
+    procedure ConvertFieldNameToJsonToken(NodeSetField: Record "Node Set Field CS") ConvertedName: Text[80]
+    begin
+        if (NodeSetField."Table No." <> 0) and (NodeSetField."Field No." <> 0) then
+            exit(ConvertFieldNameToJsonToken(NodeSetField."Table No.", NodeSetField."Field No."));
+
+        exit('');
+    end;
+
+    procedure ConvertFieldNameToJsonToken(TableNo: Integer; FieldNo: Integer): Text[80]
+    var
+        Field: Record Field;
+    begin
+        Field.SetLoadFields(FieldName);
+        if not Field.Get(TableNo, FieldNo) then
+            exit('');
+
+        if IsIdField(TableNo, FieldNo) then
+            exit('id');
+
+        exit(ConvertFieldNameToJsonToken(Field.FieldName));
+    end;
+
+    procedure ConvertFieldNameToJsonToken(FieldName: Text[80]) ConvertedName: Text[80]
     var
         I: Integer;
     begin
-        if IsMandatoryField(NodeSetField) then
-            exit('id');
-
-        NodeSetField.CalcFields("Field Name");
-
-        for I := 1 to StrLen(NodeSetField."Field Name") do
-            ConvertedName := CopyStr(ConvertedName + ReplaceSymbolIfNotAllowedInPropertyName(NodeSetField."Field Name"[I]), 1, MaxStrLen(ConvertedName));
+        for I := 1 to StrLen(FieldName) do
+            ConvertedName := CopyStr(ConvertedName + ReplaceSymbolIfNotAllowedInPropertyName(FieldName[I]), 1, MaxStrLen(ConvertedName));
     end;
 
     local procedure ReplaceSymbolIfNotAllowedInPropertyName(Symbol: Char): Text[1]
@@ -108,17 +125,17 @@ codeunit 50101 "Graph View Controller CS"
         exit(NodeId.AsValue().AsText());
     end;
 
-    procedure IsMandatoryField(NodeSetField: Record "Node Set Field CS"): Boolean
+    procedure IsIdField(TableNo: Integer; FieldNo: Integer): Boolean
     var
         GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
         IsHandled: Boolean;
-        IsMandatory: Boolean;
+        IsId: Boolean;
     begin
-        OnBeforeIsMandatoryField(NodeSetField, IsHandled, IsMandatory);
+        OnBeforeIsIdField(TableNo, FieldNo, IsHandled, IsId);
         if IsHandled then
-            exit(IsMandatory);
+            exit(IsId);
 
-        exit(GraphNodeDataMgt.IsPrimaryKeyField(NodeSetField."Table No.", NodeSetField."Field No."));
+        exit(GraphNodeDataMgt.IsPrimaryKeyField(TableNo, FieldNo));
     end;
 
     procedure GetNodeTooltip(RecRef: RecordRef; NodeId: Text; NodeSetCode: Code[20]): JsonObject
@@ -133,7 +150,6 @@ codeunit 50101 "Graph View Controller CS"
     procedure FormatSelectorText(SelectorCode: Code[20]): Text
     var
         SelectorFilter: Record "Selector Filter CS";
-        NodeSetField: Record "Node Set Field CS";
         Selector: Record "Selector CS";
         Filters: Text;
     begin
@@ -142,8 +158,7 @@ codeunit 50101 "Graph View Controller CS"
         SelectorFilter.SetRange("Selector Code", SelectorCode);
         if SelectorFilter.FindSet() then
             repeat
-                NodeSetField.Get(Selector."Table No.", SelectorFilter."Field No.");
-                Filters := Filters + '[' + NodeSetField."Json Property Name" + SelectorFilter."Field Filter" + ']';
+                Filters := Filters + '[' + ConvertFieldNameToJsonToken(Selector."Table No.", SelectorFilter."Field No.") + SelectorFilter."Field Filter" + ']';
             until SelectorFilter.Next() = 0;
 
         exit(Filters);
@@ -178,7 +193,7 @@ codeunit 50101 "Graph View Controller CS"
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnBeforeIsMandatoryField(NodeSetField: Record "Node Set Field CS"; var IsHandled: Boolean; var IsMandatory: Boolean)
+    local procedure OnBeforeIsIdField(TableNo: Integer; FieldNo: Integer; var IsHandled: Boolean; var IsId: Boolean)
     begin
     end;
 }
