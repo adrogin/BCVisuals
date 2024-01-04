@@ -17,15 +17,6 @@ codeunit 50151 "Cost View Controller CS"
         exit(GraphViewSetup."Cost Trace Node Set CS");
     end;
 
-    procedure GetDefaultStyleSet(): Code[20]
-    var
-        GraphViewSetup: Record "Graph View Setup CS";
-    begin
-        GraphViewSetup.SetLoadFields("Cost Trace Style Set CS");
-        GraphViewSetup.Get();
-        exit(GraphViewSetup."Cost Trace Style Set CS");
-    end;
-
     procedure GetDefaultLayout(): Enum "Graph Layout Name CS"
     var
         GraphViewSetup: Record "Graph View Setup CS";

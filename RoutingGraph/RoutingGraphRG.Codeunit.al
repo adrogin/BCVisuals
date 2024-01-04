@@ -30,15 +30,6 @@ codeunit 50250 "Routing Graph RG"
         exit(GraphViewSetup."Routing Node Set RG");
     end;
 
-    procedure GetDefaultStyleSet(): Code[20]
-    var
-        GraphViewSetup: Record "Graph View Setup CS";
-    begin
-        GraphViewSetup.SetLoadFields("Routing Style Set RG");
-        GraphViewSetup.Get();
-        exit(GraphViewSetup."Routing Style Set RG");
-    end;
-
     procedure GetDefaultLayout(): Enum "Graph Layout Name CS"
     var
         GraphViewSetup: Record "Graph View Setup CS";

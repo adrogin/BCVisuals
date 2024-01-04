@@ -21,12 +21,6 @@ pageextension 50150 "Graph View Setup CS" extends "Graph View Setup CS"
                     Caption = 'Cost Trace Graph Node Set';
                     ToolTip = 'Select the default node set for the cost application graph.';
                 }
-                field("Cost Trace Node Style CS"; Rec."Cost Trace Style Set CS")
-                {
-                    ApplicationArea = Basic, Suite;
-                    Caption = 'Cost Trace Graph Styles';
-                    ToolTip = 'Select the default styles for the cost application graph''s nodes and edges.';
-                }
             }
         }
     }

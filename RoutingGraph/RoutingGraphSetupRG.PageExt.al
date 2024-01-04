@@ -21,12 +21,6 @@ pageextension 50251 "Routing Graph Setup RG" extends "Graph View Setup CS"
                     Caption = 'Routing Graph Node Set';
                     ToolTip = 'Select the default node set for the routing graph.';
                 }
-                field("Routing Node Style CS"; Rec."Routing Style Set RG")
-                {
-                    ApplicationArea = Basic, Suite;
-                    Caption = 'Routing Graph Styles';
-                    ToolTip = 'Select the default styles for the routing graph''s nodes and edges.';
-                }
             }
         }
     }
