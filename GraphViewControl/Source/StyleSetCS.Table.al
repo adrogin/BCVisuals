@@ -52,10 +52,7 @@ table 50107 "Style Set CS"
         SelectorFilter.SetRange("Selector Code", Style."Selector Code");
         if SelectorFilter.FindSet() then
             repeat
-                if GraphNodeDataMgt.CanRemoveFieldFromNodeData("Node Set Code", SelectorFilter."Field No.") then
-                    if not GraphNodeDataMgt.IsFieldRequiredInTooltips("Node Set Code", SelectorFilter."Field No.") then
-                        if not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters("Node Set Code", SelectorFilter."Field No.", SelectorFilter."Selector Code") then
-                            GraphNodeDataMgt.UpdateNodeSetFieldInData("Node Set Code", SelectorFilter."Field No.", false);
+                GraphNodeDataMgt.RemoveFieldFromNodeDataIfNotNeeded("Node Set Code", SelectorFilter."Field No.", Enum::"Node Text Type CS"::None, SelectorFilter."Selector Code");
             until SelectorFilter.Next() = 0;
     end;
 

@@ -81,30 +81,31 @@ codeunit 50101 "Graph View Controller CS"
 
     procedure FormatNodeTooltipText(RecRef: RecordRef; NodeSetCode: Code[20]): Text
     var
-        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeTextField: Record "Node Text Field CS";
         TableFieldRef: FieldRef;
         TooltipText: Text;
         NewLineTok: Label '<br>';
     begin
-        NodeTooltipField.SetRange("Node Set Code", NodeSetCode);
-        if NodeTooltipField.FindSet() then
+        NodeTextField.SetRange("Node Set Code", NodeSetCode);
+        NodeTextField.SetRange(Type, NodeTextField.Type::Tooltip);
+        if NodeTextField.FindSet() then
             repeat
-                TableFieldRef := RecRef.Field(NodeTooltipField."Field No.");
+                TableFieldRef := RecRef.Field(NodeTextField."Field No.");
                 if TableFieldRef.Class = FieldClass::FlowField then
                     TableFieldRef.CalcField();
 
-                if NodeTooltipField."Show Caption" then begin
-                    NodeTooltipField.CalcFields("Field Caption");
-                    TooltipText := TooltipText + NodeTooltipField."Field Caption" + ': ';
+                if NodeTextField."Show Caption" then begin
+                    NodeTextField.CalcFields("Field Caption");
+                    TooltipText := TooltipText + NodeTextField."Field Caption" + ': ';
                 end;
 
                 TooltipText := TooltipText + Format(TableFieldRef.Value);
-                if NodeTooltipField.Delimiter = NodeTooltipField.Delimiter::Space then
+                if NodeTextField.Delimiter = NodeTextField.Delimiter::Space then
                     TooltipText := TooltipText + ' '
                 else
-                    if NodeTooltipField.Delimiter = NodeTooltipField.Delimiter::"New Line" then
+                    if NodeTextField.Delimiter = NodeTextField.Delimiter::"New Line" then
                         TooltipText := TooltipText + NewLineTok;
-            until NodeTooltipField.Next() = 0;
+            until NodeTextField.Next() = 0;
 
         exit(TooltipText);
     end;

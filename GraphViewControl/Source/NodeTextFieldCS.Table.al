@@ -1,4 +1,4 @@
-table 50102 "Node Tooltip Field CS"
+table 50102 "Node Text Field CS"
 {
     DataClassification = CustomerContent;
 
@@ -42,11 +42,15 @@ table 50102 "Node Tooltip Field CS"
             CalcFormula = lookup("Node Set CS"."Table No." where(Code = field("Node Set Code")));
             Editable = false;
         }
+        field(8; Type; Enum "Node Text Type CS")
+        {
+            Caption = 'Type';
+        }
     }
 
     keys
     {
-        key(PK; "Node Set Code", "Sequence No.")
+        key(PK; "Node Set Code", Type, "Sequence No.")
         {
             Clustered = true;
         }
@@ -60,25 +64,22 @@ table 50102 "Node Tooltip Field CS"
 
     trigger OnModify()
     var
-        xNodeTooltipField: Record "Node Tooltip Field CS";
+        xNodeTextField: Record "Node Text Field CS";
     begin
-        xNodeTooltipField.SetLoadFields("Field No.");
-        xNodeTooltipField.Get(Rec."Node Set Code", Rec."Sequence No.");
-        if xNodeTooltipField."Field No." <> Rec."Field No." then begin
+        xNodeTextField.SetLoadFields("Field No.");
+        xNodeTextField.Get(Rec."Node Set Code", Rec.Type, Rec."Sequence No.");
+        if xNodeTextField."Field No." <> Rec."Field No." then begin
             if Rec."Field No." <> 0 then
                 GraphNodeDataMgt.UpdateNodeSetFieldInData("Node Set Code", "Field No.", true);
 
-            if GraphNodeDataMgt.CanRemoveFieldFromNodeData(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.") then
-                if not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.", '') then
-                    GraphNodeDataMgt.UpdateNodeSetFieldInData(xNodeTooltipField."Node Set Code", xNodeTooltipField."Field No.", false);
+            if xNodeTextField."Field No." <> 0 then
+                GraphNodeDataMgt.RemoveFieldFromNodeDataIfNotNeeded(xNodeTextField."Node Set Code", xNodeTextField."Field No.", xNodeTextField.Type, '');
         end;
     end;
 
     trigger OnDelete()
     begin
-        if GraphNodeDataMgt.CanRemoveFieldFromNodeData(Rec."Node Set Code", Rec."Field No.") then
-            if not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(Rec."Node Set Code", Rec."Field No.", '') then
-                GraphNodeDataMgt.UpdateNodeSetFieldInData("Node Set Code", "Field No.", false);
+        GraphNodeDataMgt.RemoveFieldFromNodeDataIfNotNeeded("Node Set Code", "Field No.", Type, '');
     end;
 
     var

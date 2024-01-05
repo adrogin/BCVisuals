@@ -14,14 +14,15 @@ codeunit 60102 "Library - Graph View CS"
         NodeSetField.Insert(true);
     end;
 
-    procedure AddNodeTooltipField(NodeSetCode: Code[20]; SequenceNo: Integer; FieldNo: Integer)
+    procedure AddNodeTextField(NodeSetCode: Code[20]; SequenceNo: Integer; FieldNo: Integer; FieldType: Enum "Node Text Type CS")
     var
-        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeTextField: Record "Node Text Field CS";
     begin
-        NodeTooltipField.Validate("Node Set Code", NodeSetCode);
-        NodeTooltipField.Validate("Sequence No.", SequenceNo);
-        NodeTooltipField.Validate("Field No.", FieldNo);
-        NodeTooltipField.Insert(true);
+        NodeTextField.Validate("Node Set Code", NodeSetCode);
+        NodeTextField.Validate("Sequence No.", SequenceNo);
+        NodeTextField.Validate("Field No.", FieldNo);
+        NodeTextField.Validate(Type, FieldType);
+        NodeTextField.Insert(true);
     end;
 
     procedure AddStyleToNodeSet(NodeSetCode: Code[20]; StyleCode: Code[20])

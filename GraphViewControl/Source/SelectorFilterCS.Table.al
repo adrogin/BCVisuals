@@ -133,7 +133,7 @@ table 50104 "Selector Filter CS"
     local procedure RemoveFieldFromNodeDataIfNotRequired(NodeSetCode: Code[20]; FieldNo: Integer; SelectorCodeToExclude: Code[20])
     begin
         if GraphNodeDataMgt.CanRemoveFieldFromNodeData(NodeSetCode, FieldNo) then
-            if not GraphNodeDataMgt.IsFieldRequiredInTooltips(NodeSetCode, FieldNo) then
+            if not GraphNodeDataMgt.IsFieldRequiredInNodeText(NodeSetCode, FieldNo, Enum::"Node Text Type CS"::None) then
                 if not GraphNodeDataMgt.IsFieldRequiredInSelectorFilters(NodeSetCode, FieldNo, SelectorCodeToExclude) then
                     GraphNodeDataMgt.UpdateNodeSetFieldInData(NodeSetCode, FieldNo, false);
 

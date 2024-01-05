@@ -148,21 +148,21 @@ codeunit 60100 "Node Data Mgt. Tests CS"
         NodeSet: Record "Node Set CS";
         NodeDataTestTable: Record "Node Data Test Table CS";
         NodeSetField: Record "Node Set Field CS";
-        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeTextField: Record "Node Text Field CS";
     begin
         LibraryGraphView.CreateNodeSet(NodeSet);
         LibraryGraphView.UpdateNodeSetTableNo(NodeSet, Database::"Node Data Test Table CS");
         LibraryGraphView.AddFieldToNodeSet(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
-        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryGraphView.AddNodeTextField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"), Enum::"Node Text Type CS"::Tooltip);
 
         // [WHEN]
         NodeSetField.Get(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"));
         NodeSetField.Delete(true);
 
         // [THEN]
-        NodeTooltipField.SetRange("Node Set Code", NodeSet.Code);
-        NodeTooltipField.SetRange("Field No.", NodeDataTestTable.FieldNo("Code Field"));
-        LibraryAssert.RecordIsEmpty(NodeTooltipField);
+        NodeTextField.SetRange("Node Set Code", NodeSet.Code);
+        NodeTextField.SetRange("Field No.", NodeDataTestTable.FieldNo("Code Field"));
+        LibraryAssert.RecordIsEmpty(NodeTextField);
     end;
 
     [Test]
@@ -170,34 +170,34 @@ codeunit 60100 "Node Data Mgt. Tests CS"
     var
         NodeSet: Record "Node Set CS";
         NodeDataTestTable: Record "Node Data Test Table CS";
-        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeTextField: Record "Node Text Field CS";
     begin
         LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
 
-        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
-        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 2, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryGraphView.AddNodeTextField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"), Enum::"Node Text Type CS"::Tooltip);
+        LibraryGraphView.AddNodeTextField(NodeSet.Code, 2, NodeDataTestTable.FieldNo("Code Field"), Enum::"Node Text Type CS"::Tooltip);
 
         VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
 
-        NodeTooltipField.SetRange("Node Set Code", NodeSet.Code);
-        NodeTooltipField.DeleteAll(true);
+        NodeTextField.SetRange("Node Set Code", NodeSet.Code);
+        NodeTextField.DeleteAll(true);
 
         VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), false);
     end;
 
     [Test]
-    procedure ChangeTooltipFieldInludeInNodeDataUpdated()
+    procedure ChangeTooltipFieldIncludeInNodeDataUpdated()
     var
         NodeSet: Record "Node Set CS";
         NodeDataTestTable: Record "Node Data Test Table CS";
-        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeTextField: Record "Node Text Field CS";
     begin
         LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
-        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryGraphView.AddNodeTextField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"), Enum::"Node Text Type CS"::Tooltip);
 
-        NodeTooltipField.Get(NodeSet.Code, 1);
-        NodeTooltipField.Validate("Field No.", NodeDataTestTable.FieldNo("Decimal Field"));
-        NodeTooltipField.Modify(true);
+        NodeTextField.Get(NodeSet.Code, Enum::"Node Text Type CS"::Tooltip, 1);
+        NodeTextField.Validate("Field No.", NodeDataTestTable.FieldNo("Decimal Field"));
+        NodeTextField.Modify(true);
 
         VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), false);
         VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Decimal Field"), true);
@@ -292,17 +292,59 @@ codeunit 60100 "Node Data Mgt. Tests CS"
     var
         NodeSet: Record "Node Set CS";
         NodeDataTestTable: Record "Node Data Test Table CS";
-        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeTextField: Record "Node Text Field CS";
     begin
         LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
-        LibraryGraphView.AddNodeTooltipField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"));
+        LibraryGraphView.AddNodeTextField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"), Enum::"Node Text Type CS"::Tooltip);
 
         LibraryGraphView.AddStyleToNodeSet(
             NodeSet.Code,
             LibraryGraphView.CreateStyleWithSelector(Database::"Node Data Test Table CS", NodeDataTestTable.FieldNo("Code Field")));
 
-        NodeTooltipField.SetRange("Node Set Code", NodeSet.Code);
-        NodeTooltipField.DeleteAll(true);
+        NodeTextField.SetRange("Node Set Code", NodeSet.Code);
+        NodeTextField.DeleteAll(true);
+
+        VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
+    end;
+
+    [Test]
+    procedure ModifyNodeTextFieldPreviousValueZero()
+    var
+        NodeSet: Record "Node Set CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+        NodeTextField: Record "Node Text Field CS";
+        NodeTextFieldMustBeUpdatedErr: Label 'Node text field must be updated.';
+    begin
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+
+        NodeTextField.Validate("Node Set Code", NodeSet.Code);
+        NodeTextField.Validate("Sequence No.", 1);
+        NodeTextField.Validate(Type, Enum::"Node Text Type CS"::Label);
+        NodeTextField.Insert(true);
+
+        NodeTextField.Validate("Field No.", NodeDataTestTable.FieldNo("Code Field"));
+        NodeTextField.Modify(true);
+
+#pragma warning disable AA0181
+        NodeTextField.Find();
+#pragma warning restore
+
+        LibraryAssert.AreEqual(NodeDataTestTable.FieldNo("Code Field"), NodeTextField."Field No.", NodeTextFieldMustBeUpdatedErr);
+    end;
+
+    [Test]
+    procedure RemoveFieldFromTooltipSameFieldInLabelIncludeInDataRemainsEnabled()
+    var
+        NodeSet: Record "Node Set CS";
+        NodeDataTestTable: Record "Node Data Test Table CS";
+        NodeTextField: Record "Node Text Field CS";
+    begin
+        LibraryGraphView.CreateNodeSet(NodeSet, Database::"Node Data Test Table CS");
+        LibraryGraphView.AddNodeTextField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"), Enum::"Node Text Type CS"::Tooltip);
+        LibraryGraphView.AddNodeTextField(NodeSet.Code, 1, NodeDataTestTable.FieldNo("Code Field"), Enum::"Node Text Type CS"::Label);
+
+        NodeTextField.Get(NodeSet.Code, Enum::"Node Text Type CS"::Tooltip, 1);
+        NodeTextField.Delete(true);
 
         VerifyFieldInNodeData(NodeSet.Code, NodeDataTestTable.FieldNo("Code Field"), true);
     end;

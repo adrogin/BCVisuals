@@ -1,16 +1,16 @@
-page 50102 "Node Tooltip Fields CS"
+page 50110 "Node Label Fields CS"
 {
     PageType = ListPart;
     SourceTable = "Node Text Field CS";
-    SourceTableView = where(Type = const(Tooltip));
-    Caption = 'Tooltip Fields';
+    SourceTableView = where(Type = const(Label));
+    Caption = 'Label Fields';
     AutoSplitKey = true;
 
     layout
     {
         area(Content)
         {
-            repeater(TooltipFields)
+            repeater(LabelFields)
             {
                 field("Field No."; Rec."Field No.")
                 {
@@ -20,17 +20,17 @@ page 50102 "Node Tooltip Fields CS"
                 field("Field Caption"; Rec."Field Caption")
                 {
                     ApplicationArea = Basic, Suite;
-                    ToolTip = 'The caption of the field selected for the tooltip';
+                    ToolTip = 'The caption of the field selected for the node label';
                 }
                 field(Delimiter; Rec.Delimiter)
                 {
                     ApplicationArea = Basic, Suite;
-                    ToolTip = 'The delimiter added after the current field value in the tooltip, such as a whitespace or a line break.';
+                    ToolTip = 'The delimiter added after the current field value in the label, such as a whitespace or a line break.';
                 }
                 field("Show Caption"; Rec."Show Caption")
                 {
                     ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies if the field caption should be added to the tooltip. If this value is not selected, only the field value is displayed.';
+                    ToolTip = 'Specifies if the field caption should be added to the label. If this value is not selected, only the field value is displayed.';
                 }
             }
         }

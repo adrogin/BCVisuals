@@ -32,6 +32,11 @@ page 50109 "Node Set CS"
                     ToolTip = 'The text caption of the table associated with the node set.';
                 }
             }
+            part(LabelFields; "Node Label Fields CS")
+            {
+                ApplicationArea = Basic, Suite;
+                SubPageLink = "Node Set Code" = field(Code);
+            }
             part(TooltipFields; "Node Tooltip Fields CS")
             {
                 ApplicationArea = Basic, Suite;

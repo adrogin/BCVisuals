@@ -68,10 +68,10 @@ table 50101 "Node Set Field CS"
 
     trigger OnDelete()
     var
-        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeTextField: Record "Node Text Field CS";
     begin
-        NodeTooltipField.SetRange("Node Set Code", "Node Set Code");
-        NodeTooltipField.SetRange("Field No.", "Field No.");
-        NodeTooltipField.DeleteAll(true);
+        NodeTextField.SetRange("Node Set Code", "Node Set Code");
+        NodeTextField.SetRange("Field No.", "Field No.");
+        NodeTextField.DeleteAll(true);
     end;
 }

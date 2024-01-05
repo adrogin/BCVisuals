@@ -91,13 +91,14 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         exit(IsFieldInDefaultSet);
     end;
 
-    procedure IsFieldRequiredInTooltips(NodeSetCode: Code[20]; FieldNo: Integer): Boolean
+    procedure IsFieldRequiredInNodeText(NodeSetCode: Code[20]; FieldNo: Integer; FieldTypeToExclude: Enum "Node Text Type CS"): Boolean
     var
-        NodeTooltipField: Record "Node Tooltip Field CS";
+        NodeTextField: Record "Node Text Field CS";
     begin
-        NodeTooltipField.SetRange("Node Set Code", NodeSetCode);
-        NodeTooltipField.SetRange("Field No.", FieldNo);
-        exit(not NodeTooltipField.IsEmpty());
+        NodeTextField.SetRange("Node Set Code", NodeSetCode);
+        NodeTextField.SetFilter(Type, '<>%1', FieldTypeToExclude);
+        NodeTextField.SetRange("Field No.", FieldNo);
+        exit(not NodeTextField.IsEmpty());
     end;
 
     procedure IsFieldRequiredInSelectorFilters(NodeSetCode: Code[20]; FieldNo: Integer; SelectorCodeToExclude: Code[20]): Boolean
@@ -139,6 +140,14 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         end;
 
         exit(false);
+    end;
+
+    procedure RemoveFieldFromNodeDataIfNotNeeded(NodeSetCode: Code[20]; FieldNo: Integer; TextTypeToExclude: Enum "Node Text Type CS"; SelectorToExclude: Code[20])
+    begin
+        if CanRemoveFieldFromNodeData(NodeSetCode, FieldNo) then
+            if not IsFieldRequiredInNodeText(NodeSetCode, FieldNo, TextTypeToExclude) then
+                if not IsFieldRequiredInSelectorFilters(NodeSetCode, FieldNo, SelectorToExclude) then
+                    UpdateNodeSetFieldInData(NodeSetCode, FieldNo, false);
     end;
 
     procedure UpdateNodeSetFieldInData(NodeSetCode: Code[20]; FieldNo: Integer; IncludeInDataset: Boolean)
