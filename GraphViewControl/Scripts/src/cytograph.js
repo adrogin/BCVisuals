@@ -54,6 +54,11 @@ function getDefaultElementStyles() {
       selector: 'node',
       css: {
         'background-color':'#61bffc',
+      }
+    },
+    {
+      selector: 'node[^label]',
+      css: {
         'content': 'data(id)'
       }
     },
@@ -76,7 +81,7 @@ function formatNodes(nodeData) {
   nodeData.forEach(node => {
     nodes.push(
       {
-        data: node
+        data: stripNewLineSlashes(node)
       });
   });
 
@@ -132,8 +137,8 @@ function setGraphLayout(layoutName) {
   layout.run();
 }
 
-function createNodePopper(nodeIndex, popperContent) {
-  let node = cy.nodes()[nodeIndex];
+function createNodePopper(nodeId, popperContent) {
+  let node = cy.getElementById(nodeId);
   let popper = node.popper({
       content: () => {
           let div = document.createElement('div');
@@ -223,9 +228,20 @@ function createTextElements(nodeDefs) {
   nodeDefs.forEach(nodeDef => {
     if (typeof nodeDef.tooltip !== 'undefined')
       setNodeTooltipText(nodeDef.id, nodeDef.tooltip);
-  });
+
+    if (typeof nodeDef.popper !== 'undefined')
+      createNodePopper(nodeDef.id, nodeDef.popper);   
+    });
 
   createTooltips();
+}
+
+function stripNewLineSlashes(node) {
+  if (typeof node.label !== 'undefined') {
+    node.label = node.label.replace('\\n', '\n');
+  }
+
+  return node;
 }
 
 function initEdgeHandles() {

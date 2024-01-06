@@ -223,26 +223,12 @@ codeunit 50250 "Routing Graph RG"
 
     local procedure SetRoutingNodeProperties(var Node: JsonToken; RoutingNo: Code[20]; VersionCode: Code[20])
     var
-        NodeSetField: Record "Node Set Field CS";
         RoutingLine: Record "Routing Line";
         RecRef: RecordRef;
-        TableFieldRef: FieldRef;
     begin
-        NodeSetField.SetRange("Node Set Code", GetDefaultNodeSet());
-        NodeSetField.SetRange("Include in Node Data", true);
-
         RoutingLine.Get(RoutingNo, VersionCode, GraphViewController.GetNodeIdAsText(Node.AsObject()));
         RecRef.GetTable(RoutingLine);
-
-        // Not checking the return value here, since at least the Entry No. must be included
-        NodeSetField.FindSet();
-        repeat
-            TableFieldRef := RecRef.Field(NodeSetField."Field No.");
-            if TableFieldRef.Class = FieldClass::FlowField then
-                TableFieldRef.CalcField();
-
-            GraphViewController.AddFieldValueConvertedToFieldType(Node, NodeSetField."Json Property Name", TableFieldRef);
-        until NodeSetField.Next() = 0;
+        GraphViewController.SetNodeProperties(Node, RecRef, GetDefaultNodeSet());
     end;
 
     var

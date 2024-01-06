@@ -79,15 +79,14 @@ codeunit 50101 "Graph View Controller CS"
         Node.AsObject().Add(PropertyName, FieldValue);
     end;
 
-    procedure FormatNodeTooltipText(RecRef: RecordRef; NodeSetCode: Code[20]): Text
+    procedure FormatNodeText(RecRef: RecordRef; NodeSetCode: Code[20]; TextType: Enum "Node Text Type CS"): Text
     var
         NodeTextField: Record "Node Text Field CS";
         TableFieldRef: FieldRef;
-        TooltipText: Text;
-        NewLineTok: Label '<br>';
+        NodeText: Text;
     begin
         NodeTextField.SetRange("Node Set Code", NodeSetCode);
-        NodeTextField.SetRange(Type, NodeTextField.Type::Tooltip);
+        NodeTextField.SetRange(Type, TextType);
         if NodeTextField.FindSet() then
             repeat
                 TableFieldRef := RecRef.Field(NodeTextField."Field No.");
@@ -96,34 +95,48 @@ codeunit 50101 "Graph View Controller CS"
 
                 if NodeTextField."Show Caption" then begin
                     NodeTextField.CalcFields("Field Caption");
-                    TooltipText := TooltipText + NodeTextField."Field Caption" + ': ';
+                    NodeText := NodeText + NodeTextField."Field Caption" + ': ';
                 end;
 
-                TooltipText := TooltipText + Format(TableFieldRef.Value);
+                NodeText := NodeText + Format(TableFieldRef.Value);
                 if NodeTextField.Delimiter = NodeTextField.Delimiter::Space then
-                    TooltipText := TooltipText + ' '
+                    NodeText := NodeText + ' '
                 else
                     if NodeTextField.Delimiter = NodeTextField.Delimiter::"New Line" then
-                        TooltipText := TooltipText + NewLineTok;
+                        NodeText := NodeText + GetNewLineToken(TextType);
             until NodeTextField.Next() = 0;
 
-        exit(TooltipText);
+        exit(NodeText);
+    end;
+
+    local procedure GetNewLineToken(TextType: Enum "Node Text Type CS"): Text
+    var
+        NewLineCrTok: Label '\n';
+        NewLineHtmlTok: Label '<br>';
+    begin
+        case TextType of
+            TextType::Tooltip:
+                exit(NewLineHtmlTok);
+            TextType::Label:
+                exit(NewLineCrTok);
+            else
+                exit('');
+        end;
+    end;
+
+    local procedure GetNodeIdAsJsonToken(Node: JsonObject) NodeId: JsonToken
+    begin
+        Node.Get('id', NodeId);
     end;
 
     procedure GetNodeIdAsInteger(Node: JsonObject): Integer
-    var
-        NodeId: JsonToken;
     begin
-        Node.Get('id', NodeId);
-        exit(NodeId.AsValue().AsInteger());
+        exit(GetNodeIdAsJsonToken(Node).AsValue().AsInteger());
     end;
 
     procedure GetNodeIdAsText(Node: JsonObject): Text
-    var
-        NodeId: JsonToken;
     begin
-        Node.Get('id', NodeId);
-        exit(NodeId.AsValue().AsText());
+        exit(GetNodeIdAsJsonToken(Node).AsValue().AsText());
     end;
 
     procedure IsIdField(TableNo: Integer; FieldNo: Integer): Boolean
@@ -139,13 +152,22 @@ codeunit 50101 "Graph View Controller CS"
         exit(GraphNodeDataMgt.IsPrimaryKeyField(TableNo, FieldNo));
     end;
 
-    procedure GetNodeTooltip(RecRef: RecordRef; NodeId: Text; NodeSetCode: Code[20]): JsonObject
-    var
-        Tooltip: JsonObject;
+    procedure GetNodeTooltip(RecRef: RecordRef; NodeId: Text; NodeSetCode: Code[20]) Tooltip: JsonObject
     begin
         Tooltip.Add('nodeId', NodeId);
-        Tooltip.Add('content', FormatNodeTooltipText(RecRef, NodeSetCode));
-        exit(Tooltip);
+        Tooltip.Add('content', FormatNodeText(RecRef, NodeSetCode, Enum::"Node Text Type CS"::Tooltip));
+    end;
+
+    local procedure AppendNodeLabelStyleSelector(var Styles: JsonArray)
+    var
+        LabelSelector: JsonObject;
+        LabelStyle: JsonObject;
+    begin
+        LabelStyle.Add('label', 'data(label)');
+        LabelStyle.Add('text-wrap', 'wrap');
+        LabelSelector.Add('selector', 'node[label]');
+        LabelSelector.Add('style', LabelStyle);
+        Styles.Add(LabelSelector);
     end;
 
     procedure FormatSelectorText(SelectorCode: Code[20]): Text
@@ -175,7 +197,7 @@ codeunit 50101 "Graph View Controller CS"
         CouldNotReadStyleErr: Label 'Could not read style description %1. Make sure that the style is correctly defined.', Comment = '%1: Style code';
     begin
         if NodeSetCode = '' then
-            exit(StylesArr);  // Returning an empty array if the style set is undefined
+            exit(StylesArr);  // Returning an empty array if the style set is undefined        
 
         StyleSet.SetRange("Node Set Code", NodeSetCode);
         if StyleSet.FindSet() then
@@ -190,7 +212,40 @@ codeunit 50101 "Graph View Controller CS"
                 StylesArr.Add(StyleDef);
             until StyleSet.Next() = 0;
 
+        if NodeLabesDefined(NodeSetCode) then
+            AppendNodeLabelStyleSelector(StylesArr);
+
         exit(StylesArr);
+    end;
+
+    local procedure NodeLabesDefined(NodeSetCode: Code[20]): Boolean
+    var
+        NodeTextField: Record "Node Text Field CS";
+    begin
+        NodeTextField.SetRange("Node Set Code", NodeSetCode);
+        NodeTextField.SetRange(Type, NodeTextField.Type::Label);
+        exit(not NodeTextField.IsEmpty());
+    end;
+
+    procedure SetNodeProperties(var Node: JsonToken; SourceRecRef: RecordRef; NodeSetCode: Code[20])
+    var
+        NodeSetField: Record "Node Set Field CS";
+        SourceFieldRef: FieldRef;
+    begin
+        NodeSetField.SetRange("Node Set Code", NodeSetCode);
+        NodeSetField.SetRange("Include in Node Data", true);
+
+        if NodeSetField.FindSet() then
+            repeat
+                SourceFieldRef := SourceRecRef.Field(NodeSetField."Field No.");
+                if SourceFieldRef.Class = FieldClass::FlowField then
+                    SourceFieldRef.CalcField();
+
+                if not IsIdField(NodeSetField."Table No.", NodeSetField."Field No.") then  // Entry No. is always enabled by default as the node ID
+                    AddFieldValueConvertedToFieldType(Node, NodeSetField."Json Property Name", SourceFieldRef);
+            until NodeSetField.Next() = 0;
+
+        Node.AsObject().Add('label', FormatNodeText(SourceRecRef, NodeSetCode, Enum::"Node Text Type CS"::Label));
     end;
 
     [IntegrationEvent(false, false)]

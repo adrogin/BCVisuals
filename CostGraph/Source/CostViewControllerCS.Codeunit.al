@@ -44,27 +44,12 @@ codeunit 50151 "Cost View Controller CS"
 
     local procedure SetItemLedgEntryNodeProperties(var Node: JsonToken)
     var
-        NodeSetField: Record "Node Set Field CS";
         ItemLedgerEntry: Record "Item Ledger Entry";
         RecRef: RecordRef;
-        TableFieldRef: FieldRef;
     begin
-        NodeSetField.SetRange("Node Set Code", GetDefaultNodeSet());
-        NodeSetField.SetRange("Include in Node Data", true);
-
         ItemLedgerEntry.Get(GraphViewController.GetNodeIdAsInteger(Node.AsObject()));
         RecRef.GetTable(ItemLedgerEntry);
-
-        // Not checking the return value here, since at least the Entry No. must be included
-        NodeSetField.FindSet();
-        repeat
-            TableFieldRef := RecRef.Field(NodeSetField."Field No.");
-            if TableFieldRef.Class = FieldClass::FlowField then
-                TableFieldRef.CalcField();
-
-            if not IsEntryNoField(NodeSetField."Table No.", NodeSetField."Field No.") then  // Entry No. is always enabled by default as the node ID
-                GraphViewController.AddFieldValueConvertedToFieldType(Node, NodeSetField."Json Property Name", TableFieldRef);
-        until NodeSetField.Next() = 0;
+        GraphViewController.SetNodeProperties(Node, RecRef, GetDefaultNodeSet());
     end;
 
     local procedure IsEntryNoField(TableNo: Integer; FieldNo: Integer): Boolean
