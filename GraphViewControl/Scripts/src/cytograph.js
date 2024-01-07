@@ -81,7 +81,7 @@ function formatNodes(nodeData) {
   nodeData.forEach(node => {
     nodes.push(
       {
-        data: stripNewLineSlashes(node)
+        data: stripNewLineEscaping(node)
       });
   });
 
@@ -111,7 +111,7 @@ function addNodes(cy, nodeData) {
   nodeData.forEach(node => {
     nodes.push(
       {
-        data: node
+        data: stripNewLineEscaping(node)
       });
   });
 
@@ -236,7 +236,7 @@ function createTextElements(nodeDefs) {
   createTooltips();
 }
 
-function stripNewLineSlashes(node) {
+function stripNewLineEscaping(node) {
   if (typeof node.label !== 'undefined') {
     node.label = node.label.replace('\\n', '\n');
   }

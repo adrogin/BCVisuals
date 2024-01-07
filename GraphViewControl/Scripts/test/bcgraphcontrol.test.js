@@ -1,7 +1,7 @@
 import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAllNodes, createTooltips, setGraphLayout } from "../src/cytograph";
 import {
-    graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithData, getSampleNodeTooltipsArray,
-    nodeIdFilter, edgeNodesFilter
+    graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithData, getSampleNodeTooltipsArray, 
+    getSampleGraphElementArraysWithLabels, nodeIdFilter, edgeNodesFilter
 } from "./testutils";
 
 test('Build graph from nodes and edges arrays in format provided by BC', () => {
@@ -106,4 +106,13 @@ test('Graph nodes contain additional data provided in node info on instantiation
     expect(getGraphElements().filter(nodeIdFilter('A'))[0].json().data.numeric_data_field).toBe(100);
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().data.numeric_data_field).toBe(200);
     expect(getGraphElements().filter(nodeIdFilter('C'))[0].json().data.numeric_data_field).toBe(300);
+});
+
+test('Labels provided in graph initialization data override default label text', () => {
+    const graphDefinition = getSampleGraphElementArraysWithLabels();
+
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, getSampleGraphElementArraysWithLabels(), null);
+    
+    expect(getGraphElements().filter(nodeIdFilter('A'))[0].json().data.label).toBe('LabelA');
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().data.label).toBe('LabelB');
 });
