@@ -20,6 +20,8 @@ jobs:
         node-version: 20.x
 
     - name: Build
+      working-directory: ./GraphViewControl
       run: |
         npm install
+        npm test
         npx webpack
