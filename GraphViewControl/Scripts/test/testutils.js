@@ -24,8 +24,8 @@ export function getSampleGraphElementArrays() {
                 {'id': 'A'}, {'id': 'B'}, {'id': 'C'}
             ],
             edges: [
-                {'source': 'A', target: 'B'},
-                {'source': 'A', target: 'C'}
+                { source: 'A', target: 'B' },
+                { source: 'A', target: 'C' }
             ]
         });
 };
@@ -34,26 +34,26 @@ export function getSampleGraphElementArraysWithData() {
     return({
             nodes: [
                 {
-                    'id': 'A',
-                    'tooltip': 'TooltipA',
-                    'text_data_field': 'TextA',
-                    'numeric_data_field': 100
+                    id: 'A',
+                    tooltip: 'TooltipA',
+                    text_data_field: 'TextA',
+                    numeric_data_field: 100
                 },
                 {
-                    'id': 'B',
-                    'text_data_field': 'TextB',
-                    'numeric_data_field': 200
+                    id: 'B',
+                    text_data_field: 'TextB',
+                    numeric_data_field: 200
                 },
                 {
-                    'id': 'C',
-                    'tooltip': 'TooltipC',
-                    'text_data_field': 'TextC',
-                    'numeric_data_field': 300
+                    id: 'C',
+                    tooltip: 'TooltipC',
+                    text_data_field: 'TextC',
+                    numeric_data_field: 300
                 }
             ],
             edges: [
-                {'source': 'A', target: 'B'},
-                {'source': 'A', target: 'C'}
+                {source: 'A', target: 'B'},
+                {source: 'A', target: 'C'}
             ]
         });
 };
@@ -64,4 +64,22 @@ export function getSampleNodeTooltipsArray() {
         {'nodeId': 'B', 'content': 'TooltipB'},
         {'nodeId': 'C', 'content': 'TooltipC'}
     ]);
+};
+
+export function getSampleGraphElementArraysWithLabels() {
+    return({
+            nodes: [
+                {
+                    id: 'A',
+                    label: 'LabelA'
+                },
+                {
+                    id: 'B',
+                    label: 'LabelB'
+                }
+            ],
+            edges: [
+                { source: 'A', target: 'B' }
+            ]
+        });
 };
