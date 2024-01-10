@@ -131,6 +131,7 @@ jobs:
         - name: Download JavaScript artifacts
           with:
             name: graph_view_dist
+            uses: actions/download-artifact@v3
             path: ./GraphViewControl/Scripts/dist                
 
         - name: Run pipeline
