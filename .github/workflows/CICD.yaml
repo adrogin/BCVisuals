@@ -137,13 +137,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: npm build and test
-        uses: ./.github/workflows/nodejs_webpack.yaml
+        uses: /.github/workflows/nodejs_webpack.yaml
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: graph_view_dist
-          path: ./GraphViewControl/Scripts/dist    
+          path: /GraphViewControl/Scripts/dist    
 
   Build:
     needs: [ Initialization, BuildJS ]
