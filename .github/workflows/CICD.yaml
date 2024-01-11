@@ -146,6 +146,7 @@ jobs:
 
       - name: Build
         working-directory: ./GraphViewControl
+        shell: sh
         run: |
           npm install
           npm test
