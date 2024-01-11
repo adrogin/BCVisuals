@@ -14,7 +14,11 @@ export default {
                 include: [
                     path.resolve(__dirname, 'Scripts/src/')
                 ],
-            }
+            },
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader'],
+            },       
         ]
     },
     output: {

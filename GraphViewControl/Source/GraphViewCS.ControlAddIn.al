@@ -7,12 +7,6 @@ controladdin "Graph View CS"
     RequestedHeight = 500;
     MinimumHeight = 500;
 
-    StyleSheets =
-        'CSS/style.css',
-        'node_modules/tippy.js/dist/tippy.css',
-        'node_modules/tippy.js/themes/light.css',
-        'node_modules/tippy.js/themes/material.css';
-
     Scripts = 'Scripts/dist/main.js';
 
     procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray);
