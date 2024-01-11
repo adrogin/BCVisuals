@@ -5,6 +5,8 @@ import tippy from "tippy.js";
 import contextMenus from "cytoscape-context-menus";
 import { initializeContextMenu } from "./cycontextmenu.js";
 
+import '../../CSS/style.css';
+
 cytoscape.use(popper);
 cytoscape.use(edgehandles);
 cytoscape.use(contextMenus);
