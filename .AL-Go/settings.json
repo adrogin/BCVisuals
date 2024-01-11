@@ -1,0 +1,14 @@
+{
+  "country": "w1",
+  "appFolders":  [
+	"./GraphViewControl",
+	"./CostGraph",
+	"./RoutingGraph"
+  ],
+  "testFolders":  [
+	"./GraphViewTests",
+	"./CostGraphTests",
+	"./RoutingGraphTests"
+  ],
+  "bcptTestFolders": []
+}

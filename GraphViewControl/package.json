@@ -17,6 +17,7 @@
     "cytoscape-context-menus": "^4.1.0",
     "cytoscape-edgehandles": "^4.0.1",
     "cytoscape-popper": "^2.0.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-chain": "^1.1.6",
     "jest-environment-jsdom": "^29.7.0",
