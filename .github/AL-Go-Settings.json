@@ -1,4 +1,122 @@
 {
-  "type": "PTE",
-  "templateUrl": "https://github.com/microsoft/AL-Go-PTE@main"
+    "keyVaultCertificateUrlSecretName":  "",
+    "microsoftTelemetryConnectionString":  "",
+    "type":  "PTE",
+    "sendExtendedTelemetryToMicrosoft":  false,
+    "appBuild":  3,
+    "installTestApps":  [
+
+                        ],
+    "versioningStrategy":  0,
+    "installApps":  [
+
+                    ],
+    "installTestLibraries":  true,
+    "runNumberOffset":  0,
+    "codeSignCertificatePasswordSecretName":  "codeSignCertificatePassword",
+    "country":  "w1",
+    "excludeEnvironments":  [
+
+                            ],
+    "partnerTelemetryConnectionString":  "",
+    "doNotRunTests":  false,
+    "runs-on":  "windows-latest",
+    "configPackages":  [
+
+                       ],
+    "generateDependencyArtifact":  false,
+    "templateUrl":  "https://github.com/microsoft/AL-Go-PTE@main",
+    "keyVaultCertificatePasswordSecretName":  "",
+    "rulesetFile":  "",
+    "shell":  "powershell",
+    "enableExternalRulesets":  false,
+    "memoryLimit":  "",
+    "keyVaultClientIdSecretName":  "",
+    "testFolders":  [
+		"./GraphViewTests",
+		"./CostGraphTests",
+		"./RoutingGraphTests"
+	],
+    "githubRunner":  "windows-latest",
+    "doNotBuildTests":  false,
+    "environments":  [
+
+                     ],
+    "companyName":  "",
+    "assignPremiumPlan":  false,
+    "artifact":  "",
+    "ghTokenWorkflowSecretName":  "ghTokenWorkflow",
+    "enableTaskScheduler":  false,
+    "enableCodeCop":  true,
+    "repoVersion":  "1.0",
+    "doNotPublishApps":  false,
+    "doNotSignApps":  true,
+    "githubRunnerShell":  "powershell",
+    "cacheKeepDays":  3,
+    "bcptTestFolders":  [
+
+                        ],
+    "updateDependencies":  false,
+    "cacheImageName":  "my",
+    "treatTestFailuresAsWarnings":  false,
+    "additionalCountries":  [
+
+                            ],
+    "licenseFileUrlSecretName":  "",
+    "enableUICop":  true,
+    "customCodeCops":  [
+
+                       ],
+    "appDependencies":  [
+
+                        ],
+    "doNotRunBcptTests":  false,
+    "skipUpgrade":  false,
+    "appDependencyProbingPaths":  [
+
+                                  ],
+    "useCompilerFolder":  false,
+    "installTestFramework":  true,
+    "keyVaultCodesignCertificateName":  "",
+    "keyVaultName":  "",
+    "obsoleteTagMinAllowedMajorMinor":  "",
+    "applicationDependency":  "23.0.0.0",
+    "applicationInsightsConnectionStringSecretName":  "",
+    "failOn":  "error",
+    "projects":  [
+
+                 ],
+    "appSourceCopMandatoryAffixes":  [
+
+                                     ],
+    "projectName":  ".",
+    "testDependencies":  [
+
+                         ],
+    "appRevision":  0,
+    "codeSignCertificateUrlSecretName":  "",
+    "vsixFile":  "",
+    "useProjectDependencies":  false,
+    "unusedALGoSystemFiles":  [
+
+                              ],
+    "buildModes":  [
+
+                   ],
+    "templateBranch":  "",
+    "installPerformanceToolkit":  false,
+    "PullRequestTrigger":  "pull_request_target",
+    "appFolders":  [
+		"./GraphViewControl",
+		"./CostGraph",
+		"./RoutingGraph"
+	],
+    "repoName":  "BCVisuals",
+    "fullBuildPatterns":  [
+
+                          ],
+    "alwaysBuildAllProjects":  false,
+    "installOnlyReferencedApps":  true,
+    "installTestRunner":  true,
+    "adminCenterApiCredentialsSecretName":  ""
 }
