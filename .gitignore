@@ -7,3 +7,4 @@ package-lock.json
 .vscode/
 node_modules/
 GraphViewControl/Scripts/dist/
+Release
