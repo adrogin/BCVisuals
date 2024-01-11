@@ -132,7 +132,7 @@ jobs:
           uses: actions/download-artifact@v3
           with:
             name: graph_view_dist
-            path: ./GraphViewControl/Scripts/dist                
+            path: ./GraphViewControl/Scripts/dist
 
         - name: Run pipeline
           id: RunPipeline

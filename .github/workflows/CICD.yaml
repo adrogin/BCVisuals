@@ -134,6 +134,7 @@ jobs:
 
   BuildJS:
     name: Build and pack JavaScript app
+    runs-on: ubuntu-latest
     steps:
       - name: npm build and test
         uses: ./.github/workflows/nodejs_webpack.yaml
