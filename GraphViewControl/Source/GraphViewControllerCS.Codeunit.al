@@ -32,7 +32,7 @@ codeunit 50101 "Graph View Controller CS"
 
     local procedure ReplaceSymbolIfNotAllowedInPropertyName(Symbol: Char): Text[1]
     begin
-        if ((Symbol >= 'a') and (Symbol <= 'z')) or (Symbol >= 'A') and (Symbol <= 'Z') or ((Symbol >= '0') and (Symbol <= '9')) then
+        if ((Symbol >= 'a') and (Symbol <= 'z')) or (Symbol >= 'A') and (Symbol <= 'Z') or ((Symbol >= '0') and (Symbol <= '9')) or (Symbol = '-') then
             exit(Symbol);
 
         exit('_');
@@ -83,7 +83,7 @@ codeunit 50101 "Graph View Controller CS"
     var
         NodeTextField: Record "Node Text Field CS";
         TableFieldRef: FieldRef;
-        NodeText: Text;
+        Builder: TextBuilder;
     begin
         NodeTextField.SetRange("Node Set Code", NodeSetCode);
         NodeTextField.SetRange(Type, TextType);
@@ -95,32 +95,31 @@ codeunit 50101 "Graph View Controller CS"
 
                 if NodeTextField."Show Caption" then begin
                     NodeTextField.CalcFields("Field Caption");
-                    NodeText := NodeText + NodeTextField."Field Caption" + ': ';
+                    Builder.Append(NodeTextField."Field Caption" + ': ');
                 end;
 
-                NodeText := NodeText + Format(TableFieldRef.Value);
+                Builder.Append(Format(TableFieldRef.Value));
                 if NodeTextField.Delimiter = NodeTextField.Delimiter::Space then
-                    NodeText := NodeText + ' '
+                    Builder.Append(' ')
                 else
                     if NodeTextField.Delimiter = NodeTextField.Delimiter::"New Line" then
-                        NodeText := NodeText + GetNewLineToken(TextType);
+                        AppendLineBreak(Builder, TextType);
             until NodeTextField.Next() = 0;
 
-        exit(NodeText);
+        exit(Builder.ToText());
     end;
 
-    local procedure GetNewLineToken(TextType: Enum "Node Text Type CS"): Text
+    local procedure AppendLineBreak(var Builder: TextBuilder; TextType: Enum "Node Text Type CS")
     var
-        NewLineCrTok: Label '\n';
-        NewLineHtmlTok: Label '<br>';
+        LF: Char;
     begin
+        LF := 10;
+
         case TextType of
             TextType::Tooltip:
-                exit(NewLineHtmlTok);
+                Builder.Append('<br>');
             TextType::Label:
-                exit(NewLineCrTok);
-            else
-                exit('');
+                Builder.Append(LF);
         end;
     end;
 
