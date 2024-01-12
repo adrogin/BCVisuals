@@ -187,6 +187,8 @@ codeunit 60150 "Cost Trace Tests CS"
         ProdItem.Validate("Production BOM No.", LibraryManufacturing.CreateCertifiedProductionBOM(ProdBOMHeader, ComponentItem."No.", Quantity));
         ProdItem.Modify(true);
 
+        UpdateInventoryPostingSetup(ProdItem."Inventory Posting Group");
+
         // [GIVEN] Create a production order for item "PI"
         LibraryManufacturing.CreateAndRefreshProductionOrder(
             ProductionOrder, ProductionOrder.Status::Released, ProductionOrder."Source Type"::Item, ProdItem."No.", Quantity);
@@ -339,6 +341,17 @@ codeunit 60150 "Cost Trace Tests CS"
         TransferShipmentHeader.SetRange("Transfer Order No.", TransferOrderNo);
         TransferShipmentHeader.FindFirst();
         exit(TransferShipmentHeader."No.");
+    end;
+
+    local procedure UpdateInventoryPostingSetup(InventoryPostingGroupCode: Code[20])
+    var
+        InventoryPostingSetup: Record "Inventory Posting Setup";
+        DummyLocation: Record Location;
+    begin
+        InventoryPostingSetup.Get('', InventoryPostingGroupCode);
+
+        if InventoryPostingSetup."WIP Account" = '' then
+            LibraryInventory.UpdateInventoryPostingSetup(DummyLocation, InventoryPostingGroupCode);
     end;
 
     local procedure VerifyJsonObjectValue(ExpectedValue: Integer; ActualObject: JsonObject; KeyName: Text)

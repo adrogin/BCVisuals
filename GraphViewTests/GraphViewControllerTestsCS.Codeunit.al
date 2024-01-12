@@ -30,7 +30,7 @@ codeunit 60101 "Graph View Controller Tests CS"
         NodeSetField.Get(NodeSet.Code, NodeDataTestTable2.FieldNo("Non-Alphanumeric Field Name"));
         ConvertedName := GraphViewController.ConvertFieldNameToJsonToken(NodeSetField);
 
-        LibraryAssert.AreEqual('Non_Alphanumeric_Field_Name', ConvertedName, IncorrectTokenConversionErr);
+        LibraryAssert.AreEqual('Non-Alphanumeric_Field_Name', ConvertedName, IncorrectTokenConversionErr);
     end;
 
     [Test]
