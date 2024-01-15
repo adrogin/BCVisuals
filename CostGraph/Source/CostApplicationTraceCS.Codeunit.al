@@ -3,11 +3,16 @@ codeunit 50150 "Cost Application Trace CS"
     procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; var Nodes: JsonArray; var Edges: JsonArray)
     var
         FromItemLedgerEntry: Record "Item Ledger Entry";
-        TempDistinctNodes: Record Integer temporary;
     begin
         FromItemLedgerEntry.Get(ItemLedgEntryNo);
         GetVisitedEntriesBackward(FromItemLedgerEntry, false);
+        GetGraphElements(Nodes, Edges);
+    end;
 
+    internal procedure GetGraphElements(var Nodes: JsonArray; var Edges: JsonArray)
+    var
+        TempDistinctNodes: Record Integer temporary;
+    begin
         ItemCostFlowBuf.Reset();
         if ItemCostFlowBuf.FindSet() then
             repeat
@@ -19,7 +24,6 @@ codeunit 50150 "Cost Application Trace CS"
 
     internal procedure GetVisitedEntriesBackward(FromItemLedgEntry: Record "Item Ledger Entry"; WithinValuationDate: Boolean)
     var
-        DummyItemLedgEntry: Record "Item Ledger Entry";
         ValueEntry: Record "Value Entry";
         AvgCostEntryPointHandler: Codeunit "Avg. Cost Entry Point Handler";
     begin
@@ -33,74 +37,63 @@ codeunit 50150 "Cost Application Trace CS"
 
         ItemCostFlowBuf.Reset();
         ItemCostFlowBuf.DeleteAll();
-        DummyItemLedgEntry.Init();
-        DummyItemLedgEntry."Entry No." := -1;
-        TraceCostBackward(FromItemLedgEntry);
+        TempVisitedItemApplnEntry.DeleteAll();
+        TraceCostBackward(FromItemLedgEntry, 0);
     end;
 
-    local procedure TraceCostBackward(FromItemLedgEntry: Record "Item Ledger Entry")
+    internal procedure TraceCostBackward(FromItemLedgEntry: Record "Item Ledger Entry"; MaxRecursionDepth: Integer)
     begin
-        TempVisitedItemApplnEntry.DeleteAll();
+        MaxDepth := MaxRecursionDepth;
 
         if FromItemLedgEntry.Positive then
-            TraceCostBackwardToAppliedOutbnds(FromItemLedgEntry."Entry No.")
+            TraceCostBackwardToAppliedOutbnds(FromItemLedgEntry."Entry No.", 1)
         else
-            TraceCostBackwardToAppliedInbnds(FromItemLedgEntry."Entry No.");
-
-        TraceCostBackwardToInbndTransfers(FromItemLedgEntry."Entry No.");
+            TraceCostBackwardToAppliedInbnds(FromItemLedgEntry."Entry No.", 1);
 
         if FromItemLedgEntry."Entry Type" = FromItemLedgEntry."Entry Type"::Output then
-            TraceCyclicProdCyclicalLoop(FromItemLedgEntry);
+            TraceCyclicProdCyclicalLoop(FromItemLedgEntry, 1);
 
         if FromItemLedgEntry."Entry Type" = FromItemLedgEntry."Entry Type"::"Assembly Output" then
-            TraceCyclicAsmCyclicalLoop(FromItemLedgEntry);
+            TraceCyclicAsmCyclicalLoop(FromItemLedgEntry, 1);
     end;
 
-    local procedure TraceCostBackwardToAppliedOutbnds(EntryNo: Integer)
+    local procedure TraceCostBackwardToAppliedOutbnds(EntryNo: Integer; Depth: Integer)
     var
         ItemApplnEntry: Record "Item Application Entry";
     begin
         if GetOutboundEntriesTheInbndEntryAppliedTo(ItemApplnEntry, EntryNo) then
-            TraceCostBackwardToAppliedEntries(ItemApplnEntry, EntryNo, true);
+            TraceCostBackwardToAppliedEntries(ItemApplnEntry, EntryNo, true, Depth);
     end;
 
-    local procedure TraceCostBackwardToAppliedInbnds(EntryNo: Integer)
+    local procedure TraceCostBackwardToAppliedInbnds(EntryNo: Integer; Depth: Integer)
     var
         ItemApplnEntry: Record "Item Application Entry";
     begin
         if ItemApplnEntry.GetInboundEntriesTheOutbndEntryAppliedTo(EntryNo) then
-            TraceCostBackwardToAppliedEntries(ItemApplnEntry, EntryNo, false);
+            TraceCostBackwardToAppliedEntries(ItemApplnEntry, EntryNo, false, Depth);
     end;
 
-    local procedure TraceCostBackwardToInbndTransfers(EntryNo: Integer)
-    var
-        ItemApplnEntry: Record "Item Application Entry";
-    begin
-        if ItemApplnEntry.AppliedInbndTransEntryExists(EntryNo, false) then
-            TraceCostBackwardToAppliedEntries(ItemApplnEntry, EntryNo, false);
-    end;
-
-    local procedure TraceCostBackwardToProdConsumption(EntryNo: Integer)
+    local procedure TraceCostBackwardToProdConsumption(EntryNo: Integer; Depth: Integer)
     var
         ItemLedgEntry: Record "Item Ledger Entry";
     begin
         if not ItemLedgEntry.Get(EntryNo) then
             exit;
 
-        TraceCyclicProdCyclicalLoop(ItemLedgEntry);
+        TraceCyclicProdCyclicalLoop(ItemLedgEntry, Depth);
     end;
 
-    local procedure TraceCostBackwardToAsmConsumption(EntryNo: Integer)
+    local procedure TraceCostBackwardToAsmConsumption(EntryNo: Integer; Depth: Integer)
     var
         ItemLedgEntry: Record "Item Ledger Entry";
     begin
         if not ItemLedgEntry.Get(EntryNo) then
             exit;
 
-        TraceCyclicAsmCyclicalLoop(ItemLedgEntry);
+        TraceCyclicAsmCyclicalLoop(ItemLedgEntry, Depth);
     end;
 
-    local procedure TraceCostBackwardToAppliedEntries(var ItemApplnEntry: Record "Item Application Entry"; FromEntryNo: Integer; IsPositiveToNegativeFlow: Boolean)
+    local procedure TraceCostBackwardToAppliedEntries(var ItemApplnEntry: Record "Item Application Entry"; FromEntryNo: Integer; IsPositiveToNegativeFlow: Boolean; Depth: Integer)
     var
         ToEntryNo: Integer;
     begin
@@ -117,17 +110,17 @@ codeunit 50150 "Cost Application Trace CS"
                 // Flow is reversed when inserting into the buffer, since the tracing runs backwards
                 InsertCostFlowBufIfNotExists(ToEntryNo, FromEntryNo);
 
-                TraceCostBackwardToAppliedOutbnds(ToEntryNo);
-                TraceCostBackwardToAppliedInbnds(ToEntryNo);
-                TraceCostBackwardToProdConsumption(ToEntryNo);
-                TraceCostBackwardToAsmConsumption(ToEntryNo);
+                if (MaxDepth = 0) or (Depth < MaxDepth) then begin
+                    TraceCostBackwardToAppliedOutbnds(ToEntryNo, Depth + 1);
+                    TraceCostBackwardToAppliedInbnds(ToEntryNo, Depth + 1);
+                    TraceCostBackwardToProdConsumption(ToEntryNo, Depth + 1);
+                    TraceCostBackwardToAsmConsumption(ToEntryNo, Depth + 1);
+                end;
             end;
         until ItemApplnEntry.Next() = 0;
-
-        TraceCostBackwardToInbndTransfers(FromEntryNo);
     end;
 
-    local procedure TraceCyclicProdCyclicalLoop(ItemLedgEntry: Record "Item Ledger Entry")
+    local procedure TraceCyclicProdCyclicalLoop(ItemLedgEntry: Record "Item Ledger Entry"; Depth: Integer)
     var
         ToItemLedgEntryNo: Integer;
     begin
@@ -151,11 +144,11 @@ codeunit 50150 "Cost Application Trace CS"
                 InsertCostFlowBufIfNotExists(ItemLedgEntry."Entry No.", ToItemLedgEntryNo);
 
                 if not ItemLedgEntry.Positive then
-                    TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.");
+                    TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.", Depth + 1);
             until ItemLedgEntry.Next() = 0;
     end;
 
-    local procedure TraceCyclicAsmCyclicalLoop(ItemLedgEntry: Record "Item Ledger Entry")
+    local procedure TraceCyclicAsmCyclicalLoop(ItemLedgEntry: Record "Item Ledger Entry"; Depth: Integer)
     var
         ToItemLedgEntryNo: Integer;
     begin
@@ -178,7 +171,7 @@ codeunit 50150 "Cost Application Trace CS"
                 InsertCostFlowBufIfNotExists(ItemLedgEntry."Entry No.", ToItemLedgEntryNo);
 
                 if not ItemLedgEntry.Positive then
-                    TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.");
+                    TraceCostBackwardToAppliedInbnds(ItemLedgEntry."Entry No.", Depth);
             until ItemLedgEntry.Next() = 0;
     end;
 
@@ -263,4 +256,5 @@ codeunit 50150 "Cost Application Trace CS"
         TempVisitedItemApplnEntry: Record "Item Application Entry" temporary;
         MaxValuationDate: Date;
         LastEntryNo: Integer;
+        MaxDepth: Integer;
 }
