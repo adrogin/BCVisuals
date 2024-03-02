@@ -246,7 +246,7 @@ function stripNewLineEscaping(node) {
   return node;
 }
 
-function initEdgeHandles() {
+function initEdgeHandles(eventCallback) {
   let defaults = {
     canConnect: function(sourceNode, targetNode){
       return !sourceNode.same(targetNode);
@@ -263,6 +263,15 @@ function initEdgeHandles() {
   };
   
   eh = cy.edgehandles(defaults);
+  bindEdgeHandlesOnCompleteEvent(eventCallback);  
+}
+
+function bindEdgeHandlesOnCompleteEvent(eventCallback) {
+  if (eventCallback === undefined) {
+    eventCallback = (event, sourceNode, targetNode, addedEdge) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeCreated', [sourceNode.data(), targetNode.data()]) };
+  };
+
+  cy.on('ehcomplete', eventCallback);
 }
 
 function setEditModeEnabled(isEnabled) {

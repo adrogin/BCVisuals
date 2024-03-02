@@ -24,4 +24,5 @@ controladdin "Graph View CS"
 
     event OnNodeClick(NodeId: Text);
     event OnGraphDataReceived(Nodes: JsonArray; Edges: JsonArray);
+    event OnEdgeCreated(SourceNode: JsonObject; TargetNode: JsonObject);
 }
