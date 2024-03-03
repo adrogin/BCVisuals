@@ -14,7 +14,7 @@ cytoscape.use(contextMenus);
 var cy;  // Global Cytoscape instance
 var eh;  // EdgeHandles instance
 
-function renderGraph(containerElement, nodes, edges, styles, onClickEventCallback) {
+function renderGraph(containerElement, nodes, edges, styles, eventCallbacks) {
   if (cy != null) {
     cy.destroy();
   }
@@ -38,8 +38,7 @@ function renderGraph(containerElement, nodes, edges, styles, onClickEventCallbac
   });
 
   createTextElements(nodes);
-
-  cy.nodes().bind("click", onClickEventCallback);
+  bindCytoscapeEventHandlers(eventCallbacks);
 }
 
 function renderGraphWithNavExtensibilityBinding(containerElement, nodes, edges, styles) {
@@ -48,6 +47,34 @@ function renderGraphWithNavExtensibilityBinding(containerElement, nodes, edges, 
     (event) => {
       Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()])
     });
+}
+
+function bindCytoscapeEventHandlers(eventCallbacks) {
+  let onClickEventCallback = eventCallbacks !== null && eventCallbacks.onNodeClick !== undefined ? 
+    eventCallbacks.onNodeClick :
+    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]) };
+
+  let onEdgeCreatedCallback = eventCallbacks !== null && eventCallbacks.onEdgeCreated !== undefined ? 
+    eventCallbacks.onEdgeCreated :
+    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeCreated', [event.target.data()]) };
+
+  let onEdgeRemovedCallback = eventCallbacks !== null && eventCallbacks.onEdgeRemoved !== undefined ? 
+    eventCallbacks.onEdgeRemoved :
+    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeRemoved', [event.target.data()]) };
+
+  let onNodeCreatedCallback = eventCallbacks !== null && eventCallbacks.onNodeCreated !== undefined ? 
+    eventCallbacks.onNodeCreated :
+    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeCreated', [event.target.data()]) };
+
+  let onNodeRemovedCallback = eventCallbacks !== null && eventCallbacks.onNodeRemoved !== undefined ? 
+    eventCallbacks.onNodeRemoved :
+    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeRemoved', [event.target.data()]) };
+
+  cy.nodes().bind('click', onClickEventCallback);
+  cy.bind('add', 'node', onNodeCreatedCallback);
+  cy.bind('add', 'edge', onEdgeCreatedCallback);
+  cy.bind('remove', 'node', onNodeRemovedCallback);
+  cy.bind('remove', 'edge', onEdgeRemovedCallback);
 }
 
 function getDefaultElementStyles() {
@@ -246,7 +273,7 @@ function stripNewLineEscaping(node) {
   return node;
 }
 
-function initEdgeHandles(eventCallback) {
+function initEdgeHandles(eventCallbacks) {
   let defaults = {
     canConnect: function(sourceNode, targetNode){
       return !sourceNode.same(targetNode);
@@ -263,15 +290,30 @@ function initEdgeHandles(eventCallback) {
   };
   
   eh = cy.edgehandles(defaults);
-  bindEdgeHandlesOnCompleteEvent(eventCallback);  
+  bindEdgeHandlesEvents(eventCallbacks);
 }
 
-function bindEdgeHandlesOnCompleteEvent(eventCallback) {
-  if (eventCallback === undefined) {
-    eventCallback = (event, sourceNode, targetNode, addedEdge) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeCreated', [sourceNode.data(), targetNode.data()]) };
-  };
+function bindEdgeHandlesEvents(eventCallbacks) {
+  let onEdgeDrawingStartCallback = eventCallbacks !== null && eventCallbacks.onEdgeDrawingStart !== undefined ?
+    eventCallbacks.onEdgeDrawingStart :
+    (event, sourceNode) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingStart', [sourceNode.data()]) };
 
-  cy.on('ehcomplete', eventCallback);
+  let onEdgeDrawingStopCallback = eventCallbacks !== null && eventCallbacks.onEdgeDrawingStop !== undefined ?
+    eventCallbacks.onEdgeDrawingStop :
+    (event, sourceNode) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingStop', [sourceNode.data()]) };
+  
+  let onEdgeDrawingDoneCallback = eventCallbacks !== null && eventCallbacks.onEdgeDrawingDone !== undefined ?
+    eventCallbacks.onEdgeDrawingDone :
+    (event, sourceNode, targetNode, addedEdge) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingDone', [sourceNode.data(), targetNode.data()]) };
+  
+  let onEdgeDrawingCanceledCallback = eventCallbacks !== null && eventCallbacks.onEdgeDrawingCanceled !== undefined ?
+    eventCallbacks.onEdgeDrawingCanceled :
+    (event, sourceNode, canceledTargets) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingCanceled', [sourceNode.data(), canceledTargets]) };
+
+  cy.on('ehstart', onEdgeDrawingStartCallback);
+  cy.on('ehstop', onEdgeDrawingStopCallback);
+  cy.on('ehcomplete', onEdgeDrawingDoneCallback);
+  cy.on('ehcancel', onEdgeDrawingCanceledCallback);
 }
 
 function setEditModeEnabled(isEnabled) {
