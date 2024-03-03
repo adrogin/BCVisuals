@@ -50,23 +50,23 @@ function renderGraphWithNavExtensibilityBinding(containerElement, nodes, edges, 
 }
 
 function bindCytoscapeEventHandlers(eventCallbacks) {
-  let onClickEventCallback = eventCallbacks !== null && eventCallbacks.onNodeClick !== undefined ? 
+  let onClickEventCallback = eventCallbacks != null && eventCallbacks.onNodeClick !== undefined ? 
     eventCallbacks.onNodeClick :
     (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]) };
 
-  let onEdgeCreatedCallback = eventCallbacks !== null && eventCallbacks.onEdgeCreated !== undefined ? 
+  let onEdgeCreatedCallback = eventCallbacks != null && eventCallbacks.onEdgeCreated !== undefined ? 
     eventCallbacks.onEdgeCreated :
     (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeCreated', [event.target.data()]) };
 
-  let onEdgeRemovedCallback = eventCallbacks !== null && eventCallbacks.onEdgeRemoved !== undefined ? 
+  let onEdgeRemovedCallback = eventCallbacks != null && eventCallbacks.onEdgeRemoved !== undefined ? 
     eventCallbacks.onEdgeRemoved :
     (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeRemoved', [event.target.data()]) };
 
-  let onNodeCreatedCallback = eventCallbacks !== null && eventCallbacks.onNodeCreated !== undefined ? 
+  let onNodeCreatedCallback = eventCallbacks != null && eventCallbacks.onNodeCreated !== undefined ? 
     eventCallbacks.onNodeCreated :
     (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeCreated', [event.target.data()]) };
 
-  let onNodeRemovedCallback = eventCallbacks !== null && eventCallbacks.onNodeRemoved !== undefined ? 
+  let onNodeRemovedCallback = eventCallbacks != null && eventCallbacks.onNodeRemoved !== undefined ? 
     eventCallbacks.onNodeRemoved :
     (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeRemoved', [event.target.data()]) };
 
@@ -294,26 +294,36 @@ function initEdgeHandles(eventCallbacks) {
 }
 
 function bindEdgeHandlesEvents(eventCallbacks) {
-  let onEdgeDrawingStartCallback = eventCallbacks !== null && eventCallbacks.onEdgeDrawingStart !== undefined ?
+  let onEdgeDrawingStartCallback = eventCallbacks != null && eventCallbacks.onEdgeDrawingStart !== undefined ?
     eventCallbacks.onEdgeDrawingStart :
     (event, sourceNode) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingStart', [sourceNode.data()]) };
 
-  let onEdgeDrawingStopCallback = eventCallbacks !== null && eventCallbacks.onEdgeDrawingStop !== undefined ?
+  let onEdgeDrawingStopCallback = eventCallbacks != null && eventCallbacks.onEdgeDrawingStop !== undefined ?
     eventCallbacks.onEdgeDrawingStop :
     (event, sourceNode) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingStop', [sourceNode.data()]) };
   
-  let onEdgeDrawingDoneCallback = eventCallbacks !== null && eventCallbacks.onEdgeDrawingDone !== undefined ?
+  let onEdgeDrawingDoneCallback = eventCallbacks != null && eventCallbacks.onEdgeDrawingDone !== undefined ?
     eventCallbacks.onEdgeDrawingDone :
     (event, sourceNode, targetNode, addedEdge) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingDone', [sourceNode.data(), targetNode.data()]) };
   
-  let onEdgeDrawingCanceledCallback = eventCallbacks !== null && eventCallbacks.onEdgeDrawingCanceled !== undefined ?
+  let onEdgeDrawingCanceledCallback = eventCallbacks != null && eventCallbacks.onEdgeDrawingCanceled !== undefined ?
     eventCallbacks.onEdgeDrawingCanceled :
-    (event, sourceNode, canceledTargets) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingCanceled', [sourceNode.data(), canceledTargets]) };
+    (event, sourceNode, canceledTargets) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingCanceled', [sourceNode.data(), pushNodeData(canceledTargets)]) };
 
   cy.on('ehstart', onEdgeDrawingStartCallback);
   cy.on('ehstop', onEdgeDrawingStopCallback);
   cy.on('ehcomplete', onEdgeDrawingDoneCallback);
   cy.on('ehcancel', onEdgeDrawingCanceledCallback);
+}
+
+function pushNodeData(nodes) {
+  let nodeData = [];
+
+  nodes.forEach(node => {
+    nodeData.push(node.data());
+  });
+
+  return nodeData;
 }
 
 function setEditModeEnabled(isEnabled) {
