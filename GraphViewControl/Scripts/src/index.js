@@ -1,5 +1,5 @@
 import {
-    renderGraphWithNavExtensibilityBinding, setGraphLayout, setNodeTooltipText, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
+    renderGraph, setGraphLayout, setNodeTooltipText, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
     destroyContextMenu, sendGraphElementsToNavExtensibilityCaller, setNodeTooltipsOnAllNodes
 } from "./cytograph.js";
 
@@ -10,7 +10,7 @@ import {
  * @param {Object[]} edges - Array of Edge elements.
  */
 export function DrawGraph(containerElementName, nodes, edges) {
-    renderGraphWithNavExtensibilityBinding(document.getElementById(containerElementName), nodes, edges);
+    renderGraph(document.getElementById(containerElementName), nodes, edges);
 };
 
 /**
@@ -21,7 +21,7 @@ export function DrawGraph(containerElementName, nodes, edges) {
  * @param {Object[]} styles - Array of element styles with selectors.
  */
 export function DrawGraphWithStyles(containerElementName, nodes, edges, styles) {
-    renderGraphWithNavExtensibilityBinding(document.getElementById(containerElementName), nodes, edges, styles);
+    renderGraph(document.getElementById(containerElementName), nodes, edges, styles);
 };
 
 /**

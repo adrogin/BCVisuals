@@ -41,14 +41,6 @@ function renderGraph(containerElement, nodes, edges, styles, eventCallbacks) {
   bindCytoscapeEventHandlers(eventCallbacks);
 }
 
-function renderGraphWithNavExtensibilityBinding(containerElement, nodes, edges, styles) {
-  renderGraph(
-    containerElement, nodes, edges, styles,
-    (event) => {
-      Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()])
-    });
-}
-
 function bindCytoscapeEventHandlers(eventCallbacks) {
   let onClickEventCallback = eventCallbacks != null && eventCallbacks.onNodeClick !== undefined ? 
     eventCallbacks.onNodeClick :
@@ -367,7 +359,6 @@ function getGraphElements() {
 
 export {
   renderGraph,
-  renderGraphWithNavExtensibilityBinding,
   addNodes,
   addEdges,
   setGraphLayout,
