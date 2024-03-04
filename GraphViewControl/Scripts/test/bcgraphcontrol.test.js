@@ -116,3 +116,67 @@ test('Labels provided in graph initialization data override default label text',
     expect(getGraphElements().filter(nodeIdFilter('A'))[0].json().data.label).toBe('LabelA');
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().data.label).toBe('LabelB');
 });
+
+describe('Initialize graph with event callbacks', () => {
+    let testDone;
+
+    beforeAll(() => {
+        let eventCallbacks = {
+            onNodeClick: (event) => {
+                expect(event.target.id()).toBe('A');
+                testDone();
+            },
+
+            onNodeCreated: (event) => {
+                expect(event.target.id()).toBe('X');
+                testDone();
+            },
+
+            onEdgeCreated: (event) => {
+                expect(event.target.id()).toBe('Y');
+                testDone();
+            },
+
+            onNodeRemoved: (event) => {
+                expect(event.target.id()).toBe('X');
+                testDone();
+            },
+
+            onEdgeRemoved: (event) => {
+                expect(event.target.data().source).toBe('A');
+                expect(event.target.data().target).toBe('B');
+                testDone();
+            }
+        };
+
+        const graphDefinition = getSampleGraphElementArrays();
+        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, eventCallbacks);
+    });
+    
+    beforeEach(() => { testDone = null });
+
+    test('onNodeClick event callback returns the id of clicked node', (done) => {
+        testDone = done;
+        getGraphElements().filter(nodeIdFilter('A'))[0].emit('click');
+    });
+
+    test('onNodeCreated event callback returns the new node', (done) => {
+        testDone = done;
+        getGraphElements().cy().add({ group: 'nodes', data: { id: 'X' } });
+    });
+
+    test('onEdgeCreated event callback returns the new edge', (done) => {
+        testDone = done;
+        getGraphElements().cy().add({ group: 'edges', data: { id: 'Y', source: 'B', target: 'C' } });
+    });
+
+    test('onNodeRemoved event callback returns the removed node', (done) => {
+        testDone = done;
+        getGraphElements().cy().remove('node[id="X"]');
+    });
+
+    test('onEdgeRemoved event callback returns the removed edge', (done) => {
+        testDone = done;
+        getGraphElements().cy().remove('edge[source="A"][target="B"]');
+    });
+});

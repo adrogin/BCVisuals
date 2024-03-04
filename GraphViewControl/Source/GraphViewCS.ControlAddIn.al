@@ -24,5 +24,12 @@ controladdin "Graph View CS"
 
     event OnNodeClick(NodeId: Text);
     event OnGraphDataReceived(Nodes: JsonArray; Edges: JsonArray);
-    event OnEdgeCreated(SourceNode: JsonObject; TargetNode: JsonObject);
+    event OnEdgeDrawingStart(SourceNode: JsonObject);
+    event OnEdgeDrawingStop(SourceNode: JsonObject);
+    event OnEdgeDrawingDone(SourceNode: JsonObject; TargetNode: JsonObject);
+    event OnEdgeDrawingCanceled(SourceNode: JsonObject; CanceledTargets: JsonArray);
+    event OnNodeCreated(NewNode: JsonObject);
+    event OnEdgeCreated(NewEdge: JsonObject);
+    event OnNodeRemoved(RemovedNode: JsonObject);
+    event OnEdgeRemoved(RemovedEdge: JsonObject);
 }
