@@ -1,4 +1,7 @@
-import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAllNodes, createTooltips, setGraphLayout } from "../src/cytograph";
+import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAllNodes, createTooltips, setGraphLayout,
+    addNodes, addEdges, removeNodes, removeEdges
+} from "../src/cytograph";
+
 import {
     graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithData, getSampleNodeTooltipsArray, 
     getSampleGraphElementArraysWithLabels, nodeIdFilter, edgeNodesFilter
@@ -7,7 +10,7 @@ import {
 test('Build graph from nodes and edges arrays in format provided by BC', () => {
     const graphDefinition = getSampleGraphElementArrays();
 
-    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null); // Undefined container for headless Cytoscape instance
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges); // Undefined container for headless Cytoscape instance
     
     let graphElements = getGraphElements();
     expect(graphElements.size()).toBe(5);
@@ -28,7 +31,7 @@ test('Build graph from nodes and edges arrays in format provided by BC', () => {
 test('Graph nodes must not have tooltips if the initial dataset does not provide tooltip data', () => {
     const graphDefinition = getSampleGraphElementArrays();
 
-    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
 
     getGraphElements().filter(graphNodesFilter).forEach(node => {
         expect(node.tip).toBeUndefined();
@@ -39,7 +42,7 @@ test('Graph nodes must not have tooltips if the initial dataset does not provide
 test('Node tooltips must be initialized from the node dataset that contains tooltip info', () => {
     const graphDefinition = getSampleGraphElementArraysWithData();
 
-    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
 
     let nodeElements = getGraphElements().filter(graphNodesFilter);
     expect(nodeElements.filter(nodeIdFilter('A'))[0].tooltipText).toBe('TooltipA');
@@ -54,7 +57,7 @@ test('Node tooltips must be initialized from the node dataset that contains tool
 test('Tooltips can be set on nodes after creating a graph instance', () => {
     const graphDefinition = getSampleGraphElementArrays();
 
-    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
     setNodeTooltipsOnAllNodes(getSampleNodeTooltipsArray());
 
     let nodeElements = getGraphElements().filter(graphNodesFilter);
@@ -71,7 +74,7 @@ test('Tooltips can be set on nodes after creating a graph instance', () => {
 test('Tooltip can be set on a single node after creating a graph instance', () => {
     const graphDefinition = getSampleGraphElementArrays();
 
-    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
     setNodeTooltipText('B', 'TooltipB');
 
     expect(getGraphElements().filter(graphNodesFilter).filter(nodeIdFilter('B'))[0].tooltipText).toBe('TooltipB');
@@ -84,7 +87,7 @@ test('Tooltip can be set on a single node after creating a graph instance', () =
 
 test('Default graph layout can be changed after creating an instance', () => {
     const graphDefinition = getSampleGraphElementArrays();
-    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
 
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.x).toBeCloseTo(-0.38, 1);
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.y).toBeCloseTo(3.38, 1);
@@ -98,7 +101,7 @@ test('Default graph layout can be changed after creating an instance', () => {
 test('Graph nodes contain additional data provided in node info on instantiation', () => {
     const graphDefinition = getSampleGraphElementArraysWithData();
 
-    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null);
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
 
     expect(getGraphElements().filter(nodeIdFilter('A'))[0].json().data.text_data_field).toBe('TextA');
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().data.text_data_field).toBe('TextB');
@@ -111,7 +114,7 @@ test('Graph nodes contain additional data provided in node info on instantiation
 test('Labels provided in graph initialization data override default label text', () => {
     const graphDefinition = getSampleGraphElementArraysWithLabels();
 
-    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, getSampleGraphElementArraysWithLabels(), null);
+    renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, getSampleGraphElementArraysWithLabels());
     
     expect(getGraphElements().filter(nodeIdFilter('A'))[0].json().data.label).toBe('LabelA');
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().data.label).toBe('LabelB');
@@ -178,5 +181,52 @@ describe('Initialize graph with event callbacks', () => {
     test('onEdgeRemoved event callback returns the removed edge', (done) => {
         testDone = done;
         getGraphElements().cy().remove('edge[source="A"][target="B"]');
+    });
+});
+
+describe('Graph elements manipulations', () => {
+
+    test('Add nodes and edges to a graph instance', () => {
+        const graphDefinition = getSampleGraphElementArrays();
+        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
+
+        addNodes([
+            { "id": "X" },
+            { "id": "Y" }
+        ]);
+
+        addEdges([
+            { "source": "A", "target": "X" },
+            { "source": "B", "target": "Y" }
+        ]);
+
+        expect(getGraphElements().filter(nodeIdFilter('X')).size()).toBe(1);
+        expect(getGraphElements().filter(nodeIdFilter('Y')).size()).toBe(1);
+        expect(getGraphElements().filter(edgeNodesFilter('A', 'X')).size()).toBe(1);
+        expect(getGraphElements().filter(edgeNodesFilter('B', 'Y')).size()).toBe(1);
+    });
+
+    test('Remove nodes and edges from a graph instance', () => {
+        const graphDefinition = getSampleGraphElementArrays();
+        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
+
+        addNodes([{ "id": "X" }]);
+        addEdges([{ "source": "C", "target": "X" }]);
+        removeEdges([
+            { "source": "A", "target": "C" },
+            { "source": "C", "target": "X"}
+        ]);
+
+        removeNodes([
+            { "id": "C" },
+            { "id": "X" }
+        ]);
+
+        expect(getGraphElements().filter(edgeNodesFilter('A', 'C')).size()).toBe(0);
+        expect(getGraphElements().filter(edgeNodesFilter('C', 'X')).size()).toBe(0);
+        expect(getGraphElements().filter(nodeIdFilter('C')).size()).toBe(0);
+        expect(getGraphElements().filter(nodeIdFilter('X')).size()).toBe(0);
+        expect(getGraphElements().filter(graphNodesFilter).size()).toBe(2);
+        expect(getGraphElements().filter(graphEdgesFilter).size()).toBe(1);
     });
 });

@@ -21,6 +21,10 @@ controladdin "Graph View CS"
     procedure InitializeDefaultContextMenu();
     procedure DestroyContextMenu();
     procedure RequestGraphData();
+    procedure AddNodes(NodesToAdd: JsonArray);
+    procedure AddEdges(EdgesToAdd: JsonArray);
+    procedure RemoveNodes(NodesToRemove: JsonArray);
+    procedure RemoveEdges(EdgesToRemove: JsonArray);
 
     event OnNodeClick(NodeId: Text);
     event OnGraphDataReceived(Nodes: JsonArray; Edges: JsonArray);

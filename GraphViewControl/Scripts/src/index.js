@@ -1,6 +1,6 @@
 import {
     renderGraph, setGraphLayout, setNodeTooltipText, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
-    destroyContextMenu, sendGraphElementsToNavExtensibilityCaller, setNodeTooltipsOnAllNodes
+    destroyContextMenu, sendGraphElementsToNavExtensibilityCaller, setNodeTooltipsOnAllNodes, addNodes, addEdges, removeNodes, removeEdges
 } from "./cytograph.js";
 
 /**
@@ -10,7 +10,16 @@ import {
  * @param {Object[]} edges - Array of Edge elements.
  */
 export function DrawGraph(containerElementName, nodes, edges) {
-    renderGraph(document.getElementById(containerElementName), nodes, edges);
+    renderGraph(
+        document.getElementById(containerElementName), nodes, edges,
+        {
+            onNodeClick: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]) },
+            onEdgeCreated: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeCreated', [event.target.data()]) },
+            onEdgeRemoved: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeRemoved', [event.target.data()]) },
+            onNodeCreated: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeCreated', [event.target.data()]) },
+            onNodeRemoved: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeRemoved', [event.target.data()]) },
+        }
+    );
 };
 
 /**
@@ -92,4 +101,39 @@ export function DestroyContextMenu() {
  */
 export function RequestGraphData() {
     sendGraphElementsToNavExtensibilityCaller();
+}
+
+/**
+ * Add nodes to the active graph instance
+ * @param {Object[]} nodesToAdd - array of Node elements to be added to the graph 
+ */
+export function AddNodes(nodesToAdd) {
+    addNodes(nodesToAdd);
+}
+
+/**
+ * Add edges to the active graph instance
+ * @param {Object[]} edgesToAdd - array of Edge elements to be added to the graph 
+ */
+export function AddEdges(edgesToAdd) {
+    addEdges(edgesToAdd);
+}
+
+/**
+ * Remove nodes from the active graph instance.
+ * @param {Object[]} nodesToRemove - array of Node elements to be removed. Node objects must contain the id value, other properties are ignored.
+ * If a node with the given id is not found in the graph, the array element is ignored.
+ */
+export function RemoveNodes(nodesToRemove) {
+    removeNodes(nodesToRemove);
+}
+
+/**
+ * Remove edges from the active graph instance.
+ * @param {Object[]} edgesToRemove - array of Edge elements to be removed. Edge objects must contain the source and target values, other properties are ignored.
+ * If a node with the given id is not found in the graph, the array element is ignored.
+ * Edges being removed are filtered based on the source and target values. If the graph contains mmultiple nodes between the same source and target nodes, all parallel edges will be removed.
+ */
+export function RemoveEdges(edgesToRemove) {
+    removeEdges(edgesToRemove);
 }

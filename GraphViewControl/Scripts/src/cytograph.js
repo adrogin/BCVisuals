@@ -42,31 +42,13 @@ function renderGraph(containerElement, nodes, edges, styles, eventCallbacks) {
 }
 
 function bindCytoscapeEventHandlers(eventCallbacks) {
-  let onClickEventCallback = eventCallbacks != null && eventCallbacks.onNodeClick !== undefined ? 
-    eventCallbacks.onNodeClick :
-    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]) };
-
-  let onEdgeCreatedCallback = eventCallbacks != null && eventCallbacks.onEdgeCreated !== undefined ? 
-    eventCallbacks.onEdgeCreated :
-    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeCreated', [event.target.data()]) };
-
-  let onEdgeRemovedCallback = eventCallbacks != null && eventCallbacks.onEdgeRemoved !== undefined ? 
-    eventCallbacks.onEdgeRemoved :
-    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeRemoved', [event.target.data()]) };
-
-  let onNodeCreatedCallback = eventCallbacks != null && eventCallbacks.onNodeCreated !== undefined ? 
-    eventCallbacks.onNodeCreated :
-    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeCreated', [event.target.data()]) };
-
-  let onNodeRemovedCallback = eventCallbacks != null && eventCallbacks.onNodeRemoved !== undefined ? 
-    eventCallbacks.onNodeRemoved :
-    (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeRemoved', [event.target.data()]) };
-
-  cy.nodes().bind('click', onClickEventCallback);
-  cy.bind('add', 'node', onNodeCreatedCallback);
-  cy.bind('add', 'edge', onEdgeCreatedCallback);
-  cy.bind('remove', 'node', onNodeRemovedCallback);
-  cy.bind('remove', 'edge', onEdgeRemovedCallback);
+  if (eventCallbacks !== undefined) {
+    cy.nodes().bind('click', eventCallbacks.onNodeClick);
+    cy.bind('add', 'node', eventCallbacks.onNodeCreated);
+    cy.bind('add', 'edge', eventCallbacks.onEdgeCreated);
+    cy.bind('remove', 'node', eventCallbacks.onNodeRemoved);
+    cy.bind('remove', 'edge', eventCallbacks.onEdgeRemoved);
+  }
 }
 
 function getDefaultElementStyles() {
@@ -126,7 +108,7 @@ function formatEdges(edges) {
   return edgeObjects;
 }
 
-function addNodes(cy, nodeData) {
+function addNodes(nodeData) {
   var nodes = [];
 
   nodeData.forEach(node => {
@@ -139,8 +121,8 @@ function addNodes(cy, nodeData) {
   cy.add({ group: 'nodes', nodes });
 }
 
-function addEdges(cy, edges) {
-  edges.forEach(edge => {
+function addEdges(edgesData) {
+  edgesData.forEach(edge => {
     cy.add(
       {
         group: 'edges',
@@ -150,6 +132,18 @@ function addEdges(cy, edges) {
           target: edge.target
       }
     });
+  });
+}
+
+function removeNodes(nodesToRemove) {
+  nodesToRemove.forEach(node => {
+    cy.remove(`node[id="${node.id}"]`)
+  });
+}
+
+function removeEdges(edgesToRemove) {
+  edgesToRemove.forEach(edge => {
+    cy.remove(`edge[source="${edge.source}"][target="${edge.target}"]`)
   });
 }
 
@@ -361,6 +355,8 @@ export {
   renderGraph,
   addNodes,
   addEdges,
+  removeNodes,
+  removeEdges,
   setGraphLayout,
   createNodePopper,
   setNodeTooltipText,
