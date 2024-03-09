@@ -14,11 +14,21 @@ codeunit 50150 "Cost Application Trace CS"
         TempDistinctNodes: Record Integer temporary;
     begin
         ItemCostFlowBuf.Reset();
+        ItemCostFlowBuf.SetFilter("From Item Ledg. Entry No.", '>%1', 0);
+        ItemCostFlowBuf.SetFilter("To Item Ledg. Entry No.", '>%1', 0);
         if ItemCostFlowBuf.FindSet() then
             repeat
                 AddNodeToArray(Nodes, ItemCostFlowBuf."From Item Ledg. Entry No.", TempDistinctNodes);
                 AddNodeToArray(Nodes, ItemCostFlowBuf."To Item Ledg. Entry No.", TempDistinctNodes);
                 AddEdgeToArray(Edges, ItemCostFlowBuf."From Item Ledg. Entry No.", ItemCostFlowBuf."To Item Ledg. Entry No.");
+            until ItemCostFlowBuf.Next() = 0;
+
+        // Special case of entries without applications. These entries should be added as detached graph nodes with no edges.
+        ItemCostFlowBuf.Reset();
+        ItemCostFlowBuf.SetRange("From Item Ledg. Entry No.", 0);
+        if ItemCostFlowBuf.FindSet() then
+            repeat
+                AddNodeToArray(Nodes, ItemCostFlowBuf."To Item Ledg. Entry No.", TempDistinctNodes);
             until ItemCostFlowBuf.Next() = 0;
     end;
 
@@ -43,6 +53,7 @@ codeunit 50150 "Cost Application Trace CS"
 
     internal procedure TraceCostBackward(FromItemLedgEntry: Record "Item Ledger Entry"; MaxRecursionDepth: Integer)
     begin
+        InsertCostFlowBufIfNotExists(0, FromItemLedgEntry."Entry No.");
         MaxDepth := MaxRecursionDepth;
 
         if FromItemLedgEntry.Positive then

@@ -9,28 +9,30 @@ controladdin "Graph View CS"
 
     Scripts = 'Scripts/dist/main.js';
 
-    procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray);
-    procedure DrawGraphWithStyles(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; Styles: JsonArray);
-    procedure SetLayout(LayoutName: Text);
-    procedure SetNodeTooltipText(NodeId: Text; TooltipText: Text);
-    procedure SetTooltipTextOnMultipleNodes(Tooltips: JsonArray);
-    procedure CreateTooltips();
-    procedure CreateTextElements();
-    procedure InitializeEdgeHandles();
-    procedure SetEditModeEnabled(IsEnabled: Boolean);
-    procedure InitializeDefaultContextMenu();
-    procedure DestroyContextMenu();
-    procedure RequestGraphData();
     procedure AddNodes(NodesToAdd: JsonArray);
     procedure AddEdges(EdgesToAdd: JsonArray);
-    procedure RemoveNodes(NodesToRemove: JsonArray);
+    procedure CreateTextElements();
+    procedure CreateTooltips();
+    procedure DestroyContextMenu();
+    procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray);
+    procedure DrawGraphWithStyles(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; Styles: JsonArray);
+    procedure InitializeDefaultContextMenu();
+    procedure InitializeEdgeHandles();
     procedure RemoveEdges(EdgesToRemove: JsonArray);
+    procedure RemoveNodes(NodesToRemove: JsonArray);
+    procedure RequestGraphData();
+    procedure SetLayout(LayoutName: Text);
+    procedure SetNodeData(NodeId: Text; NodeData: JsonObject);
+    procedure SetNodeLabel(NodeId: Text; Label: Text);
+    procedure SetNodeTooltipText(NodeId: Text; TooltipText: Text);
+    procedure SetTooltipTextOnMultipleNodes(Tooltips: JsonArray);
+    procedure SetEditModeEnabled(IsEnabled: Boolean);
 
     event OnNodeClick(NodeId: Text);
     event OnGraphDataReceived(Nodes: JsonArray; Edges: JsonArray);
     event OnEdgeDrawingStart(SourceNode: JsonObject);
     event OnEdgeDrawingStop(SourceNode: JsonObject);
-    event OnEdgeDrawingDone(SourceNode: JsonObject; TargetNode: JsonObject);
+    event OnEdgeDrawingDone(SourceNode: JsonObject; TargetNode: JsonObject; AddedEdge: JsonObject);
     event OnEdgeDrawingCanceled(SourceNode: JsonObject; CanceledTargets: JsonArray);
     event OnNodeCreated(NewNode: JsonObject);
     event OnEdgeCreated(NewEdge: JsonObject);

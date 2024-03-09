@@ -136,6 +136,8 @@ function addEdges(edgesData) {
 }
 
 function removeNodes(nodesToRemove) {
+  // This function is called from BC and receives a JSON array, not a Cytoscape elements collection.
+  // Unlike Cytoscape's node.id(), this node.id is not a function.
   nodesToRemove.forEach(node => {
     cy.remove(`node[id="${node.id}"]`)
   });
@@ -172,6 +174,15 @@ function createNodePopper(nodeId, popperContent) {
   cy.on('pan zoom resize', update);
 }
 
+function setNodeData(nodeId, nodeData) {
+  cy.nodes(`#${nodeId}`).data({...nodeData});
+}
+
+function setNodeLabel(nodeId, label) {
+  cy.nodes(`#${nodeId}`).data('label', label);
+  cy.nodes(`#${nodeId}`).css({ content: label });
+}
+
 function setNodeTooltipText(nodeId, tooltipText) {  
   cy.getElementById(nodeId).tooltipText = tooltipText;
 }
@@ -184,7 +195,7 @@ function setNodeTooltipsOnAllNodes(tooltips) {
   });
 }
 
-function setNodeTooltipTextOnNodeIndex(nodeIndex, tooltipText) {  
+function setNodeTooltipTextOnNodeIndex(nodeIndex, tooltipText) {
   cy.nodes()[nodeIndex].tooltipText = tooltipText;
 }
 
@@ -261,10 +272,13 @@ function stripNewLineEscaping(node) {
 
 function initEdgeHandles(eventCallbacks) {
   let defaults = {
-    canConnect: function(sourceNode, targetNode){
-      return !sourceNode.same(targetNode);
-    },
-    edgeParams: function(sourceNode, targetNode){
+    // Do not allow self-loops or parallel edges
+    canConnect: function(sourceNode, targetNode) {
+      return !sourceNode.same(targetNode) &&
+            sourceNode.edgesTo(`[id="${ targetNode.id() }"]`).size() == 0 && targetNode.edgesTo(`[id="${ sourceNode.id() }"]`).size() == 0;
+        },
+
+    edgeParams: function(sourceNode, targetNode) {
       return {};
     },
     hoverDelay: 150,
@@ -280,26 +294,10 @@ function initEdgeHandles(eventCallbacks) {
 }
 
 function bindEdgeHandlesEvents(eventCallbacks) {
-  let onEdgeDrawingStartCallback = eventCallbacks != null && eventCallbacks.onEdgeDrawingStart !== undefined ?
-    eventCallbacks.onEdgeDrawingStart :
-    (event, sourceNode) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingStart', [sourceNode.data()]) };
-
-  let onEdgeDrawingStopCallback = eventCallbacks != null && eventCallbacks.onEdgeDrawingStop !== undefined ?
-    eventCallbacks.onEdgeDrawingStop :
-    (event, sourceNode) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingStop', [sourceNode.data()]) };
-  
-  let onEdgeDrawingDoneCallback = eventCallbacks != null && eventCallbacks.onEdgeDrawingDone !== undefined ?
-    eventCallbacks.onEdgeDrawingDone :
-    (event, sourceNode, targetNode, addedEdge) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingDone', [sourceNode.data(), targetNode.data()]) };
-  
-  let onEdgeDrawingCanceledCallback = eventCallbacks != null && eventCallbacks.onEdgeDrawingCanceled !== undefined ?
-    eventCallbacks.onEdgeDrawingCanceled :
-    (event, sourceNode, canceledTargets) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeDrawingCanceled', [sourceNode.data(), pushNodeData(canceledTargets)]) };
-
-  cy.on('ehstart', onEdgeDrawingStartCallback);
-  cy.on('ehstop', onEdgeDrawingStopCallback);
-  cy.on('ehcomplete', onEdgeDrawingDoneCallback);
-  cy.on('ehcancel', onEdgeDrawingCanceledCallback);
+  cy.on('ehstart', eventCallbacks.onEdgeDrawingStart);
+  cy.on('ehstop', eventCallbacks.onEdgeDrawingStop);
+  cy.on('ehcomplete', eventCallbacks.onEdgeDrawingDone);
+  cy.on('ehcancel', eventCallbacks.onEdgeDrawingCanceled);
 }
 
 function pushNodeData(nodes) {
@@ -360,6 +358,8 @@ export {
   setGraphLayout,
   createNodePopper,
   setNodeTooltipText,
+  setNodeLabel,
+  setNodeData,
   createTooltips,
   setNodeTooltipsOnAllNodes,
   initEdgeHandles,
@@ -368,5 +368,6 @@ export {
   destroyContextMenu,
   sendGraphElementsToCaller,
   sendGraphElementsToNavExtensibilityCaller,
-  getGraphElements
+  getGraphElements,
+  pushNodeData
 }

@@ -91,6 +91,14 @@ codeunit 50100 "Graph Node Data Mgt. CS"
         exit(IsFieldInDefaultSet);
     end;
 
+    procedure GetValueFromObject(JObj: JsonToken; KeyName: Text): Text
+    var
+        Token: JsonToken;
+    begin
+        JObj.AsObject().Get(KeyName, Token);
+        exit(Token.AsValue().AsText());
+    end;
+
     procedure IsFieldRequiredInNodeText(NodeSetCode: Code[20]; FieldNo: Integer; FieldTypeToExclude: Enum "Node Text Type CS"): Boolean
     var
         NodeTextField: Record "Node Text Field CS";

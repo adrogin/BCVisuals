@@ -72,7 +72,7 @@ codeunit 50250 "Routing Graph RG"
         OperationNo: Code[20];
     begin
         foreach Node in Nodes do begin
-            OperationNo := CopyStr(GetValueFromObject(Node, 'id'), 1, MaxStrLen(OperationNo));
+            OperationNo := CopyStr(GraphNodeDataMgt.GetValueFromObject(Node, 'id'), 1, MaxStrLen(OperationNo));
 
             if not RoutingLineExists(RoutingNo, VersionCode, OperationNo) then begin
                 RoutingLine.Validate("Routing No.", RoutingNo);
@@ -100,7 +100,7 @@ codeunit 50250 "Routing Graph RG"
         RoutingLine.ModifyAll("Previous Operation No.", '');
 
         foreach Node in Nodes do begin
-            RoutingLine.Get(RoutingNo, VersionCode, GetValueFromObject(Node, 'id'));
+            RoutingLine.Get(RoutingNo, VersionCode, GraphNodeDataMgt.GetValueFromObject(Node, 'id'));
             LineUpdated := false;
 
             if NextOperations.Get(RoutingLine."Operation No.", OperationFilter) then begin
@@ -128,8 +128,8 @@ codeunit 50250 "Routing Graph RG"
         Clear(NextOperations);
 
         foreach Edge in Edges do begin
-            SourceNodeId := GetValueFromObject(Edge, 'source');
-            TargetNodeId := GetValueFromObject(Edge, 'target');
+            SourceNodeId := GraphNodeDataMgt.GetValueFromObject(Edge, 'source');
+            TargetNodeId := GraphNodeDataMgt.GetValueFromObject(Edge, 'target');
             AddEdgeToSequenceDictionary(SourceNodeId, TargetNodeId, NextOperations);
             AddEdgeToSequenceDictionary(TargetNodeId, SourceNodeId, PreviousOperations);
         end;
@@ -187,14 +187,6 @@ codeunit 50250 "Routing Graph RG"
             SequenceDictionary.Add(FromNodeId, ToNodeId)
     end;
 
-    local procedure GetValueFromObject(JObj: JsonToken; KeyName: Text): Text
-    var
-        Token: JsonToken;
-    begin
-        JObj.AsObject().Get(KeyName, Token);
-        exit(Token.AsValue().AsText());
-    end;
-
     local procedure RoutingLineExists(RoutingNo: Code[20]; VersionCode: Code[20]; OperationNo: Code[30]): Boolean
     var
         RoutingLine: Record "Routing Line";
@@ -233,5 +225,6 @@ codeunit 50250 "Routing Graph RG"
 
     var
         GraphViewController: Codeunit "Graph View Controller CS";
+        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
         VisitedNodes: List of [Code[30]];
 }

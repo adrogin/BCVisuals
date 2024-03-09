@@ -42,7 +42,7 @@ codeunit 50151 "Cost View Controller CS"
         exit(TooltipsArray);
     end;
 
-    local procedure SetItemLedgEntryNodeProperties(var Node: JsonToken)
+    procedure SetItemLedgEntryNodeProperties(var Node: JsonToken)
     var
         ItemLedgerEntry: Record "Item Ledger Entry";
         RecRef: RecordRef;
@@ -50,6 +50,15 @@ codeunit 50151 "Cost View Controller CS"
         ItemLedgerEntry.Get(GraphViewController.GetNodeIdAsInteger(Node.AsObject()));
         RecRef.GetTable(ItemLedgerEntry);
         GraphViewController.SetNodeProperties(Node, RecRef, GetDefaultNodeSet());
+    end;
+
+    procedure SetItemLedgEntryNodeProperties(var Node: JsonObject)
+    var
+        NodeToken: JsonToken;
+    begin
+        NodeToken := Node.AsToken();
+        SetItemLedgEntryNodeProperties(NodeToken);
+        Node := NodeToken.AsObject();
     end;
 
     local procedure IsEntryNoField(TableNo: Integer; FieldNo: Integer): Boolean
@@ -73,4 +82,5 @@ codeunit 50151 "Cost View Controller CS"
 
     var
         GraphViewController: Codeunit "Graph View Controller CS";
+        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
 }
