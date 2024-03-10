@@ -48,3 +48,11 @@ To use this functionality:
 - Once all edits are done, push **Save** and close the page
 
   ![image](https://github.com/adrogin/BCVisuals/assets/42849285/e2f2100b-2a05-4290-ba5b-82ddb4295ab1)
+
+## Application Worksheet
+Graph representation of the application worksheet is a part of the CostGraph extension. It can be accessed from the standard Business Central application worksheet and employs the same functionality, replacing the table-based presentation of the item ledger with the graph view.
+To access the graph-based application worksheet, open the Application Worksheet page, apply the necessary filters, and run the *View as Graph* action.
+![OpenApplicationWorksheet](https://github.com/adrogin/BCVisuals/assets/42849285/16fc639c-13ac-4bc3-b8e0-51940c737a30)
+
+To start editing applications, switch the page to the Edit mode. Remove applications between entries with the right-click on a graph node and define new applications with a simple drag and drop action.
+[ApplicationWorksheet.webm](https://github.com/adrogin/BCVisuals/assets/42849285/4b9984ec-c70c-4315-8dff-4f80a79bdefd)
