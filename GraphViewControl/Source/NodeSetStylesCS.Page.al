@@ -65,32 +65,6 @@ page 50108 "Node Set Styles CS"
         }
     }
 
-    procedure SetNodeSetCode(NewNodeSetCode: Code[20])
-    begin
-        NodeSetCode := NewNodeSetCode;
-        InitializeSourceTable();
-    end;
-
-    local procedure InitializeSourceTable()
-    var
-        StyleSet: Record "Style Set CS";
-        Style: Record "Style CS";
-    begin
-        Rec.Reset();
-        Rec.DeleteAll();
-
-        StyleSet.SetRange("Node Set Code", NodeSetCode);
-        if StyleSet.FindSet() then
-            repeat
-                Style.SetLoadFields(Code, Description, "Selector Code", "Selector Text");
-                Style.Get(StyleSet."Style Code");
-                Rec.Copy(Style);
-                Rec.Insert();
-            until StyleSet.Next() = 0;
-
-        CurrPage.Update(false);
-    end;
-
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     var
         StyleSet: Record "Style Set CS";
@@ -98,6 +72,8 @@ page 50108 "Node Set Styles CS"
         StyleSet.Validate("Node Set Code", NodeSetCode);
         StyleSet.Validate("Style Code", Rec.Code);
         StyleSet.Insert(true);
+
+        InitCurrentRec(Rec.Code);
     end;
 
     trigger OnDeleteRecord(): Boolean
@@ -107,6 +83,29 @@ page 50108 "Node Set Styles CS"
         StyleSet."Node Set Code" := NodeSetCode;
         StyleSet."Style Code" := Rec.Code;
         StyleSet.Delete(true);
+    end;
+
+    procedure SetNodeSetCode(NewNodeSetCode: Code[20])
+    begin
+        NodeSetCode := NewNodeSetCode;
+        InitializeSourceTable();
+    end;
+
+    local procedure InitializeSourceTable()
+    var
+        StyleSet: Record "Style Set CS";
+    begin
+        Rec.Reset();
+        Rec.DeleteAll();
+
+        StyleSet.SetRange("Node Set Code", NodeSetCode);
+        if StyleSet.FindSet() then
+            repeat
+                InitCurrentRec(StyleSet."Style Code");
+                Rec.Insert();
+            until StyleSet.Next() = 0;
+
+        //        CurrPage.Update(false);
     end;
 
     local procedure LookupStyle(var StyleCode: Text): Boolean
@@ -121,6 +120,15 @@ page 50108 "Node Set Styles CS"
         StylesList.GetRecord(Style);
         StyleCode := Style.Code;
         exit(true);
+    end;
+
+    local procedure InitCurrentRec(StyleCode: Code[20])
+    var
+        Style: Record "Style CS";
+    begin
+        Style.SetLoadFields(Code, Description, "Selector Code", "Selector Text");
+        Style.Get(StyleCode);
+        Rec.Copy(Style);
     end;
 
     var

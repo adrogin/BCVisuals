@@ -40,9 +40,17 @@ table 50100 "Node Set CS"
     trigger OnDelete()
     var
         NodeSetField: Record "Node Set Field CS";
+        NodeTextField: Record "Node Text Field CS";
+        StyleSet: Record "Style Set CS";
     begin
         NodeSetField.SetRange("Node Set Code", Code);
         NodeSetField.DeleteAll();
+
+        NodeTextField.SetRange("Node Set Code", Code);
+        NodeTextField.DeleteAll();
+
+        StyleSet.SetRange("Node Set Code", Code);
+        StyleSet.DeleteAll();
     end;
 
     trigger OnInsert()
