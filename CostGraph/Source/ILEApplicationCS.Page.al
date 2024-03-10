@@ -47,7 +47,7 @@ page 50151 "ILE Application CS"
                         if IsVirtualEdge(AddedEdge) then
                             exit;
 
-                        if ApplnWorksheetEdit.ApplyRec(AddedEdge) then begin
+                        if ApplyRec(AddedEdge) then begin
                             Edges.Add(AddedEdge);
                             RefreshNode(SourceNode);
                             RefreshNode(TargetNode);
@@ -66,7 +66,7 @@ page 50151 "ILE Application CS"
                         if IsVirtualEdge(RemovedEdge) then
                             exit;
 
-                        if ApplnWorksheetEdit.RemoveApplications(RemovedEdge) then begin
+                        if RemoveApplications(RemovedEdge) then begin
                             RemoveEdgeFromCollection(RemovedEdge.AsToken());
                             RefreshNode(GraphNodeDataMgt.GetValueFromObject(RemovedEdge.AsToken(), 'source'));
                             RefreshNode(GraphNodeDataMgt.GetValueFromObject(RemovedEdge.AsToken(), 'target'));
@@ -105,55 +105,89 @@ page 50151 "ILE Application CS"
         }
         area(Processing)
         {
-            action(EnableEditMode)
-            {
-                Caption = 'Edit';
-                ToolTip = 'In edit mode, you can add or remove graph edges. Start dragging a node to draw a new edge. Right-click on an edge to delete it.';
-                ApplicationArea = Basic, Suite;
-                Visible = not IsEditModeEnabled;
-                Image = Edit;
-
-                trigger OnAction()
-                begin
-                    IsEditModeEnabled := not IsEditModeEnabled;
-                    CurrPage.GraphControl.SetEditModeEnabled(IsEditModeEnabled);
-                    CurrPage.GraphControl.InitializeDefaultContextMenu();
-                end;
-            }
-            action(DisableEditMode)
+            group(View)
             {
                 Caption = 'View';
-                ToolTip = 'In view mode, nodes can be rearranged manually, but adding or removing edges is not allowed. Switch to edit mode to draw or delete graph edges.';
-                ApplicationArea = Basic, Suite;
-                Visible = IsEditModeEnabled;
-                Image = View;
+                Image = ViewDetails;
 
-                trigger OnAction()
-                begin
-                    IsEditModeEnabled := not IsEditModeEnabled;
-                    CurrPage.GraphControl.SetEditModeEnabled(IsEditModeEnabled);
-                    CurrPage.GraphControl.DestroyContextMenu();
-                end;
+                action(EnableEditMode)
+                {
+                    Caption = 'Edit';
+                    ToolTip = 'In edit mode, you can add or remove graph edges. Start dragging a node to draw a new edge. Right-click on an edge to delete it.';
+                    ApplicationArea = Basic, Suite;
+                    Visible = not IsEditModeEnabled;
+                    Image = Edit;
+
+                    trigger OnAction()
+                    begin
+                        IsEditModeEnabled := not IsEditModeEnabled;
+                        CurrPage.GraphControl.SetEditModeEnabled(IsEditModeEnabled);
+                        CurrPage.GraphControl.InitializeDefaultContextMenu();
+                    end;
+                }
+                action(DisableEditMode)
+                {
+                    Caption = 'View';
+                    ToolTip = 'In view mode, nodes can be rearranged manually, but adding or removing edges is not allowed. Switch to edit mode to draw or delete graph edges.';
+                    ApplicationArea = Basic, Suite;
+                    Visible = IsEditModeEnabled;
+                    Image = View;
+
+                    trigger OnAction()
+                    begin
+                        IsEditModeEnabled := not IsEditModeEnabled;
+                        CurrPage.GraphControl.SetEditModeEnabled(IsEditModeEnabled);
+                        CurrPage.GraphControl.DestroyContextMenu();
+                    end;
+                }
             }
-            action(Save)
+            group(Functions)
             {
-                Caption = 'Save';
-                ToolTip = 'Save the application changes.';
-                ApplicationArea = Basic, Suite;
-                Image = Save;
+                Caption = 'F&unctions';
+                Image = "Action";
+                action(Reapply)
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Rea&pply';
+                    Image = "Action";
+                    ToolTip = 'Reapply entries that you have removed.';
 
-                trigger OnAction()
-                begin
-                    CurrPage.GraphControl.RequestGraphData();
-                end;
+                    trigger OnAction()
+                    begin
+                        ApplnWorksheetEdit.UnblockItems();
+                        ApplnWorksheetEdit.ReapplyAll();
+                    end;
+                }
+                action(UndoApplications)
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Undo Manual Changes';
+                    Image = Restore;
+                    ToolTip = 'Undo your previous application change.';
+
+                    trigger OnAction()
+                    begin
+                        if ApplnWorksheetEdit.ApplicationLogIsEmpty() then begin
+                            Message(NothingToRevertMsg);
+                            exit;
+                        end;
+
+                        if Confirm(RevertAllQst) then begin
+                            ApplnWorksheetEdit.UndoApplications();
+                            Message(RevertCompletedMsg);
+                        end;
+
+                        InitializeGraph();
+                    end;
+                }
             }
         }
         area(Promoted)
         {
             actionref(EnableEditPromoted; EnableEditMode) { }
             actionref(DisableEditPromoted; DisableEditMode) { }
-            actionref(SavePromoted; Save) { }
-            actionref(PromotedGraphViewSetup; GraphViewSetup) { }
+            actionref(ReapplyPromoted; Reapply) { }
+            actionref(UndoPromoted; UndoApplications) { }
         }
     }
 
@@ -164,12 +198,20 @@ page 50151 "ILE Application CS"
 
     trigger OnOpenPage()
     begin
+        InitializeGraph();
+    end;
+
+    local procedure InitializeGraph()
+    begin
+        Clear(Nodes);
+        Clear(Edges);
         ApplnWorksheetEdit.BuildApplnWorksheetGraph(FilteredItemLedgEntry, Nodes, Edges);
         CostViewController.SetNodesData(Nodes);
         CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()));
         CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
         CurrPage.GraphControl.CreateTooltips();
         CurrPage.GraphControl.InitializeEdgeHandles();  // Initialize necessary components to support edit mode
+        CurrPage.GraphControl.SetEditModeEnabled(IsEditModeEnabled);
     end;
 
     local procedure IsVirtualEdge(Edge: JsonObject): Boolean
@@ -214,16 +256,52 @@ page 50151 "ILE Application CS"
         Node: JsonObject;
     begin
         Node.Add('id', NodeId);
-        RefreshNode(Node);
+        CostViewController.SetItemLedgEntryNodeProperties(Node);
+        CurrPage.GraphControl.SetNodeData(GraphNodeDataMgt.GetValueFromObject(Node.AsToken(), 'id'), Node);
     end;
 
     local procedure RefreshNode(Node: JsonObject)
-    var
-        UpdatedNode: JsonObject;
     begin
-        UpdatedNode.Add('id', GraphNodeDataMgt.GetValueFromObject(Node.AsToken(), 'id'));
-        CostViewController.SetItemLedgEntryNodeProperties(UpdatedNode);
-        CurrPage.GraphControl.SetNodeData(GraphNodeDataMgt.GetValueFromObject(Node.AsToken(), 'id'), UpdatedNode);
+        RefreshNode(GraphNodeDataMgt.GetValueFromObject(Node.AsToken(), 'id'));
+    end;
+
+    trigger OnQueryClosePage(CloseAction: Action): Boolean
+    begin
+        if ApplnWorksheetEdit.AnyTouchedEntries() then begin
+            if not Confirm(CloseWindowQst) then
+                exit(false);
+
+            ApplnWorksheetEdit.UnblockItems();
+            ApplnWorksheetEdit.ReapplyAll();
+        end;
+
+        exit(true);
+    end;
+
+    procedure ApplyRec(GraphEdge: JsonObject): Boolean
+    var
+        TempJsonBuffer: Record "JSON Buffer" temporary;
+        ApplyItemLedgerEntries: Codeunit "Apply Item Ledger Entries CS";
+        IsOK: Boolean;
+    begin
+        ApplyItemLedgerEntries.SetContext(ApplnWorksheetEdit);
+        ApplnWorksheetEdit.WriteJsonObejctToBuffer(GraphEdge, TempJsonBuffer);
+        IsOK := ApplyItemLedgerEntries.Run(TempJsonBuffer);
+        ApplyItemLedgerEntries.GetContext(ApplnWorksheetEdit);
+        exit(IsOK);
+    end;
+
+    procedure RemoveApplications(GraphEdge: JsonObject): Boolean
+    var
+        TempJsonBuffer: Record "JSON Buffer" temporary;
+        UnapplyItemLedgerEntries: Codeunit "Unapply Item Ledger Entries CS";
+        IsOK: Boolean;
+    begin
+        UnapplyItemLedgerEntries.SetContext(ApplnWorksheetEdit);
+        ApplnWorksheetEdit.WriteJsonObejctToBuffer(GraphEdge, TempJsonBuffer);
+        IsOK := UnapplyItemLedgerEntries.Run(TempJsonBuffer);
+        UnapplyItemLedgerEntries.GetContext(ApplnWorksheetEdit);
+        exit(IsOK);
     end;
 
     var
@@ -235,4 +313,8 @@ page 50151 "ILE Application CS"
         GraphLayout: Enum "Graph Layout Name CS";
         IsEditModeEnabled: Boolean;
         Nodes, Edges : JsonArray;
+        CloseWindowQst: Label 'After the window is closed, the system will check for and reapply open entries.\Do you want to close the window?';
+        RevertAllQst: Label 'Are you sure that you want to undo all changes?';
+        NothingToRevertMsg: Label 'Nothing to undo.';
+        RevertCompletedMsg: Label 'The changes have been undone.';
 }

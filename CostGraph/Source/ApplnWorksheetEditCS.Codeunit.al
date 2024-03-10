@@ -22,24 +22,34 @@ codeunit 50152 "Appln. Worksheet - Edit CS"
         ILEApplication.Run();
     end;
 
-    procedure ApplyRec(GraphEdge: JsonObject): Boolean
+    procedure AnyTouchedEntries(): Boolean
     begin
-        exit(RunCodeunitWithJsonParam(Codeunit::"Apply Item Ledger Entries CS", GraphEdge));
+        exit(ItemJnlPostLine.AnyTouchedEntries());
     end;
 
-    procedure RemoveApplications(GraphEdge: JsonObject): Boolean
+    procedure ReapplyAll()
     begin
-        exit(RunCodeunitWithJsonParam(Codeunit::"Unapply Item Ledger Entries CS", GraphEdge));
+        ItemJnlPostLine.RedoApplications();
+        ItemJnlPostLine.CostAdjust();
+        ItemJnlPostLine.ClearApplicationLog();
     end;
 
-    local procedure RunCodeunitWithJsonParam(CodeunitNo: Integer; JObject: JsonObject): Boolean
+    procedure UndoApplications()
+    begin
+        ItemJnlPostLine.UndoApplications();
+    end;
+
+    procedure ApplicationLogIsEmpty(): Boolean
+    begin
+        exit(ItemJnlPostLine.ApplicationLogIsEmpty());
+    end;
+
+    procedure WriteJsonObejctToBuffer(JObject: JsonObject; var JsonBuffer: Record "JSON Buffer")
     var
-        TempJsonBuffer: Record "JSON Buffer" temporary;
         JsonText: Text;
     begin
         JObject.WriteTo(JsonText);
-        TempJsonBuffer.SetValueWithoutModifying(JsonText);
-        exit(Codeunit.Run(CodeunitNo, TempJsonBuffer));
+        JsonBuffer.SetValueWithoutModifying(JsonText);
     end;
 
     procedure ApplyRec(SourceEntryNo: Integer; TargetEntryNo: Integer)
@@ -62,18 +72,50 @@ codeunit 50152 "Appln. Worksheet - Edit CS"
             Error(NoAvailableQtyToApplyErr);
     end;
 
-    procedure RemoveApplications(Inbound: Integer; Outbound: Integer)
+    procedure RemoveApplications(InboundEntryNo: Integer; OutboundEntryNo: Integer)
     var
         Application: Record "Item Application Entry";
     begin
         Application.SetCurrentKey("Inbound Item Entry No.", "Outbound Item Entry No.");
-        Application.SetRange("Inbound Item Entry No.", Inbound);
-        Application.SetRange("Outbound Item Entry No.", Outbound);
+        Application.SetRange("Inbound Item Entry No.", InboundEntryNo);
+        Application.SetRange("Outbound Item Entry No.", OutboundEntryNo);
         if Application.FindSet() then
             repeat
                 ItemJnlPostLine.UnApply(Application);
                 ItemJnlPostLine.LogUnapply(Application);
             until Application.Next() = 0;
+
+        BlockItem(InboundEntryNo);
+    end;
+
+    local procedure BlockItem(ItemLedgerEntryNo: Integer)
+    var
+        ItemLedgerEntry: Record "Item Ledger Entry";
+        Item: Record Item;
+    begin
+        ItemLedgerEntry.Get(ItemLedgerEntryNo);
+        Item.Get(ItemLedgerEntry."Item No.");
+        if Item."Application Wksh. User ID" <> UpperCase(UserId) then
+            Item.CheckBlockedByApplWorksheet();
+
+        Item."Application Wksh. User ID" := UserId();
+        Item.Modify(true);
+    end;
+
+    procedure UnblockItems()
+    var
+        Item: Record Item;
+    begin
+        if TempUnapplyItem.FindSet() then
+            repeat
+                Item.Get(TempUnapplyItem."No.");
+                if Item."Application Wksh. User ID" = UpperCase(UserId) then begin
+                    Item."Application Wksh. User ID" := '';
+                    Item.Modify();
+                end;
+            until TempUnapplyItem.Next() = 0;
+
+        TempUnapplyItem.DeleteAll();
     end;
 
     procedure EvaluateTextToInt(TextValue: Text) IntValue: Integer
@@ -112,5 +154,6 @@ codeunit 50152 "Appln. Worksheet - Edit CS"
     end;
 
     var
+        TempUnapplyItem: Record Item temporary;
         ItemJnlPostLine: Codeunit "Item Jnl.-Post Line";
 }

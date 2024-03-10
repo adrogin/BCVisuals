@@ -14,7 +14,6 @@ codeunit 50154 "Unapply Item Ledger Entries CS"
     var
         ItemLedgerEntry: Record "Item Ledger Entry";
         GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
-        ApplnWorksheetEdit: Codeunit "Appln. Worksheet - Edit CS";
         SourceId, TargetId : Integer;
     begin
         SourceId := ApplnWorksheetEdit.EvaluateTextToInt(GraphNodeDataMgt.GetValueFromObject(GraphEdge.AsToken(), 'source'));
@@ -26,4 +25,17 @@ codeunit 50154 "Unapply Item Ledger Entries CS"
         else
             ApplnWorksheetEdit.RemoveApplications(TargetId, SourceId);
     end;
+
+    procedure GetContext(var ApplnWorksheetEditInstance: Codeunit "Appln. Worksheet - Edit CS")
+    begin
+        ApplnWorksheetEditInstance := ApplnWorksheetEdit;
+    end;
+
+    procedure SetContext(ApplnWorksheetEditInstance: Codeunit "Appln. Worksheet - Edit CS")
+    begin
+        ApplnWorksheetEdit := ApplnWorksheetEditInstance;
+    end;
+
+    var
+        ApplnWorksheetEdit: Codeunit "Appln. Worksheet - Edit CS";
 }
