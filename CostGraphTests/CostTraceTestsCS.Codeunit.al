@@ -53,14 +53,14 @@ codeunit 60150 "Cost Trace Tests CS"
         Nodes: JsonArray;
         Edges: JsonArray;
     begin
-        // [SCENARIO] Post single inbound entry and build cost graph. Result set is empty.
+        // [SCENARIO] Post single inbound entry and build cost graph. Result contains the single node.
 
         ItemLedgEntryNo :=
             CreateAndPostItemJournalLine(Enum::"Item Ledger Entry Type"::"Positive Adjmt.", LibraryInventory.CreateItemNo(), LibraryRandom.RandInt(100));
 
         CostApplicationTrace.BuildCostSourceGraph(ItemLedgEntryNo, Nodes, Edges);
 
-        LibraryAssert.AreEqual(0, Nodes.Count(), IncorrectNodeCountErr);
+        LibraryAssert.AreEqual(1, Nodes.Count(), IncorrectNodeCountErr);
         LibraryAssert.AreEqual(0, Edges.Count(), IncorrectEdgeCountErr);
     end;
 
@@ -71,14 +71,14 @@ codeunit 60150 "Cost Trace Tests CS"
         Nodes: JsonArray;
         Edges: JsonArray;
     begin
-        // [SCENARIO] Post single outbound entry without application and build cost graph. Result set is empty.
+        // [SCENARIO] Post single outbound entry without application and build cost graph. Result contains the single node.
 
         ItemLedgEntryNo :=
             CreateAndPostItemJournalLine(Enum::"Item Ledger Entry Type"::"Negative Adjmt.", LibraryInventory.CreateItemNo(), LibraryRandom.RandInt(100));
 
         CostApplicationTrace.BuildCostSourceGraph(ItemLedgEntryNo, Nodes, Edges);
 
-        LibraryAssert.AreEqual(0, Nodes.Count(), IncorrectNodeCountErr);
+        LibraryAssert.AreEqual(1, Nodes.Count(), IncorrectNodeCountErr);
         LibraryAssert.AreEqual(0, Edges.Count(), IncorrectEdgeCountErr);
     end;
 
