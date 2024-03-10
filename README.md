@@ -55,4 +55,5 @@ To access the graph-based application worksheet, open the Application Worksheet 
 ![OpenApplicationWorksheet](https://github.com/adrogin/BCVisuals/assets/42849285/16fc639c-13ac-4bc3-b8e0-51940c737a30)
 
 To start editing applications, switch the page to the Edit mode. Remove applications between entries with the right-click on a graph node and define new applications with a simple drag and drop action.
-[ApplicationWorksheet.webm](https://github.com/adrogin/BCVisuals/assets/42849285/4b9984ec-c70c-4315-8dff-4f80a79bdefd)
+
+[![Watch the video](https://img.youtube.com/vi/XU-MhwA6QmA/0.jpg)](https://youtu.be/XU-MhwA6QmA)
