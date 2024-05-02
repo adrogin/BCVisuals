@@ -54,6 +54,6 @@ Graph representation of the application worksheet is a part of the CostGraph ext
 To access the graph-based application worksheet, open the Application Worksheet page, apply the necessary filters, and run the *View as Graph* action.
 ![OpenApplicationWorksheet](https://github.com/adrogin/BCVisuals/assets/42849285/16fc639c-13ac-4bc3-b8e0-51940c737a30)
 
-To start editing applications, switch the page to the Edit mode. Remove applications between entries with the right-click on a graph node and define new applications with a simple drag and drop action.
+To start editing applications, switch the page to the Edit mode. Remove applications between entries with the right-click on a graph edge and define new applications with a simple drag and drop action.
 
 [![Watch the video](https://img.youtube.com/vi/XU-MhwA6QmA/0.jpg)](https://youtu.be/XU-MhwA6QmA)
