@@ -44,7 +44,7 @@ codeunit 50152 "Appln. Worksheet - Edit CS"
         exit(ItemJnlPostLine.ApplicationLogIsEmpty());
     end;
 
-    procedure WriteJsonObejctToBuffer(JObject: JsonObject; var JsonBuffer: Record "JSON Buffer")
+    procedure WriteJsonObjectToBuffer(JObject: JsonObject; var JsonBuffer: Record "JSON Buffer")
     var
         JsonText: Text;
     begin

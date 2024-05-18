@@ -104,8 +104,6 @@ page 50108 "Node Set Styles CS"
                 InitCurrentRec(StyleSet."Style Code");
                 Rec.Insert();
             until StyleSet.Next() = 0;
-
-        //        CurrPage.Update(false);
     end;
 
     local procedure LookupStyle(var StyleCode: Text): Boolean

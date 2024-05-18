@@ -285,7 +285,7 @@ page 50151 "ILE Application CS"
         IsOK: Boolean;
     begin
         ApplyItemLedgerEntries.SetContext(ApplnWorksheetEdit);
-        ApplnWorksheetEdit.WriteJsonObejctToBuffer(GraphEdge, TempJsonBuffer);
+        ApplnWorksheetEdit.WriteJsonObjectToBuffer(GraphEdge, TempJsonBuffer);
         IsOK := ApplyItemLedgerEntries.Run(TempJsonBuffer);
         ApplyItemLedgerEntries.GetContext(ApplnWorksheetEdit);
         exit(IsOK);
@@ -298,7 +298,7 @@ page 50151 "ILE Application CS"
         IsOK: Boolean;
     begin
         UnapplyItemLedgerEntries.SetContext(ApplnWorksheetEdit);
-        ApplnWorksheetEdit.WriteJsonObejctToBuffer(GraphEdge, TempJsonBuffer);
+        ApplnWorksheetEdit.WriteJsonObjectToBuffer(GraphEdge, TempJsonBuffer);
         IsOK := UnapplyItemLedgerEntries.Run(TempJsonBuffer);
         UnapplyItemLedgerEntries.GetContext(ApplnWorksheetEdit);
         exit(IsOK);

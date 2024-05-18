@@ -152,6 +152,9 @@ codeunit 50100 "Graph Node Data Mgt. CS"
 
     procedure RemoveFieldFromNodeDataIfNotNeeded(NodeSetCode: Code[20]; FieldNo: Integer; TextTypeToExclude: Enum "Node Text Type CS"; SelectorToExclude: Code[20])
     begin
+        if FieldNo = 0 then
+            exit;
+
         if CanRemoveFieldFromNodeData(NodeSetCode, FieldNo) then
             if not IsFieldRequiredInNodeText(NodeSetCode, FieldNo, TextTypeToExclude) then
                 if not IsFieldRequiredInSelectorFilters(NodeSetCode, FieldNo, SelectorToExclude) then
