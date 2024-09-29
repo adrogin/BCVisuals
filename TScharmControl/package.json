@@ -12,6 +12,7 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
+    "rollup-plugin-import-css": "^3.5.4",
     "tscharm": "^0.1.0"
   }
 }

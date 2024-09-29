@@ -1,5 +1,6 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
+import importCss from "rollup-plugin-import-css";
 
 export default {
 	input: [
@@ -8,9 +9,11 @@ export default {
     output: {
         format: 'iife',
         file: 'dist/main.js',
-        name: 'tscharmControl'
+        name: 'tscharmControl',
+        assetFileNames: "[name][extname]"
     },
     plugins: [
+        importCss(),
         terser(),
         nodeResolve()
     ]

@@ -13,6 +13,7 @@ controladdin "Timeline Control"
         'dist/main.js',
         'Scripts/index.js';
     StartupScript = 'Scripts/startup.js';
+    StyleSheets = 'dist/main.css';
 
     procedure CreateChart(Width: Integer; Height: Integer);
     procedure ShowLabels(Show: Boolean);
