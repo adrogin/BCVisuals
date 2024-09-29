@@ -1,4 +1,5 @@
 import { Chart, Slider } from "tscharm";
+import "tscharm/stylesheets/chart.css";
 
 var chart;
 var slider;
