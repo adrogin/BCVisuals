@@ -7,4 +7,5 @@ package-lock.json
 .vscode/
 node_modules/
 GraphViewControl/Scripts/dist/
+TScharmControl/dist/
 Release

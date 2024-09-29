@@ -1,0 +1,17 @@
+{
+  "name": "tcharmcontrol",
+  "version": "0.1.0",
+  "description": "Timeline control add-in based on the TScharm timeline chart",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup --config rollup.config.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "tscharm": "^0.1.0"
+  }
+}
