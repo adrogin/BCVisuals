@@ -1,4 +1,5 @@
 import { Chart, Slider } from "tscharm";
+import "tscharm/stylesheets/chart.css";
 
 var chart;
 var slider;
@@ -64,6 +65,10 @@ export function setScale(MinValue, MaxValue) {
         MaxValue = new Date(MaxValue);
     }
     chart.setScale(MinValue, MaxValue);
+}
+
+export function setAllowOverlap(isAllowed) {
+    chart.lines.allowOverlap = isAllowed;
 }
 
 export function bindBarEvents() {

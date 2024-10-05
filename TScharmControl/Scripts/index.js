@@ -57,3 +57,7 @@ function SetScale(MinValue, MaxValue) {
 function BindBarEvents() {
     tscharmControl.bindBarEvents();
 }
+
+function SetAllowOverlap(IsAllowed) {
+    tscharmControl.setAllowOverlap(IsAllowed);
+}
