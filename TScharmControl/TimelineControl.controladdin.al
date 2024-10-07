@@ -30,7 +30,7 @@ controladdin "Timeline Control"
     procedure Clear();
     procedure SetScale(MinValue: Integer; MaxValue: Integer);
     procedure SetScale(MinValue: DateTime; MaxValue: DateTime);
-    procedure RequestDocumentSize();
+    procedure SetAllowOverlap(IsAllowed: Boolean);
 
     event ControlAddInReady();
     event OnResizeLeftDone(LineId: Integer; BarId: Integer; NewPosition: Integer);

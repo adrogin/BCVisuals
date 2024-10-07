@@ -67,6 +67,10 @@ export function setScale(MinValue, MaxValue) {
     chart.setScale(MinValue, MaxValue);
 }
 
+export function setAllowOverlap(isAllowed) {
+    chart.lines.allowOverlap = isAllowed;
+}
+
 export function bindBarEvents() {
     chart.bindEventHandler(
         'onResizeLeftDone', (LineId, BarId, NewPosition) => Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnResizeLeftDone', [LineId, BarId, NewPosition]));
