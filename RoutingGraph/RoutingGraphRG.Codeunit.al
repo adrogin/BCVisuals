@@ -39,6 +39,25 @@ codeunit 50250 "Routing Graph RG"
         exit(GraphViewSetup."Routing Graph Layout RG");
     end;
 
+    procedure GetGraphContextMenuItems(): JsonArray
+    var
+        MenuItems: JsonArray;
+        WorkCenterMenuItem: JsonObject;
+        MachineCenterMenuItem: JsonObject;
+        AddWorkCenterMenuItemLbl: Label 'Add work center';
+        AddMachineCenterMenuItemLbl: Label 'Add machine center';
+    begin
+        WorkCenterMenuItem.Add('id', 'AddWorkCenter');
+        WorkCenterMenuItem.Add('content', AddWorkCenterMenuItemLbl);
+
+        MachineCenterMenuItem.Add('id', 'AddMachineCenter');
+        MachineCenterMenuItem.Add('content', AddMachineCenterMenuItemLbl);
+
+        MenuItems.Add(WorkCenterMenuItem);
+        MenuItems.Add(MachineCenterMenuItem);
+        exit(MenuItems);
+    end;
+
     procedure SetNodesData(var Nodes: JsonArray; RoutingNo: Code[20]; VersionCode: Code[20])
     var
         Node: JsonToken;
@@ -63,6 +82,59 @@ codeunit 50250 "Routing Graph RG"
         end;
 
         exit(Status <> Status::Certified);
+    end;
+
+    internal procedure IncrementOperationNo(RoutingNo: Code[20]; VersionCode: Code[20]): Code[10]
+    var
+        RoutingLine: Record "Routing Line";
+    begin
+        RoutingLine.SetLoadFields("Operation No.");
+        RoutingLine.SetRange("Routing No.", RoutingNo);
+        RoutingLine.SetRange("Version Code", VersionCode);
+        if RoutingLine.FindLast() then
+            exit(IncStr(RoutingLine."Operation No."));
+
+        exit('01');
+    end;
+
+    internal procedure AddWorkCenterRoutingLine(RoutingNo: Code[20]; VersionCode: Code[20]): Code[10]
+    var
+        WorkCenter: Record "Work Center";
+        PageManagement: Codeunit "Page Management";
+        OperationNo: Code[10];
+    begin
+        if Page.RunModal(PageManagement.GetDefaultLookupPageID(Database::"Work Center"), WorkCenter) <> Action::LookupOK then
+            exit('');
+
+        OperationNo := IncrementOperationNo(RoutingNo, VersionCode);
+        AddRoutingLine(RoutingNo, VersionCode, OperationNo, Enum::"Capacity Type Routing"::"Work Center", WorkCenter."No.");
+        exit(OperationNo);
+    end;
+
+    internal procedure AddMachineCenterRoutingLine(RoutingNo: Code[20]; VersionCode: Code[20]): Code[10]
+    var
+        MachineCenter: Record "Machine Center";
+        PageManagement: Codeunit "Page Management";
+        OperationNo: Code[10];
+    begin
+        if Page.RunModal(PageManagement.GetDefaultLookupPageID(Database::"Machine Center"), MachineCenter) <> Action::LookupOK then
+            exit;
+
+        OperationNo := IncrementOperationNo(RoutingNo, VersionCode);
+        AddRoutingLine(RoutingNo, VersionCode, OperationNo, Enum::"Capacity Type Routing"::"Machine Center", MachineCenter."No.");
+        exit(OperationNo);
+    end;
+
+    internal procedure AddRoutingLine(RoutingNo: Code[20]; VersionCode: Code[20]; OperationNo: Code[10]; CapacityType: Enum "Capacity Type Routing"; CapacityNo: Code[20])
+    var
+        RoutingLine: Record "Routing Line";
+    begin
+        RoutingLine.Validate("Routing No.", RoutingNo);
+        RoutingLine.Validate("Version Code", VersionCode);
+        RoutingLine.Validate("Operation No.", OperationNo);
+        RoutingLine.Validate(Type, CapacityType);
+        RoutingLine.Validate("No.", CapacityNo);
+        RoutingLine.Insert(true);
     end;
 
     local procedure CreateRoutingLinesFromNodes(var Nodes: JsonArray; RoutingNo: Code[20]; VersionCode: Code[20])
@@ -142,7 +214,7 @@ codeunit 50250 "Routing Graph RG"
         if VisitedNodes.Contains(RoutingLine."Operation No.") then
             exit;
 
-        AddNodeToArray(Nodes, RoutingLine."Operation No.");
+        AddNodeToVisited(Nodes, RoutingLine."Operation No.");
 
         if RoutingLine."Next Operation No." = '' then
             exit;
@@ -158,13 +230,33 @@ codeunit 50250 "Routing Graph RG"
             until NextRoutingLine.Next() = 0;
     end;
 
+    internal procedure RoutingLinesToJsonArray(RoutingNo: Code[20]; VersionCode: Code[20]): JsonArray
+    var
+        RoutingLine: Record "Routing Line";
+        Nodes: JsonArray;
+    begin
+        RoutingLine.SetLoadFields("Operation No.");
+        RoutingLine.SetRange("Routing No.", RoutingNo);
+        RoutingLine.SetRange("Version Code", VersionCode);
+        if RoutingLine.FindSet() then
+            repeat
+                AddNodeToArray(Nodes, RoutingLine."Operation No.");
+            until RoutingLine.Next() = 0;
+
+        exit(Nodes);
+    end;
+
     local procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Code[30])
     var
         Node: JsonObject;
     begin
         Node.Add('id', NodeId);
         Nodes.Add(Node);
+    end;
 
+    local procedure AddNodeToVisited(var Nodes: JsonArray; NodeId: Code[30])
+    begin
+        AddNodeToArray(Nodes, NodeId);
         VisitedNodes.Add(NodeId);
     end;
 
@@ -221,6 +313,30 @@ codeunit 50250 "Routing Graph RG"
         RoutingLine.Get(RoutingNo, VersionCode, GraphViewController.GetNodeIdAsText(Node.AsObject()));
         RecRef.GetTable(RoutingLine);
         GraphViewController.SetNodeProperties(Node, RecRef, GetDefaultNodeSet());
+    end;
+
+    procedure HandleCanvasMenuItemSelected(GraphControl: ControlAddIn "Graph View CS"; MenuItemId: Text; RoutingNo: Code[20]; VersionCode: Code[20])
+    var
+        Node: JsonObject;
+        Token: JsonToken;
+        Nodes: JsonArray;
+        OperationNo: Code[10];
+    begin
+        case
+            MenuItemId.ToLower() of
+            'addworkcenter':
+                OperationNo := AddWorkCenterRoutingLine(RoutingNo, VersionCode);
+            'addmachinecenter':
+                OperationNo := AddMachineCenterRoutingLine(RoutingNo, VersionCode);
+        end;
+
+        if OperationNo <> '' then begin
+            Node.Add('id', OperationNo);
+            Token := Node.AsToken();
+            SetRoutingNodeProperties(Token, RoutingNo, VersionCode);
+            Nodes.Add(Token.AsObject());
+            GraphControl.AddNodes(Nodes);
+        end;
     end;
 
     var

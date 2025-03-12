@@ -2,19 +2,19 @@ import cytoscape from "cytoscape";
 import popper from 'cytoscape-popper';
 import edgehandles from "cytoscape-edgehandles";
 import tippy from "tippy.js";
-import contextMenus from "cytoscape-context-menus";
-import { initializeContextMenu } from "./cycontextmenu.js";
+import cxtmenu from 'cytoscape-cxtmenu';
+import { initializeContextMenuItems, initializeCanvasContextMenuItems } from "./cycontextmenu.js";
 
 import '../../CSS/style.css';
 
 cytoscape.use(popper);
 cytoscape.use(edgehandles);
-cytoscape.use(contextMenus);
+cytoscape.use(cxtmenu);
 
 var cy;  // Global Cytoscape instance
 var eh;  // EdgeHandles instance
 
-function renderGraph(containerElement, nodes, edges, styles, eventCallbacks) {
+function renderGraph(containerElement, nodes, edges, styles, layout, eventCallbacks) {
   if (cy != null) {
     cy.destroy();
   }
@@ -33,7 +33,7 @@ function renderGraph(containerElement, nodes, edges, styles, eventCallbacks) {
     style: styles,
 
     layout: {
-      name: 'breadthfirst'
+      name: layout != null ? layout : 'breadthfirst'
     }
   });
 
@@ -315,11 +315,21 @@ function setEditModeEnabled(isEnabled) {
 }
 
 function initializeDefaultContextMenu() {
-  initializeContextMenu(cy);  
+  initializeContextMenuItems(cy);  
 }
 
 function destroyContextMenu() {
-  cy.contextMenu.destroy();
+  if (!cy.contextMenus) {
+    return;
+  }
+
+  cy.contextMenus.forEach(menu => {
+    menu.destroy();
+  });
+}
+
+function initializeCanvasContextMenu(menuItems, onClickCallback) {
+  initializeCanvasContextMenuItems(cy, menuItems, onClickCallback);
 }
 
 function sendGraphElementsToCaller(eventCallback) {
@@ -365,6 +375,7 @@ export {
   initEdgeHandles,
   setEditModeEnabled,
   initializeDefaultContextMenu,
+  initializeCanvasContextMenu,
   destroyContextMenu,
   sendGraphElementsToCaller,
   sendGraphElementsToNavExtensibilityCaller,

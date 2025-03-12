@@ -8,13 +8,12 @@ pageextension 50251 "Routing Graph Setup RG" extends "Graph View Setup CS"
             {
                 Caption = 'Routing Graph';
 
-                // Property is currently not supported. Graph is always rendered with the Breadth First layout.
-                // field(RoutingGraphLayoutRG; Rec."Routing Graph Layout RG")
-                // {
-                //     ApplicationArea = Basic, Suite;
-                //     Caption = 'Routing Graph Layout';
-                //     ToolTip = 'Select the default layout for the routing graph.';
-                // }
+                field(RoutingGraphLayoutRG; Rec."Routing Graph Layout RG")
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Routing Graph Layout';
+                    ToolTip = 'Select the default layout for the routing graph.';
+                }
                 field("Routing Node Set RG"; Rec."Routing Node Set RG")
                 {
                     ApplicationArea = Basic, Suite;

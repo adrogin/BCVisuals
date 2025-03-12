@@ -20,6 +20,11 @@ page 50250 "Routing Graph RG"
                     begin
                         RoutingGraph.UpdatRoutingFromGraph(Nodes, Edges, RoutingNo, VersionCode);
                     end;
+
+                    trigger OnCanvasMenuItemSelected(MenuItemId: Text)
+                    begin
+                        RoutingGraph.HandleCanvasMenuItemSelected(CurrPage.GraphControl, MenuItemId, RoutingNo, VersionCode);
+                    end;
                 }
             }
         }
@@ -42,6 +47,7 @@ page 50250 "Routing Graph RG"
                     IsEditModeEnabled := not IsEditModeEnabled;
                     CurrPage.GraphControl.SetEditModeEnabled(IsEditModeEnabled);
                     CurrPage.GraphControl.InitializeDefaultContextMenu();
+                    CurrPage.GraphControl.InitializeCanvasContextMenu(RoutingGraph.GetGraphContextMenuItems());
                 end;
             }
             action(DisableEditMode)
@@ -94,7 +100,9 @@ page 50250 "Routing Graph RG"
     trigger OnOpenPage()
     begin
         RoutingGraph.SetNodesData(Nodes, RoutingNo, VersionCode);
-        CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(RoutingGraph.GetDefaultNodeSet()));
+        CurrPage.GraphControl.DrawGraphWithStyles(
+            'controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(RoutingGraph.GetDefaultNodeSet()),
+            GraphViewController.GraphLayoutEnumToText(RoutingGraph.GetDefaultLayout()));
         CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(RoutingGraph.GetNodeTooltipsArray(Nodes, RoutingNo, VersionCode));
         CurrPage.GraphControl.CreateTooltips();
         CurrPage.GraphControl.InitializeEdgeHandles();  // Initialize necessary components to support edit mode

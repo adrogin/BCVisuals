@@ -1,5 +1,5 @@
 import {
-    renderGraph, setGraphLayout, setNodeTooltipText, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, 
+    renderGraph, setGraphLayout, setNodeTooltipText, createTooltips, initEdgeHandles, setEditModeEnabled, initializeDefaultContextMenu, initializeCanvasContextMenu,
     destroyContextMenu, sendGraphElementsToNavExtensibilityCaller, setNodeTooltipsOnAllNodes, addNodes, addEdges, removeNodes, removeEdges, setNodeData,
     setNodeLabel, pushNodeData
 } from "./cytograph.js";
@@ -20,10 +20,11 @@ export function DrawGraph(containerElementName, nodes, edges) {
  * @param {Object[]} nodes - Array of Node elements.
  * @param {Object[]} edges - Array of Edge elements.
  * @param {Object[]} styles - Array of element styles with selectors.
+ * @param {String} layout - Optional name of the graph layout. Refer to https://js.cytoscape.org/#layouts for supported layouts. Default breadthfirst layout will be used if not provided.
  */
-export function DrawGraphWithStyles(containerElementName, nodes, edges, styles) {
+export function DrawGraphWithStyles(containerElementName, nodes, edges, styles, layout) {
     renderGraph(
-        document.getElementById(containerElementName), nodes, edges, styles,
+        document.getElementById(containerElementName), nodes, edges, styles, layout,
         {
             onNodeClick: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]) },
             onEdgeCreated: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeCreated', [event.target.data()]) },
@@ -103,6 +104,13 @@ export function InitializeDefaultContextMenu() {
 }
 
 /**
+ * Create an instance of the context menu bound to the background rather than graph elements.
+ */
+export function InitializeCanvasContextMenu(MenuItems) {
+    initializeCanvasContextMenu(MenuItems, (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnCanvasMenuItemSelected', [event]) });
+}
+
+/**
  * Destroy the instance of the context menu.
  */
 export function DestroyContextMenu() {
@@ -122,6 +130,15 @@ export function RequestGraphData() {
  */
 export function AddNodes(nodesToAdd) {
     addNodes(nodesToAdd);
+}
+
+/**
+ * Add one node to the active graph instance placing it at the current cursor position
+ * @param {Object} nodeToAdd - Node element to be added to the graph 
+ */
+export function AddNodeAtCursorPosition(nodeToAdd) {
+    nodeToAdd.position = { x: event.clientX, y: event.clientY };
+    addNodes(nodeToAdd);
 }
 
 /**

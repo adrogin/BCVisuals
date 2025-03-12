@@ -153,7 +153,7 @@ describe('Initialize graph with event callbacks', () => {
         };
 
         const graphDefinition = getSampleGraphElementArrays();
-        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, eventCallbacks);
+        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, null, eventCallbacks);
     });
     
     beforeEach(() => { testDone = null });

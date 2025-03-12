@@ -11,12 +11,15 @@ controladdin "Graph View CS"
 
     procedure AddNodes(NodesToAdd: JsonArray);
     procedure AddEdges(EdgesToAdd: JsonArray);
+    procedure AddNodeAtCursorPosition(Node: JsonObject);
     procedure CreateTextElements();
     procedure CreateTooltips();
     procedure DestroyContextMenu();
     procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray);
     procedure DrawGraphWithStyles(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; Styles: JsonArray);
+    procedure DrawGraphWithStyles(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; Styles: JsonArray; Layout: Text);
     procedure InitializeDefaultContextMenu();
+    procedure InitializeCanvasContextMenu(MenuItems: JsonArray);
     procedure InitializeEdgeHandles();
     procedure RemoveEdges(EdgesToRemove: JsonArray);
     procedure RemoveNodes(NodesToRemove: JsonArray);
@@ -38,4 +41,5 @@ controladdin "Graph View CS"
     event OnEdgeCreated(NewEdge: JsonObject);
     event OnNodeRemoved(RemovedNode: JsonObject);
     event OnEdgeRemoved(RemovedEdge: JsonObject);
+    event OnCanvasMenuItemSelected(MenuItemId: Text);
 }
