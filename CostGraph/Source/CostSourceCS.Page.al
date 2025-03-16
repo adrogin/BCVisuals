@@ -25,6 +25,16 @@ page 50150 "Cost Source CS"
                             ShowCostApplicationGraph();
                     end;
                 }
+                field(CostTraceDirection; TraceDirection)
+                {
+                    Caption = 'Cost Trace Direction';
+                    ToolTip = 'Select the cost tracing direction: whether the cost application will be traced backwards to the cost source for the selected entry, or forward to all entries whose cost depends on the selected entry.';
+
+                    trigger OnValidate()
+                    begin
+                        ShowCostApplicationGraph();
+                    end;
+                }
                 field(GraphLayoutControl; GraphLayout)
                 {
                     Caption = 'Graph Layout';
