@@ -2,7 +2,7 @@
   "id": "4f759f87-5734-4d67-beba-8e769592b4ce",
   "name": "CostGraph",
   "publisher": "ADR",
-  "version": "2.2.0.0",
+  "version": "2.3.0.0",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -15,7 +15,7 @@
       "id": "55ab618a-8619-41bd-84b5-ea53a62ee07b",
       "name": "Graph View Control",
       "publisher": "ADR",
-      "version": "2.2.0.0"
+      "version": "2.3.0.0"
     }
   ],
   "screenshots": [],
