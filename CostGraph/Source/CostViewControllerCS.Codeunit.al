@@ -82,5 +82,4 @@ codeunit 50151 "Cost View Controller CS"
 
     var
         GraphViewController: Codeunit "Graph View Controller CS";
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
 }

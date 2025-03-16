@@ -2,6 +2,7 @@ page 50107 "Styles List CS"
 {
     PageType = List;
     ApplicationArea = Basic, Suite;
+    UsageCategory = None;
     SourceTable = "Style CS";
     Caption = 'Styles';
     CardPageId = "Style Card";

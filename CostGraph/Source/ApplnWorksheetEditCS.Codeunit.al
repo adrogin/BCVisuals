@@ -8,7 +8,7 @@ codeunit 50152 "Appln. Worksheet - Edit CS"
         ItemLedgerEntry.CopyFilters(FilteredItemLedgEntry);
         if ItemLedgerEntry.FindSet() then
             repeat
-                CostApplicationTrace.TraceCostBackward(ItemLedgerEntry, 1);
+                CostApplicationTrace.TraceCost(ItemLedgerEntry, Enum::"Cost Trace Direction"::Backward, 1);
             until ItemLedgerEntry.Next() = 0;
 
         CostApplicationTrace.GetGraphElements(Nodes, Edges);
@@ -98,7 +98,7 @@ codeunit 50152 "Appln. Worksheet - Edit CS"
         if Item."Application Wksh. User ID" <> UpperCase(UserId) then
             Item.CheckBlockedByApplWorksheet();
 
-        Item."Application Wksh. User ID" := UserId();
+        Item."Application Wksh. User ID" := CopyStr(UserId(), 1, MaxStrLen(Item."Application Wksh. User ID"));
         Item.Modify(true);
     end;
 

@@ -3,7 +3,7 @@ page 50151 "ILE Application CS"
     Caption = 'ILE Application';
     PageType = Card;
     ApplicationArea = Basic, Suite;
-    UsageCategory = Tasks;
+    UsageCategory = None;
 
     layout
     {
@@ -31,6 +31,11 @@ page 50151 "ILE Application CS"
                 usercontrol(GraphControl; "Graph View CS")
                 {
                     ApplicationArea = Basic, Suite;
+
+                    trigger ControlAddinReady()
+                    begin
+                        InitializeGraph();
+                    end;
 
                     trigger OnNodeClick(NodeId: Text)
                     var
@@ -194,11 +199,6 @@ page 50151 "ILE Application CS"
     trigger OnInit()
     begin
         GraphLayout := GraphLayout::Breadthfirst;
-    end;
-
-    trigger OnOpenPage()
-    begin
-        InitializeGraph();
     end;
 
     local procedure InitializeGraph()

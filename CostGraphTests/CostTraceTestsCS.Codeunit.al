@@ -169,9 +169,7 @@ codeunit 60150 "Cost Trace Tests CS"
     var
         ComponentItem: Record Item;
         ProdItem: Record Item;
-        ProdBOMHeader: Record "Production BOM Header";
         ProductionOrder: Record "Production Order";
-        ProdOrderLine: Record "Prod. Order Line";
         Quantity: Integer;
         ItemLedgEntryNos: List of [Integer];
         Nodes: JsonArray;
@@ -182,10 +180,7 @@ codeunit 60150 "Cost Trace Tests CS"
         // [GIVEN] Component item "CI" and a production item "PI". "PI" includes "CI" in its production BOM.
         LibraryInventory.CreateItem(ComponentItem);
         Quantity := LibraryRandom.RandInt(100);
-
-        LibraryInventory.CreateItem(ProdItem);
-        ProdItem.Validate("Production BOM No.", LibraryManufacturing.CreateCertifiedProductionBOM(ProdBOMHeader, ComponentItem."No.", Quantity));
-        ProdItem.Modify(true);
+        CreateProductionItem(ProdItem, ComponentItem."No.", Quantity);
 
         UpdateInventoryPostingSetup(ProdItem."Inventory Posting Group");
 
@@ -197,9 +192,7 @@ codeunit 60150 "Cost Trace Tests CS"
         ItemLedgEntryNos.Add(CreateAndPostItemJournalLine(Enum::"Item Journal Entry Type"::Purchase, ComponentItem."No.", Quantity));
 
         // [GIVEN] Post production order consumption and output
-        FindProdOrderLine(ProductionOrder, ProdOrderLine);
-        LibraryPatterns.POSTConsumption(ProdOrderLine, ComponentItem, '', '', Quantity, WorkDate(), 0);
-        LibraryPatterns.POSTOutput(ProdOrderLine, Quantity, WorkDate(), 0);
+        PostProdConsumptionAndOutput(ProductionOrder, ComponentItem, Quantity);
         CollectItemLedgerEntries(ItemLedgEntryNos, ComponentItem."No.", Enum::"Item Ledger Document Type"::" ", ProductionOrder."No.");
         CollectItemLedgerEntries(ItemLedgEntryNos, ProdItem."No.", Enum::"Item Ledger Document Type"::" ", ProductionOrder."No.");
 
@@ -268,6 +261,52 @@ codeunit 60150 "Cost Trace Tests CS"
         VerifyEdgeInArray(Edges, 0, ItemLedgEntryNos.Get(3), ItemLedgEntryNos.Get(4));
     end;
 
+    [Test]
+    procedure TraceProductionChainForwardFromConsumption()
+    var
+        ComponentItem: Record Item;
+        ProdItem: Record Item;
+        ProductionOrder: Record "Production Order";
+        Quantity: Integer;
+        ItemLedgEntryNos: List of [Integer];
+        Nodes: JsonArray;
+        Edges: JsonArray;
+    begin
+        // [SCENARIO] Purchase component, produce a manufacturing item in a production order, sell the product, and build the cost graph starting from the consumption
+
+        // [GIVEN] Component item "CI" and a production item "PI". "PI" includes "CI" in its production BOM.
+        LibraryInventory.CreateItem(ComponentItem);
+        Quantity := LibraryRandom.RandInt(100);
+        CreateProductionItem(ProdItem, ComponentItem."No.", Quantity);
+
+        UpdateInventoryPostingSetup(ProdItem."Inventory Posting Group");
+
+        // [GIVEN] Create a production order for item "PI"
+        LibraryManufacturing.CreateAndRefreshProductionOrder(
+            ProductionOrder, ProductionOrder.Status::Released, ProductionOrder."Source Type"::Item, ProdItem."No.", Quantity);
+
+        // [GIVEN] Post purchase of the component "CI"
+        CreateAndPostItemJournalLine(Enum::"Item Journal Entry Type"::Purchase, ComponentItem."No.", Quantity);
+
+        // [GIVEN] Post production order consumption and output
+        PostProdConsumptionAndOutput(ProductionOrder, ComponentItem, Quantity);
+        CollectItemLedgerEntries(ItemLedgEntryNos, ComponentItem."No.", Enum::"Item Ledger Document Type"::" ", ProductionOrder."No.");
+        CollectItemLedgerEntries(ItemLedgEntryNos, ProdItem."No.", Enum::"Item Ledger Document Type"::" ", ProductionOrder."No.");
+
+        // [GIVEN] Sell the item "PI"
+        ItemLedgEntryNos.Add(CreateAndPostItemJournalLine(Enum::"Item Journal Entry Type"::Sale, ProdItem."No.", Quantity));
+
+        // [WHEN] Build cost graph from the consumption entry
+        CostApplicationTrace.BuildCostSourceGraph(FindItemLedgerEntryNo(Enum::"Item Ledger Entry Type"::Consumption, ComponentItem."No."), Enum::"Cost Trace Direction"::Forward, Nodes, Edges);
+
+        // [THEN] Graph contains 3 nodes and 2 edges: Purchase -> Consumption -> Output -> Sale
+        VerifyNodesList(ItemLedgEntryNos, Nodes);
+
+        LibraryAssert.AreEqual(2, Edges.Count(), IncorrectEdgeCountErr);
+        VerifyEdgeInArray(Edges, 0, ItemLedgEntryNos.Get(1), ItemLedgEntryNos.Get(2));
+        VerifyEdgeInArray(Edges, 1, ItemLedgEntryNos.Get(2), ItemLedgEntryNos.Get(3));
+    end;
+
     local procedure CollectItemLedgerEntries(
         var ItemLedgerEntryNos: List of [Integer]; ItemNo: Code[20]; DocumentType: Enum "Item Ledger Document Type"; DocumentNo: Code[20])
     var
@@ -299,6 +338,25 @@ codeunit 60150 "Cost Trace Tests CS"
     local procedure CreateAndPostItemJournalLine(EntryType: Enum "Item Ledger Entry Type"; ItemNo: Code[20]; Quantity: Decimal): Integer
     begin
         exit(CreateAndPostItemJournalLine(EntryType, ItemNo, Quantity, ''));
+    end;
+
+    local procedure CreateProductionItem(var ProdItem: Record Item; ComponentItemNo: Code[20]; ComponentQty: Decimal)
+    var
+        ProdBOMHeader: Record "Production BOM Header";
+    begin
+        LibraryInventory.CreateItem(ProdItem);
+        ProdItem.Validate("Production BOM No.", LibraryManufacturing.CreateCertifiedProductionBOM(ProdBOMHeader, ComponentItemNo, ComponentQty));
+        ProdItem.Modify(true);
+    end;
+
+    procedure FindItemLedgerEntryNo(EntryType: Enum "Item Ledger Entry Type"; ItemNo: Code[20]): Integer
+    var
+        ItemLedgerEntry: Record "Item Ledger Entry";
+    begin
+        ItemLedgerEntry.SetRange("Item No.", ItemNo);
+        ItemLedgerEntry.SetRange("Entry Type", EntryType);
+        ItemLedgerEntry.FindFirst();
+        exit(ItemLedgerEntry."Entry No.");
     end;
 
     local procedure FindProdOrderLine(ProductionOrder: Record "Production Order"; var ProdOrderLine: Record "Prod. Order Line")
@@ -341,6 +399,15 @@ codeunit 60150 "Cost Trace Tests CS"
         TransferShipmentHeader.SetRange("Transfer Order No.", TransferOrderNo);
         TransferShipmentHeader.FindFirst();
         exit(TransferShipmentHeader."No.");
+    end;
+
+    local procedure PostProdConsumptionAndOutput(ProductionOrder: Record "Production Order"; ComponentItem: Record Item; ComponentQty: Decimal)
+    var
+        ProdOrderLine: Record "Prod. Order Line";
+    begin
+        FindProdOrderLine(ProductionOrder, ProdOrderLine);
+        LibraryPatterns.POSTConsumption(ProdOrderLine, ComponentItem, '', '', ComponentQty, WorkDate(), 0);
+        LibraryPatterns.POSTOutput(ProdOrderLine, ComponentQty, WorkDate(), 0);
     end;
 
     local procedure UpdateInventoryPostingSetup(InventoryPostingGroupCode: Code[20])

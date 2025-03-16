@@ -20,19 +20,9 @@ page 50150 "Cost Source CS"
                     Editable = false;
 
                     trigger OnAssistEdit()
-                    var
-                        CostSourceTrace: Codeunit "Cost Application Trace CS";
-                        Nodes: JsonArray;
-                        Edges: JsonArray;
                     begin
-                        if SelectEntry(EntryNo) then begin
-                            EntryInfo := FormatEntryInfo(EntryNo);
-                            CostSourceTrace.BuildCostSourceGraph(EntryNo, Nodes, Edges);
-                            CostViewController.SetNodesData(Nodes);
-                            CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()));
-                            CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
-                            CurrPage.GraphControl.CreateTooltips();
-                        end;
+                        if SelectEntry(EntryNo) then
+                            ShowCostApplicationGraph();
                     end;
                 }
                 field(GraphLayoutControl; GraphLayout)
@@ -53,6 +43,12 @@ page 50150 "Cost Source CS"
                 usercontrol(GraphControl; "Graph View CS")
                 {
                     ApplicationArea = Basic, Suite;
+
+                    trigger ControlAddinReady()
+                    begin
+                        if EntryNo <> 0 then
+                            ShowCostApplicationGraph();
+                    end;
 
                     trigger OnNodeClick(NodeId: Text)
                     var
@@ -96,6 +92,7 @@ page 50150 "Cost Source CS"
     trigger OnInit()
     begin
         GraphLayout := GraphLayout::Breadthfirst;
+        TraceDirection := Enum::"Cost Trace Direction"::Backward;
     end;
 
     local procedure SelectEntry(var NewEntryNo: Integer): Boolean
@@ -110,6 +107,16 @@ page 50150 "Cost Source CS"
         exit(false);
     end;
 
+    procedure SetEntryNo(SelectedEntryNo: Integer)
+    begin
+        EntryNo := SelectedEntryNo;
+    end;
+
+    procedure SetTraceDirection(Direction: Enum "Cost Trace Direction")
+    begin
+        TraceDirection := Direction;
+    end;
+
     local procedure FormatEntryInfo(ItemLedgEntryNo: Integer): Text
     var
         ItemLedgerEntry: Record "Item Ledger Entry";
@@ -120,10 +127,25 @@ page 50150 "Cost Source CS"
         exit(StrSubstNo(EntryInfoFormatTok, ItemLedgEntryNo, ItemLedgerEntry."Document Type", ItemLedgerEntry."Document No."));
     end;
 
+    local procedure ShowCostApplicationGraph()
+    var
+        CostSourceTrace: Codeunit "Cost Application Trace CS";
+        Nodes: JsonArray;
+        Edges: JsonArray;
+    begin
+        EntryInfo := FormatEntryInfo(EntryNo);
+        CostSourceTrace.BuildCostSourceGraph(EntryNo, TraceDirection, Nodes, Edges);
+        CostViewController.SetNodesData(Nodes);
+        CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()));
+        CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
+        CurrPage.GraphControl.CreateTooltips();
+    end;
+
     var
         GraphViewController: Codeunit "Graph View Controller CS";
         CostViewController: Codeunit "Cost View Controller CS";
         GraphLayout: Enum "Graph Layout Name CS";
         EntryNo: Integer;
         EntryInfo: Text;
+        TraceDirection: Enum "Cost Trace Direction";
 }

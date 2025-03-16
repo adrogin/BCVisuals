@@ -2,6 +2,7 @@ page 50101 "Node Set Fields CS"
 {
     PageType = List;
     ApplicationArea = Basic, Suite;
+    UsageCategory = None;
     Caption = 'Graph Node Data';
     SourceTable = "Node Set Field CS";
     InsertAllowed = false;

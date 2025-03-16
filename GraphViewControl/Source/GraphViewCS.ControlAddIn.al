@@ -8,6 +8,7 @@ controladdin "Graph View CS"
     MinimumHeight = 500;
 
     Scripts = 'Scripts/dist/main.js';
+    StartupScript = 'Scripts/src/startup.js';
 
     procedure AddNodes(NodesToAdd: JsonArray);
     procedure AddEdges(EdgesToAdd: JsonArray);
@@ -28,6 +29,7 @@ controladdin "Graph View CS"
     procedure SetTooltipTextOnMultipleNodes(Tooltips: JsonArray);
     procedure SetEditModeEnabled(IsEnabled: Boolean);
 
+    event ControlAddinReady();
     event OnNodeClick(NodeId: Text);
     event OnGraphDataReceived(Nodes: JsonArray; Edges: JsonArray);
     event OnEdgeDrawingStart(SourceNode: JsonObject);

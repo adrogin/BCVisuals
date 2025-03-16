@@ -2,6 +2,7 @@ page 50103 "Style Card"
 {
     PageType = Card;
     ApplicationArea = Basic, Suite;
+    UsageCategory = None;
     SourceTable = "Style CS";
     Caption = 'Style';
 
