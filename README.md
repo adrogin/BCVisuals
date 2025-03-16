@@ -23,8 +23,12 @@ A control add-in which traces cost sources for an item ledger entry and displays
 
 ![CostSource1](https://github.com/adrogin/BCVisuals/assets/42849285/7202dc38-eb19-4430-8825-29dd681a21ee)
 
-
+There are two ways users can access the cost tracing functionality.
+1. Search for the **Cost Source** page and select the source item ledger entry and the cost tracing direction in page controls.
 ![CostSource2](https://github.com/adrogin/BCVisuals/assets/42849285/a6c1fb6e-66d5-43be-b3f6-a4e8a511b767)
+
+2. Navigate to the **Item Ledger Entries** page, select the source entry you want to explore, and choose one of the menu options: **Trace Inbound Cost Applications** or **Trace Outboud Cost Applications**.
+![image](https://github.com/user-attachments/assets/6999455f-c521-4267-ba89-47199190a0bd)
 
 ## Node Styles
 By default, all graph nodes are rendered with the same predefined style, while it may be useful to apply different styles to differentiate various types of entries. For example, highlighting all negative entries in a distinct colour is very helpful in understanding the positive to negative cost flow. Similarly, the cost application graph is easier to read when different entry types are drawn as different shapes. This visual differentiation can be achieved by configuring graph selectors and styles. Import the configuration package **PackageGRAPHVIEW.rapidstart** from the **Config** folder to see an example of the style configuration.
