@@ -25,7 +25,10 @@ export function DrawGraphWithStyles(containerElementName, nodes, edges, styles) 
     renderGraph(
         document.getElementById(containerElementName), nodes, edges, styles,
         {
-            onNodeClick: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()]) },
+            onNodeClick: (event) => {
+                Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()])
+                event.stopPropagation();  // To prevent the event from firing twice on compound nodes
+            },
             onEdgeCreated: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeCreated', [event.target.data()]) },
             onEdgeRemoved: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnEdgeRemoved', [event.target.data()]) },
             onNodeCreated: (event) => { Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeCreated', [event.target.data()]) },

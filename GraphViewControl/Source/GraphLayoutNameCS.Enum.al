@@ -18,4 +18,8 @@ enum 50100 "Graph Layout Name CS"
     {
         Caption = 'Breadth First';
     }
+    value(5; fCoSE)
+    {
+        Caption = 'fCoSE';
+    }
 }
