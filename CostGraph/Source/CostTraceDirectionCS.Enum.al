@@ -1,4 +1,4 @@
-enum 50150 "Cost Trace Direction"
+enum 50150 "Cost Trace Direction CS"
 {
     value(0; Forward)
     {

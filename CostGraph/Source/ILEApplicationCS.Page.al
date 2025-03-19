@@ -254,9 +254,10 @@ page 50151 "ILE Application CS"
     local procedure RefreshNode(NodeId: Text)
     var
         Node: JsonObject;
+        GroupNodes: List of [Text];
     begin
         Node.Add('id', NodeId);
-        CostViewController.SetItemLedgEntryNodeProperties(Node);
+        CostViewController.SetItemLedgEntryNodeProperties(Node, GroupNodes);
         CurrPage.GraphControl.SetNodeData(GraphNodeDataMgt.GetValueFromObject(Node.AsToken(), 'id'), Node);
     end;
 

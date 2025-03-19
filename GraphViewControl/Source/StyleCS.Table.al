@@ -59,7 +59,7 @@ table 50105 "Style CS"
         Rec.CalcFields(StyleSheet);
         if Rec.StyleSheet.HasValue then begin
             Rec.StyleSheet.CreateInStream(InStr);
-            InStr.ReadText(StyleText);
+            InStr.Read(StyleText);
         end;
 
         exit(StyleText);
@@ -70,6 +70,6 @@ table 50105 "Style CS"
         OutStr: OutStream;
     begin
         Rec.StyleSheet.CreateOutStream(OutStr);
-        OutStr.WriteText(StyleText);
+        OutStr.Write(StyleText);
     end;
 }

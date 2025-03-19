@@ -285,7 +285,7 @@ codeunit 60150 "Cost Trace Tests CS"
         ItemLedgEntryNos.Add(CreateAndPostItemJournalLine(Enum::"Item Journal Entry Type"::Sale, ProdItem."No.", Quantity));
 
         // [WHEN] Build cost graph from the consumption entry
-        CostApplicationTrace.BuildCostSourceGraph(FindItemLedgerEntryNo(Enum::"Item Ledger Entry Type"::Consumption, ComponentItem."No."), Enum::"Cost Trace Direction"::Forward, Nodes, Edges);
+        CostApplicationTrace.BuildCostSourceGraph(FindItemLedgerEntryNo(Enum::"Item Ledger Entry Type"::Consumption, ComponentItem."No."), Enum::"Cost Trace Direction CS"::Forward, Nodes, Edges);
 
         // [THEN] Graph contains 3 nodes and 2 edges: Consumption -> Output -> Sale
         VerifyNodesList(ItemLedgEntryNos, Nodes);
@@ -336,7 +336,7 @@ codeunit 60150 "Cost Trace Tests CS"
         ItemLedgerEntryNos.Add(CreateAndPostItemJournalLine(Enum::"Item Journal Entry Type"::Sale, AsmItem."No.", Quantity, Locations[2].Code));
 
         // [WHEN] Build cost graph
-        CostApplicationTrace.BuildCostSourceGraph(ItemLedgerEntryNos.Get(1), Enum::"Cost Trace Direction"::Forward, Nodes, Edges);
+        CostApplicationTrace.BuildCostSourceGraph(ItemLedgerEntryNos.Get(1), Enum::"Cost Trace Direction CS"::Forward, Nodes, Edges);
 
         // [THEN] Graph contains 8 nodes and 7 edges
         VerifyNodesList(ItemLedgerEntryNos, Nodes);

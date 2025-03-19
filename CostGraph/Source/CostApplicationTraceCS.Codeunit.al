@@ -2,10 +2,10 @@ codeunit 50150 "Cost Application Trace CS"
 {
     procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; var Nodes: JsonArray; var Edges: JsonArray)
     begin
-        BuildCostSourceGraph(ItemLedgEntryNo, Enum::"Cost Trace Direction"::Backward, Nodes, Edges);
+        BuildCostSourceGraph(ItemLedgEntryNo, Enum::"Cost Trace Direction CS"::Backward, Nodes, Edges);
     end;
 
-    procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; Direction: Enum "Cost Trace Direction"; var Nodes: JsonArray; var Edges: JsonArray)
+    procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; Direction: Enum "Cost Trace Direction CS"; var Nodes: JsonArray; var Edges: JsonArray)
     var
         FromItemLedgerEntry: Record "Item Ledger Entry";
     begin
@@ -42,45 +42,45 @@ codeunit 50150 "Cost Application Trace CS"
             until ItemCostFlowBuf.Next() = 0;
     end;
 
-    internal procedure TraceCost(FromItemLedgEntry: Record "Item Ledger Entry"; Direction: Enum "Cost Trace Direction"; MaxTraceDepth: Integer)
+    internal procedure TraceCost(FromItemLedgEntry: Record "Item Ledger Entry"; Direction: Enum "Cost Trace Direction CS"; MaxTraceDepth: Integer)
     begin
         InsertCostFlowBufIfNotExists(0, FromItemLedgEntry."Entry No.");
         MaxDepth := MaxTraceDepth;
         TraceCostApplication(FromItemLedgEntry, Direction, MaxTraceDepth);
     end;
 
-    local procedure TraceCostApplication(FromItemLedgerEntry: Record "Item Ledger Entry"; Direction: Enum "Cost Trace Direction"; Depth: Integer)
+    local procedure TraceCostApplication(FromItemLedgerEntry: Record "Item Ledger Entry"; Direction: Enum "Cost Trace Direction CS"; Depth: Integer)
     begin
         if IsApplicationBetweenConsumptionAndOuntput(FromItemLedgerEntry, Direction) then
             case true of
-                (FromItemLedgerEntry."Entry Type" = FromItemLedgerEntry."Entry Type"::Output) and (Direction = Enum::"Cost Trace Direction"::Backward):
+                (FromItemLedgerEntry."Entry Type" = FromItemLedgerEntry."Entry Type"::Output) and (Direction = Enum::"Cost Trace Direction CS"::Backward):
                     TraceCyclicProdCyclicalLoopBackward(FromItemLedgerEntry, Depth + 1);  // tracing backward to consumption
-                (FromItemLedgerEntry."Entry Type" = FromItemLedgerEntry."Entry Type"::Consumption) and (Direction = Enum::"Cost Trace Direction"::Forward):
+                (FromItemLedgerEntry."Entry Type" = FromItemLedgerEntry."Entry Type"::Consumption) and (Direction = Enum::"Cost Trace Direction CS"::Forward):
                     TraceCyclicProdCyclicalLoopForward(FromItemLedgerEntry, Depth + 1);   // tracing forward to output
-                (FromItemLedgerEntry."Entry Type" = FromItemLedgerEntry."Entry Type"::"Assembly Output") and (Direction = Enum::"Cost Trace Direction"::Backward):
+                (FromItemLedgerEntry."Entry Type" = FromItemLedgerEntry."Entry Type"::"Assembly Output") and (Direction = Enum::"Cost Trace Direction CS"::Backward):
                     TraceCyclicAsmCyclicalLoopBackward(FromItemLedgerEntry, Depth + 1);   // tracing backward to assembly consumption
-                (FromItemLedgerEntry."Entry Type" = FromItemLedgerEntry."Entry Type"::"Assembly Consumption") and (Direction = Enum::"Cost Trace Direction"::Forward):
+                (FromItemLedgerEntry."Entry Type" = FromItemLedgerEntry."Entry Type"::"Assembly Consumption") and (Direction = Enum::"Cost Trace Direction CS"::Forward):
                     TraceCyclicAsmCyclicalLoopForward(FromItemLedgerEntry, Depth + 1);    // tracing forward to assembly output
             end
         else
             case true of
-                FromItemLedgerEntry.Positive and (Direction = Enum::"Cost Trace Direction"::Forward):
+                FromItemLedgerEntry.Positive and (Direction = Enum::"Cost Trace Direction CS"::Forward):
                     TraceCostForwardToOutbounds(FromItemLedgerEntry."Entry No.", Depth + 1);
-                FromItemLedgerEntry.Positive and (Direction = Enum::"Cost Trace Direction"::Backward):
+                FromItemLedgerEntry.Positive and (Direction = Enum::"Cost Trace Direction CS"::Backward):
                     TraceCostBackwardToOutbounds(FromItemLedgerEntry."Entry No.", Depth + 1);
-                not FromItemLedgerEntry.Positive and (Direction = Enum::"Cost Trace Direction"::Forward):
+                not FromItemLedgerEntry.Positive and (Direction = Enum::"Cost Trace Direction CS"::Forward):
                     TraceCostForwardToInbounds(FromItemLedgerEntry."Entry No.", Depth + 1);
-                not FromItemLedgerEntry.Positive and (Direction = Enum::"Cost Trace Direction"::Backward):
+                not FromItemLedgerEntry.Positive and (Direction = Enum::"Cost Trace Direction CS"::Backward):
                     TraceCostBackwardToInbounds(FromItemLedgerEntry."Entry No.", Depth + 1);
             end;
     end;
 
-    local procedure IsApplicationBetweenConsumptionAndOuntput(ItemLedgerEntry: Record "Item Ledger Entry"; Direction: Enum "Cost Trace Direction"): Boolean
+    local procedure IsApplicationBetweenConsumptionAndOuntput(ItemLedgerEntry: Record "Item Ledger Entry"; Direction: Enum "Cost Trace Direction CS"): Boolean
     begin
         case Direction of
-            Enum::"Cost Trace Direction"::Forward:
+            Enum::"Cost Trace Direction CS"::Forward:
                 exit(ItemLedgerEntry."Entry Type" in [Enum::"Item Ledger Entry Type"::Consumption, Enum::"Item Ledger Entry Type"::"Assembly Consumption"]);
-            Enum::"Cost Trace Direction"::Backward:
+            Enum::"Cost Trace Direction CS"::Backward:
                 exit(ItemLedgerEntry."Entry Type" in [Enum::"Item Ledger Entry Type"::Output, Enum::"Item Ledger Entry Type"::"Assembly Output"]);
         end;
     end;
@@ -90,7 +90,7 @@ codeunit 50150 "Cost Application Trace CS"
         ItemApplnEntry: Record "Item Application Entry";
     begin
         if GetOutboundEntriesTheInbndEntryAppliedTo(ItemApplnEntry, EntryNo) then
-            TraceCostApplicationEntries(ItemApplnEntry, EntryNo, Enum::"Cost Trace Direction"::Backward, true, Depth);
+            TraceCostApplicationEntries(ItemApplnEntry, EntryNo, Enum::"Cost Trace Direction CS"::Backward, true, Depth);
     end;
 
     local procedure TraceCostBackwardToInbounds(EntryNo: Integer; Depth: Integer)
@@ -98,7 +98,7 @@ codeunit 50150 "Cost Application Trace CS"
         ItemApplnEntry: Record "Item Application Entry";
     begin
         if ItemApplnEntry.GetInboundEntriesTheOutbndEntryAppliedTo(EntryNo) then
-            TraceCostApplicationEntries(ItemApplnEntry, EntryNo, Enum::"Cost Trace Direction"::Backward, false, Depth);
+            TraceCostApplicationEntries(ItemApplnEntry, EntryNo, Enum::"Cost Trace Direction CS"::Backward, false, Depth);
     end;
 
     local procedure TraceCostForwardToOutbounds(EntryNo: Integer; Depth: Integer)
@@ -106,7 +106,7 @@ codeunit 50150 "Cost Application Trace CS"
         ItemApplnEntry: Record "Item Application Entry";
     begin
         if ItemApplnEntry.GetOutboundEntriesAppliedToTheInboundEntry(EntryNo) then
-            TraceCostApplicationEntries(ItemApplnEntry, EntryNo, Enum::"Cost Trace Direction"::Forward, true, Depth);
+            TraceCostApplicationEntries(ItemApplnEntry, EntryNo, Enum::"Cost Trace Direction CS"::Forward, true, Depth);
     end;
 
     local procedure TraceCostForwardToInbounds(EntryNo: Integer; Depth: Integer)
@@ -114,10 +114,10 @@ codeunit 50150 "Cost Application Trace CS"
         ItemApplnEntry: Record "Item Application Entry";
     begin
         if GetInboundEntriesAppliedToTheOutboundEntry(ItemApplnEntry, EntryNo) then
-            TraceCostApplicationEntries(ItemApplnEntry, EntryNo, Enum::"Cost Trace Direction"::Forward, false, Depth);
+            TraceCostApplicationEntries(ItemApplnEntry, EntryNo, Enum::"Cost Trace Direction CS"::Forward, false, Depth);
     end;
 
-    local procedure TraceCostApplicationEntries(var ItemApplnEntry: Record "Item Application Entry"; FromEntryNo: Integer; Direction: Enum "Cost Trace Direction"; IsPositiveToNegativeFlow: Boolean; Depth: Integer)
+    local procedure TraceCostApplicationEntries(var ItemApplnEntry: Record "Item Application Entry"; FromEntryNo: Integer; Direction: Enum "Cost Trace Direction CS"; IsPositiveToNegativeFlow: Boolean; Depth: Integer)
     var
         ToItemLedgerEntry: Record "Item Ledger Entry";
         ToEntryNo: Integer;
@@ -131,7 +131,7 @@ codeunit 50150 "Cost Application Trace CS"
             else
                 ToEntryNo := ItemApplnEntry."Inbound Item Entry No.";
 
-            if Direction = Enum::"Cost Trace Direction"::Forward then
+            if Direction = Enum::"Cost Trace Direction CS"::Forward then
                 InsertCostFlowBufIfNotExists(FromEntryNo, ToEntryNo)
             else
                 InsertCostFlowBufIfNotExists(ToEntryNo, FromEntryNo);
@@ -288,31 +288,24 @@ codeunit 50150 "Cost Application Trace CS"
     end;
 
     local procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Integer; var DistinctNodes: Record Integer)
-    var
-        Node: JsonObject;
     begin
         if DistinctNodes.Get(NodeId) then
             exit;
 
-        Node.Add('id', NodeId);
-        Nodes.Add(Node);
-
+        GraphViewController.AddNodeToArray(Nodes, NodeId);
         DistinctNodes.Number := NodeId;
         DistinctNodes.Insert();
     end;
 
     local procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Integer; TargetNodeId: Integer)
-    var
-        Edge: JsonObject;
     begin
-        Edge.Add('source', Format(SourceNodeId));
-        Edge.Add('target', Format(TargetNodeId));
-        Edges.Add(Edge);
+        GraphViewController.AddEdgeToArray(Edges, SourceNodeId, TargetNodeId);
     end;
 
     var
         ItemCostFlowBuf: Record "Item Cost Flow Buf. CS";
         TempVisitedItemApplnEntry: Record "Item Application Entry" temporary;
+        GraphViewController: Codeunit "Graph View Controller CS";
         LastEntryNo: Integer;
         MaxDepth: Integer;
 }

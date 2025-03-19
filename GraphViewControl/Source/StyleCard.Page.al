@@ -43,7 +43,6 @@ page 50103 "Style Card"
                 {
                     ApplicationArea = Basic, Suite;
                     MultiLine = true;
-                    RowSpan = 6;
                     ShowCaption = false;
 
                     trigger OnValidate()

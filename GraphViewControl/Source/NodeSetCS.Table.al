@@ -67,12 +67,11 @@ table 50100 "Node Set CS"
     begin
         PrevTableNo := GetPrevTableNo(Code);
         if (PrevTableNo <> xRec."Table No.") and (PrevTableNo <> 0) then
-            if not Confirm(ConfirmChangeTableMsg) then
-                exit;
-
-        NodeSetField.SetRange("Node Set Code", Code);
-        NodeSetField.DeleteAll(true);
-        GraphNodeDataMgt.UpdateNodeSetFields(Code, "Table No.");
+            if Confirm(ConfirmChangeTableMsg) then begin
+                NodeSetField.SetRange("Node Set Code", Code);
+                NodeSetField.DeleteAll(true);
+                GraphNodeDataMgt.UpdateNodeSetFields(Code, "Table No.");
+            end;
     end;
 
     local procedure GetPrevTableNo(NodeSetCode: Code[20]): Integer

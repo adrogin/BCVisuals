@@ -2,10 +2,15 @@ codeunit 50151 "Cost View Controller CS"
 {
     procedure SetNodesData(var Nodes: JsonArray)
     var
+        GroupNodes: List of [Text];
+        GroupNodeId: Text;
         Node: JsonToken;
     begin
         foreach Node in Nodes do
-            SetItemLedgEntryNodeProperties(Node);
+            SetItemLedgEntryNodeProperties(Node, GroupNodes);
+
+        foreach GroupNodeId in GroupNodes do
+            GraphViewController.AddCompoundNodeToArray(Nodes, GroupNodeId);
     end;
 
     procedure GetDefaultNodeSet(): Code[20]
@@ -33,31 +38,32 @@ codeunit 50151 "Cost View Controller CS"
         TooltipsArray: JsonArray;
         Node: JsonToken;
     begin
-        foreach Node in Nodes do begin
-            ItemLedgerEntry.Get(GraphViewController.GetNodeIdAsInteger(Node.AsObject()));
-            RecRef.GetTable(ItemLedgerEntry);
-            TooltipsArray.Add(GraphViewController.GetNodeTooltip(RecRef, Format(ItemLedgerEntry."Entry No."), GetDefaultNodeSet()));
-        end;
+        foreach Node in Nodes do
+            if not GraphViewController.IsCompoundNode(Node.AsObject()) then
+                if ItemLedgerEntry.Get(GraphViewController.GetNodeIdAsInteger(Node.AsObject())) then begin
+                    RecRef.GetTable(ItemLedgerEntry);
+                    TooltipsArray.Add(GraphViewController.GetNodeTooltip(RecRef, Format(ItemLedgerEntry."Entry No."), GetDefaultNodeSet()));
+                end;
 
         exit(TooltipsArray);
     end;
 
-    procedure SetItemLedgEntryNodeProperties(var Node: JsonToken)
+    procedure SetItemLedgEntryNodeProperties(var Node: JsonToken; GroupNodes: List of [Text])
     var
         ItemLedgerEntry: Record "Item Ledger Entry";
         RecRef: RecordRef;
     begin
         ItemLedgerEntry.Get(GraphViewController.GetNodeIdAsInteger(Node.AsObject()));
         RecRef.GetTable(ItemLedgerEntry);
-        GraphViewController.SetNodeProperties(Node, RecRef, GetDefaultNodeSet());
+        GraphViewController.SetNodeProperties(Node, GroupNodes, RecRef, GetDefaultNodeSet());
     end;
 
-    procedure SetItemLedgEntryNodeProperties(var Node: JsonObject)
+    procedure SetItemLedgEntryNodeProperties(var Node: JsonObject; var GroupNodes: List of [Text])
     var
         NodeToken: JsonToken;
     begin
         NodeToken := Node.AsToken();
-        SetItemLedgEntryNodeProperties(NodeToken);
+        SetItemLedgEntryNodeProperties(NodeToken, GroupNodes);
         Node := NodeToken.AsObject();
     end;
 

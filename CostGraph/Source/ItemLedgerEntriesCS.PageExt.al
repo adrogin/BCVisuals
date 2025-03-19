@@ -16,7 +16,7 @@ pageextension 50152 "Item Ledger Entries CS" extends "Item Ledger Entries"
                     CostSource: Page "Cost Source CS";
                 begin
                     CostSource.SetEntryNo(Rec."Entry No.");
-                    CostSource.SetTraceDirection(Enum::"Cost Trace Direction"::Backward);
+                    CostSource.SetTraceDirection(Enum::"Cost Trace Direction CS"::Backward);
                     CostSource.Run();
                 end;
             }
@@ -32,7 +32,7 @@ pageextension 50152 "Item Ledger Entries CS" extends "Item Ledger Entries"
                     CostSource: Page "Cost Source CS";
                 begin
                     CostSource.SetEntryNo(Rec."Entry No.");
-                    CostSource.SetTraceDirection(Enum::"Cost Trace Direction"::Forward);
+                    CostSource.SetTraceDirection(Enum::"Cost Trace Direction CS"::Forward);
                     CostSource.Run();
                 end;
             }

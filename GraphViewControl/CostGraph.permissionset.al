@@ -27,5 +27,11 @@ permissionset 50100 CostGraph
         codeunit "Graph Node Data Mgt. CS" = X,
         tabledata "Style Set CS" = RIMD,
         table "Style Set CS" = X,
-        page "Graph View Setup CS" = X;
+        page "Graph View Setup CS" = X,
+        tabledata "Node Set Group Field CS" = RIMD,
+        table "Node Set Group Field CS" = X,
+        page "Node Label Fields CS" = X,
+        page "Node Set CS" = X,
+        page "Node Set Group Fields CS" = X,
+        page "Node Set Styles CS" = X;
 }
