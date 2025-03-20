@@ -10,8 +10,8 @@ import {
  * @param {Object[]} nodes - Array of Node elements.
  * @param {Object[]} edges - Array of Edge elements.
  */
-export function DrawGraph(containerElementName, nodes, edges) {
-    DrawGraphWithStyles(document.getElementById(containerElementName), nodes, edges, undefined);
+export function DrawGraph(containerElementName, nodes, edges, layout) {
+    DrawGraphWithStyles(document.getElementById(containerElementName), nodes, edges, undefined, layout);
 };
 
 /**
@@ -21,9 +21,9 @@ export function DrawGraph(containerElementName, nodes, edges) {
  * @param {Object[]} edges - Array of Edge elements.
  * @param {Object[]} styles - Array of element styles with selectors.
  */
-export function DrawGraphWithStyles(containerElementName, nodes, edges, styles) {
+export function DrawGraphWithStyles(containerElementName, nodes, edges, styles, layout) {
     renderGraph(
-        document.getElementById(containerElementName), nodes, edges, styles,
+        document.getElementById(containerElementName), nodes, edges, styles, layout,
         {
             onNodeClick: (event) => {
                 Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('OnNodeClick', [event.target.id()])

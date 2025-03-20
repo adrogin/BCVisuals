@@ -108,7 +108,7 @@ page 50150 "Cost Source CS"
 
     trigger OnInit()
     begin
-        GraphLayout := GraphLayout::Breadthfirst;
+        GraphLayout := CostViewController.GetDefaultLayout();
         TraceDirection := Enum::"Cost Trace Direction CS"::Backward;
     end;
 
@@ -148,10 +148,14 @@ page 50150 "Cost Source CS"
     var
         CostSourceTrace: Codeunit "Cost Application Trace CS";
     begin
+        Clear(Nodes);
+        Clear(Edges);
         EntryInfo := FormatEntryInfo(EntryNo);
         CostSourceTrace.BuildCostSourceGraph(EntryNo, TraceDirection, Nodes, Edges);
         CostViewController.SetNodesData(Nodes);
-        CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()));
+        CurrPage.GraphControl.DrawGraphWithStyles(
+            'controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()),
+            GraphViewController.GraphLayoutEnumToText(GraphLayout));
         CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
         CurrPage.GraphControl.CreateTooltips();
     end;
