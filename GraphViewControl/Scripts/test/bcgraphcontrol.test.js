@@ -233,15 +233,26 @@ describe('Graph elements manipulations', () => {
 
 describe('Events on compound nodes', () => {
     test('OnNodeClick event called once when a child of a compound node is clicked', (done) => {
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+    
         const onClickHandler = jest.fn(() => { done() });
         renderGraph(
-            undefined,
-            [{'id': 'A'}, {'id': 'B', 'parent': 'A'}],    
+            container,
+            [
+                { data: {'id': 'A'}, position: { x: 10, y: 10 }},
+                { data: {'id': 'B', 'parent': 'A'}, position: { x: 10, y: 10 }}
+            ],
             null,
             null,
             onClickHandler);
 
-        document.dispatchEvent(new MouseEvent("click", { clientX: 0, clientY: 0 }));
+        let cy = getGraphElements().cy();
+        cy.pan({ x: 0, y: 0 });
+        cy.zoom(1);
+        cy.viewport({ zoom: 1, pan: { x: 0, y: 0 }});
+
+        document.dispatchEvent(new MouseEvent("click", { clientX: 10, clientY: 10 }));
 
         expect(onClickHandler).toHaveBeenCalledTimes(1);
     });
