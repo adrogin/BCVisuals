@@ -55,4 +55,19 @@ page 50109 "Node Set CS"
             }
         }
     }
+    actions
+    {
+        area(Navigation)
+        {
+            action(NodeData)
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Node Data';
+                ToolTip = 'Set up node texts and tooltips, and node visualisation styles.';
+                Image = DataEntry;
+                RunObject = page "Node Set Fields CS";
+                RunPageLink = "Node Set Code" = field(Code);
+            }
+        }
+    }
 }

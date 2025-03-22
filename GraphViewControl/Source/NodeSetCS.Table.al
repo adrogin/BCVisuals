@@ -20,6 +20,23 @@ table 50100 "Node Set CS"
             Caption = 'Table No.';
             DataClassification = SystemMetadata;
             TableRelation = AllObjWithCaption."Object ID" where("Object Type" = const(Table));
+
+            trigger OnValidate()
+            var
+                NodeSetField: Record "Node Set Field CS";
+                ConfirmChangeTableMsg: Label 'The node set setup, including tooltips and style settings, will be deleted. Do you want to continue?';
+                UpdateConfirmed: Boolean;
+            begin
+                UpdateConfirmed := true;
+                if (Rec."Table No." <> xRec."Table No.") and (xRec."Table No." <> 0) then
+                    UpdateConfirmed := Confirm(ConfirmChangeTableMsg);
+
+                if UpdateConfirmed then begin
+                    NodeSetField.SetRange("Node Set Code", Code);
+                    NodeSetField.DeleteAll(true);
+                    GraphNodeDataMgt.UpdateNodeSetFields(Code, "Table No.");
+                end;
+            end;
         }
         field(4; "Table Caption"; Text[249])
         {
@@ -57,30 +74,6 @@ table 50100 "Node Set CS"
     begin
         if "Table No." <> 0 then
             GraphNodeDataMgt.UpdateNodeSetFields(Code, "Table No.");
-    end;
-
-    trigger OnModify()
-    var
-        NodeSetField: Record "Node Set Field CS";
-        PrevTableNo: Integer;
-        ConfirmChangeTableMsg: Label 'The node set setup, including tooltips and style settings, will be reset to default. Do you want to continue?';
-    begin
-        PrevTableNo := GetPrevTableNo(Code);
-        if (PrevTableNo <> xRec."Table No.") and (PrevTableNo <> 0) then
-            if Confirm(ConfirmChangeTableMsg) then begin
-                NodeSetField.SetRange("Node Set Code", Code);
-                NodeSetField.DeleteAll(true);
-                GraphNodeDataMgt.UpdateNodeSetFields(Code, "Table No.");
-            end;
-    end;
-
-    local procedure GetPrevTableNo(NodeSetCode: Code[20]): Integer
-    var
-        NodeSet: Record "Node Set CS";
-    begin
-        NodeSet.SetLoadFields("Table No.");
-        NodeSet.Get(NodeSetCode);
-        exit(NodeSet."Table No.");
     end;
 
     var

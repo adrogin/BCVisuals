@@ -57,17 +57,15 @@ codeunit 60100 "Node Data Mgt. Tests CS"
     var
         NodeSet: Record "Node Set CS";
         NodeSetTestTable2: Record "Node Data Test Table 2 CS";
-        ConfirmChangeTableMsg: Label 'The node set setup, including tooltips and style settings, will be reset to default. Do you want to continue?';
+        ConfirmChangeTableMsg: Label 'The node set setup, including tooltips and style settings, will be deleted. Do you want to continue?';
     begin
         LibraryGraphView.CreateNodeSet(NodeSet);
         LibraryGraphView.UpdateNodeSetTableNo(NodeSet, Database::"Node Data Test Table CS");
 
         GraphNodeDataMgt.UpdateNodeSetFields(NodeSet.Code, Database::"Node Data Test Table CS");
 
-        NodeSet.Validate("Table No.", Database::"Node Data Test Table 2 CS");
-
         LibraryVariableStorage.Enqueue(ConfirmChangeTableMsg);
-        NodeSet.Modify(true);
+        NodeSet.Validate("Table No.", Database::"Node Data Test Table 2 CS");
 
         VerifyFieldInNodeSet(NodeSet.Code, NodeSetTestTable2.FieldNo("PK Guid Field"));
         VerifyFieldNotInNodeSet(NodeSet.Code, NodeSetTestTable2.FieldNo("Media Field"));

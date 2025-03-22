@@ -1,20 +1,25 @@
 codeunit 60150 "Cost Trace Tests CS"
 {
     Subtype = Test;
+    TestPermissions = Disabled;
 
     var
         CostApplicationTrace: Codeunit "Cost Application Trace CS";
         LibraryInventory: Codeunit "Library - Inventory";
         LibraryWarehouse: Codeunit "Library - Warehouse";
         LibraryManufacturing: Codeunit "Library - Manufacturing";
+        LibraryDataMocks: Codeunit "Library - Data Mocks";
         LibraryAssembly: Codeunit "Library - Assembly";
         LibraryPatterns: Codeunit "Library - Patterns";
+        LibraryUtility: Codeunit "Library - Utility";
         LibraryRandom: Codeunit "Library - Random";
         LibraryAssert: Codeunit "Library Assert";
         IncorrectNodeCountErr: Label 'Incorrect number of nodes in the graph.';
         IncorrectEdgeCountErr: Label 'Incorrect number of edges in the graph.';
         IncorrectNodeNoErr: Label 'Incorrect item ledger entry No. in the edge.';
         ItemLedgEntryMissingInNodeListErr: Label 'Node is missing in the list.';
+        IncorrectPropertyValueErr: Label 'Property value is incorrect.';
+        MustNotDefineParentNodeErr: Label 'Parent node must not be defined.';
 
     [Test]
     procedure ApplyOutboutdToInboudTraceBack()
@@ -346,6 +351,44 @@ codeunit 60150 "Cost Trace Tests CS"
             VerifyEdgeInArray(Edges, I - 1, ItemLedgerEntryNos.Get(I), ItemLedgerEntryNos.Get(I + 1));
     end;
 
+    [Test]
+    procedure BuildCostGraphGroupByDocumentNo()
+    var
+        GraphViewController: Codeunit "Graph View Controller CS";
+        CostViewController: Codeunit "Cost View Controller CS";
+        DocumentNos: array[2] of Code[20];
+        EntryNos: array[5] of Integer;
+        Nodes: JsonArray;
+        I: Integer;
+    begin
+        DocumentNos[1] := LibraryUtility.GenerateGUID();
+        DocumentNos[2] := LibraryUtility.GenerateGUID();
+
+        EntryNos[1] := GetNextItemLedgerEntryNo();
+        for I := 2 to ArrayLen(EntryNos) do
+            EntryNos[I] := EntryNos[I - 1] + 1;
+
+        LibraryDataMocks.MockItemLedgerEntry(EntryNos[1], DocumentNos[1]);
+        LibraryDataMocks.MockItemLedgerEntry(EntryNos[2], DocumentNos[1]);
+        LibraryDataMocks.MockItemLedgerEntry(EntryNos[3], DocumentNos[2]);
+        LibraryDataMocks.MockItemLedgerEntry(EntryNos[4], '');
+        LibraryDataMocks.MockItemLedgerEntry(EntryNos[5], '');
+
+        for I := 1 to ArrayLen(EntryNos) do
+            GraphViewController.AddNodeToArray(Nodes, EntryNos[I]);
+
+        CostViewController.SetNodesData(Nodes);
+
+        LibraryAssert.AreEqual(7, Nodes.Count, ItemLedgEntryMissingInNodeListErr);
+        VerifyNodeParent(Nodes, 0, Format(EntryNos[1]), DocumentNos[1]);
+        VerifyNodeParent(Nodes, 1, Format(EntryNos[2]), DocumentNos[1]);
+        VerifyNodeParent(Nodes, 2, Format(EntryNos[3]), DocumentNos[2]);
+        VerifyNodeParent(Nodes, 3, Format(EntryNos[4]), '');
+        VerifyNodeParent(Nodes, 4, Format(EntryNos[5]), '');
+        VerifyNodeParent(Nodes, 5, DocumentNos[1], '');
+        VerifyNodeParent(Nodes, 6, DocumentNos[2], '');
+    end;
+
     local procedure CollectAssemblyLedgerEntries(var ItemLedgerEntryNos: List of [Integer]; OrderNo: Code[20]; AsmItemNo: Code[20]; ComponentItemNo: Code[20])
     begin
         CollectItemLedgerEntries(
@@ -441,6 +484,16 @@ codeunit 60150 "Cost Trace Tests CS"
         ProdOrderLine.FindFirst();
     end;
 
+    local procedure GetNextItemLedgerEntryNo(): Integer
+    var
+        ItemLedgerEntry: Record "Item Ledger Entry";
+    begin
+        if ItemLedgerEntry.FindLast() then
+            exit(ItemLedgerEntry."Entry No." + 1);
+
+        exit(1);
+    end;
+
     local procedure GetNodeId(Node: JsonObject): Integer
     var
         NodeId: JsonToken;
@@ -529,5 +582,23 @@ codeunit 60150 "Cost Trace Tests CS"
             Nodes.Get(I, Node);
             LibraryAssert.IsTrue(ExpectedNodes.Contains(GetNodeId(Node.AsObject())), ItemLedgEntryMissingInNodeListErr);
         end;
+    end;
+
+    local procedure VerifyNodeParent(Nodes: JsonArray; Index: Integer; IdExpected: Text; ParentExpected: Text)
+    var
+        Node: JsonToken;
+        ActualValue: JsonToken;
+        ParentDefined: Boolean;
+    begin
+        Nodes.Get(Index, Node);
+
+        Node.AsObject().Get('id', ActualValue);
+        LibraryAssert.AreEqual(IdExpected, ActualValue.AsValue().AsText(), IncorrectPropertyValueErr);
+
+        ParentDefined := Node.AsObject().Get('parent', ActualValue);
+        if ParentExpected = '' then
+            LibraryAssert.IsFalse(ParentDefined, MustNotDefineParentNodeErr)
+        else
+            LibraryAssert.AreEqual(ParentExpected, ActualValue.AsValue().AsText(), IncorrectPropertyValueErr);
     end;
 }
