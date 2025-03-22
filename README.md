@@ -6,7 +6,8 @@ Currently the repository contains three components:
 - **CostGraph**: Extends the graph view control presending item ledger applications in a visual graph layout;
 - **RoutingGraph**: Another extension on top of the graph view control. Visual presentation of production routings which enables more intuitive editing of complex routings.
 
-Graph image is rendered by the Cytoscape package (https://cytoscape.org/). Besides Cytoscape, the GraphViewControl add-in uses PopperJS (https://popper.js.org/) and Tippy.js (https://atomiks.github.io/tippyjs/) to display tooltips on graph nodes. Edge editing functionality is facilitated by the cytoscape-edghandles package (https://github.com/cytoscape/cytoscape.js-edgehandles). 
+Graph image is rendered by the Cytoscape package (https://js.cytoscape.org/). Besides Cytoscape, the GraphViewControl add-in uses PopperJS (https://popper.js.org/) and Tippy.js (https://atomiks.github.io/tippyjs/) to display tooltips on graph nodes. Edge editing functionality is facilitated by the cytoscape-edghandles package (https://github.com/cytoscape/cytoscape.js-edgehandles). fCoSE algorithm for node layout is implemented by the cytoscape.js-fcose package (https://github.com/iVis-at-Bilkent/cytoscape.js-fcose).
+
 All the dependencies are packed and minified by the Webpack bundler, so the control add-in loads a single .js file from the /Scripts/dist folder.
 To build the BC extension from the repository, follow these steps.
 
@@ -38,6 +39,18 @@ By default, all graph nodes are rendered with the same predefined style, while i
 
 ### Example: Negative entries in red, and square shapes for production outputs
 ![CostSource6](https://github.com/adrogin/BCVisuals/assets/42849285/ed9460f4-c9f3-46d6-8cdf-5add2f517167)
+
+## Node groups
+Item ledger entries in the cost layout can be grouped in clusters and presented as compound nodes in the graph.
+To enable node groups, open the node set you want to apply to the graph and select table fields to group on in the **Group Fields** section. The following example demonstrates a cost graph with ledger entries grouped by the document type and the document number.
+
+![image](https://github.com/user-attachments/assets/a440d795-1fc1-4323-9e09-4d54cee8ff7d)
+
+Layout of the compound nodes works best with the fCoSE algorithm.
+With this configuration, each compound node (yellow rectangle) represents a document, with nodes inside rectangles showing item ledger entries with the same **Document Type** and **Document No.** values.
+
+![CostApplication_fCoSE](https://github.com/user-attachments/assets/e914b61a-2e45-43d6-8645-017dc3358859)
+
 
 ## RoutingGraph
 This application simplifies routing setup in Business Central by enabling visual editing of the operations sequence. Drag and drop routing edges to connect operations instead of entering next and previous operations manually. When the edits are saved, the fields "Next Operation No." and "Previous Operation No." in all routing lines are updated to reflect the changes.
