@@ -8,7 +8,7 @@ codeunit 50152 "Appln. Worksheet - Edit CS"
         ItemLedgerEntry.CopyFilters(FilteredItemLedgEntry);
         if ItemLedgerEntry.FindSet() then
             repeat
-                CostApplicationTrace.TraceCost(ItemLedgerEntry, Enum::"Cost Trace Direction"::Backward, 1);
+                CostApplicationTrace.TraceCost(ItemLedgerEntry, Enum::"Cost Trace Direction CS"::Backward, 1);
             until ItemLedgerEntry.Next() = 0;
 
         CostApplicationTrace.GetGraphElements(Nodes, Edges);

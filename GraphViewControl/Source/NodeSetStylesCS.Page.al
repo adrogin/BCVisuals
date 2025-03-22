@@ -2,8 +2,8 @@ page 50108 "Node Set Styles CS"
 {
     PageType = ListPart;
     ApplicationArea = Basic, Suite;
-    SourceTable = "Style CS";
-    SourceTableTemporary = true;
+    SourceTable = "Style Set CS";
+    SourceTableView = sorting("Sorting Order") order(ascending);
     Caption = 'Styles';
 
     layout
@@ -12,29 +12,34 @@ page 50108 "Node Set Styles CS"
         {
             repeater(Styles)
             {
-                field(Code; Rec.Code)
+                field(SortingOrder; Rec."Sorting Order")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the order in which styles are applied to the node set. Styles applied later (higher order value) will override styles applied to the same node earler.';
+                }
+                field(Code; Rec."Style Code")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'The code of the style to apply to graph nodes.';
 
-                    trigger OnLookup(var Text: Text): Boolean
+                    trigger OnValidate()
                     begin
-                        exit(LookupStyle(Text));
+                        if Style.Get(Rec."Style Code") then;
                     end;
                 }
-                field(Description; Rec.Description)
+                field(Description; Style.Description)
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Text description explaining the purpose of the style.';
                     Editable = false;
                 }
-                field(SelectorCode; Rec."Selector Code")
+                field(SelectorCode; Style."Selector Code")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'The code of the selector which will be applied to graph elements. The style will be assigned to the elements satisfying the selector.';
                     Editable = false;
                 }
-                field(SelectorText; Rec."Selector Text")
+                field(SelectorText; Style."Selector Text")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Selector filters which will be applied to graph elements. The style will be assigned to the elements satisfying the selector.';
@@ -59,76 +64,26 @@ page 50108 "Node Set Styles CS"
                     ToolTip = 'Configure the selectors and the style sheet for the selected style';
                     Image = StyleSheet;
                     RunObject = page "Style Card";
-                    RunPageLink = Code = field(Code);
+                    RunPageLink = Code = field("Style Code");
                 }
             }
         }
     }
 
-    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
-    var
-        StyleSet: Record "Style Set CS";
+    trigger OnAfterGetRecord()
     begin
-        StyleSet.Validate("Node Set Code", NodeSetCode);
-        StyleSet.Validate("Style Code", Rec.Code);
-        StyleSet.Insert(true);
+        Clear(Style);
+        if Rec."Style Code" = '' then
+            exit;
 
-        InitCurrentRec(Rec.Code);
+        if Style.Get(Rec."Style Code") then;
     end;
 
-    trigger OnDeleteRecord(): Boolean
-    var
-        StyleSet: Record "Style Set CS";
+    trigger OnNewRecord(BelowxRec: Boolean)
     begin
-        StyleSet."Node Set Code" := NodeSetCode;
-        StyleSet."Style Code" := Rec.Code;
-        StyleSet.Delete(true);
+        Clear(Style);
     end;
 
-    procedure SetNodeSetCode(NewNodeSetCode: Code[20])
-    begin
-        NodeSetCode := NewNodeSetCode;
-        InitializeSourceTable();
-    end;
-
-    local procedure InitializeSourceTable()
-    var
-        StyleSet: Record "Style Set CS";
-    begin
-        Rec.Reset();
-        Rec.DeleteAll();
-
-        StyleSet.SetRange("Node Set Code", NodeSetCode);
-        if StyleSet.FindSet() then
-            repeat
-                InitCurrentRec(StyleSet."Style Code");
-                Rec.Insert();
-            until StyleSet.Next() = 0;
-    end;
-
-    local procedure LookupStyle(var StyleCode: Text): Boolean
     var
         Style: Record "Style CS";
-        StylesList: Page "Styles List CS";
-    begin
-        StylesList.LookupMode(true);
-        if StylesList.RunModal() <> Action::LookupOK then
-            exit(false);
-
-        StylesList.GetRecord(Style);
-        StyleCode := Style.Code;
-        exit(true);
-    end;
-
-    local procedure InitCurrentRec(StyleCode: Code[20])
-    var
-        Style: Record "Style CS";
-    begin
-        Style.SetLoadFields(Code, Description, "Selector Code", "Selector Text");
-        Style.Get(StyleCode);
-        Rec.Copy(Style);
-    end;
-
-    var
-        NodeSetCode: Code[20];
 }

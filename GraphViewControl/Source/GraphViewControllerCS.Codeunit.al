@@ -1,5 +1,48 @@
 codeunit 50101 "Graph View Controller CS"
 {
+    procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Text)
+    var
+        Node: JsonObject;
+    begin
+        Node.Add('id', NodeId);
+        Nodes.Add(Node);
+    end;
+
+    procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Integer)
+    var
+        Node: JsonObject;
+    begin
+        Node.Add('id', NodeId);
+        Nodes.Add(Node);
+    end;
+
+    procedure AddCompoundNodeToArray(var Nodes: JsonArray; NodeId: Text)
+    var
+        Node: JsonObject;
+    begin
+        Node.Add('id', NodeId);
+        Node.Add('compound', true);
+        Nodes.Add(Node);
+    end;
+
+    procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Text; TargetNodeId: Text)
+    var
+        Edge: JsonObject;
+    begin
+        Edge.Add('source', Format(SourceNodeId));
+        Edge.Add('target', Format(TargetNodeId));
+        Edges.Add(Edge);
+    end;
+
+    procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Integer; TargetNodeId: Integer)
+    var
+        Edge: JsonObject;
+    begin
+        Edge.Add('source', Format(SourceNodeId));
+        Edge.Add('target', Format(TargetNodeId));
+        Edges.Add(Edge);
+    end;
+
     procedure ConvertFieldNameToJsonToken(NodeSetField: Record "Node Set Field CS") ConvertedName: Text[80]
     begin
         if (NodeSetField."Table No." <> 0) and (NodeSetField."Field No." <> 0) then
@@ -30,6 +73,31 @@ codeunit 50101 "Graph View Controller CS"
             ConvertedName := CopyStr(ConvertedName + ReplaceSymbolIfNotAllowedInPropertyName(FieldName[I]), 1, MaxStrLen(ConvertedName));
     end;
 
+    procedure FindNodeById(NodeId: Text; Nodes: JsonArray; var SelectedNode: JsonObject): Boolean
+    var
+        NodeSelectorTok: Label '$[?(@.id==%1)]', Comment = '%1: ID of the node to search', Locked = true;
+        Node: JsonToken;
+        NodeFound: Boolean;
+    begin
+        NodeFound := Nodes.SelectToken(StrSubstNo(NodeSelectorTok, NodeId), Node);
+
+        if not NodeFound then
+            exit(false);
+
+        SelectedNode := Node.AsObject();
+        exit(true);
+    end;
+
+    procedure IsCompoundNode(Node: JsonObject): Boolean
+    var
+        IsCompound: JsonToken;
+    begin
+        if not Node.Get('compound', IsCompound) then
+            exit(false);
+
+        exit(IsCompound.AsValue().AsBoolean());
+    end;
+
     local procedure ReplaceSymbolIfNotAllowedInPropertyName(Symbol: Char): Text[1]
     begin
         if ((Symbol >= 'a') and (Symbol <= 'z')) or (Symbol >= 'A') and (Symbol <= 'Z') or ((Symbol >= '0') and (Symbol <= '9')) or (Symbol = '-') then
@@ -49,6 +117,8 @@ codeunit 50101 "Graph View Controller CS"
                 exit('concentric');
             GraphLayout::Breadthfirst:
                 exit('breadthfirst');
+            GraphLayout::fCoSE:
+                exit('fcose');
         end;
     end;
 
@@ -198,6 +268,7 @@ codeunit 50101 "Graph View Controller CS"
         if NodeSetCode = '' then
             exit(StylesArr);  // Returning an empty array if the style set is undefined        
 
+        StyleSet.SetCurrentKey("Sorting Order");
         StyleSet.SetRange("Node Set Code", NodeSetCode);
         if StyleSet.FindSet() then
             repeat
@@ -226,6 +297,21 @@ codeunit 50101 "Graph View Controller CS"
         exit(not NodeTextField.IsEmpty());
     end;
 
+    procedure SetNodeProperties(var Node: JsonToken; GroupNodes: List of [Text]; SourceRecRef: RecordRef; NodeSetCode: Code[20])
+    var
+        NodeGroupId: Text;
+    begin
+        SetNodeProperties(Node, SourceRecRef, NodeSetCode);
+        NodeGroupId := GetNodeGroupId(SourceRecRef, NodeSetCode);
+
+        if NodeGroupId <> '' then begin
+            if not GroupNodes.Contains(NodeGroupId) then
+                GroupNodes.Add(NodeGroupId);
+
+            Node.AsObject().Add('parent', NodeGroupId);
+        end;
+    end;
+
     procedure SetNodeProperties(var Node: JsonToken; SourceRecRef: RecordRef; NodeSetCode: Code[20])
     var
         NodeSetField: Record "Node Set Field CS";
@@ -245,6 +331,23 @@ codeunit 50101 "Graph View Controller CS"
             until NodeSetField.Next() = 0;
 
         Node.AsObject().Add('label', FormatNodeText(SourceRecRef, NodeSetCode, Enum::"Node Text Type CS"::Label));
+    end;
+
+    procedure GetNodeGroupId(SourceRecRef: RecordRef; NodeSetCode: Code[20]): Text
+    var
+        NodeSetGroupField: Record "Node Set Group Field CS";
+        NodeGroupId: Text;
+        SeparatorChar: Char;
+    begin
+        SeparatorChar := ' ';
+
+        NodeSetGroupField.SetRange("Node Set Code", NodeSetCode);
+        if NodeSetGroupField.FindSet() then
+            repeat
+                NodeGroupId := NodeGroupId + Format(SourceRecRef.Field(NodeSetGroupField."Field No.").Value) + SeparatorChar;
+            until NodeSetGroupField.Next() = 0;
+
+        exit(NodeGroupId.TrimEnd(SeparatorChar));
     end;
 
     [IntegrationEvent(false, false)]

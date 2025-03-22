@@ -46,12 +46,28 @@ page 50109 "Node Set CS"
             part(NodeSetStyles; "Node Set Styles CS")
             {
                 ApplicationArea = Basic, Suite;
+                SubPageLink = "Node Set Code" = field(Code);
+            }
+            part(GroupFields; "Node Set Group Fields CS")
+            {
+                ApplicationArea = Basic, Suite;
+                SubPageLink = "Node Set Code" = field(Code);
             }
         }
     }
-
-    trigger OnOpenPage()
-    begin
-        CurrPage.NodeSetStyles.Page.SetNodeSetCode(Rec.Code);
-    end;
+    actions
+    {
+        area(Navigation)
+        {
+            action(NodeData)
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Node Data';
+                ToolTip = 'Set up node texts and tooltips, and node visualisation styles.';
+                Image = DataEntry;
+                RunObject = page "Node Set Fields CS";
+                RunPageLink = "Node Set Code" = field(Code);
+            }
+        }
+    }
 }

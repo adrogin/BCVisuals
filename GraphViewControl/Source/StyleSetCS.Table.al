@@ -16,6 +16,10 @@ table 50107 "Style Set CS"
             TableRelation = "Style CS".Code;
             NotBlank = true;
         }
+        field(3; "Sorting Order"; Integer)
+        {
+            Caption = 'Sorting Order';
+        }
     }
 
     keys

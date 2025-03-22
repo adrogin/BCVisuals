@@ -63,7 +63,14 @@ page 50150 "Cost Source CS"
                     trigger OnNodeClick(NodeId: Text)
                     var
                         ItemLedgerEntry: Record "Item Ledger Entry";
+                        Node: JsonObject;
                     begin
+                        if not GraphViewController.FindNodeById(NodeId, Nodes, Node) then
+                            exit;
+
+                        if GraphViewController.IsCompoundNode(Node) then
+                            exit;
+
                         ItemLedgerEntry.Get(CostViewController.NodeId2ItemLedgEntryNo(NodeId));
                         Page.Run(Page::"Item Ledger Entries", ItemLedgerEntry);
                     end;
@@ -101,8 +108,8 @@ page 50150 "Cost Source CS"
 
     trigger OnInit()
     begin
-        GraphLayout := GraphLayout::Breadthfirst;
-        TraceDirection := Enum::"Cost Trace Direction"::Backward;
+        GraphLayout := CostViewController.GetDefaultLayout();
+        TraceDirection := Enum::"Cost Trace Direction CS"::Backward;
     end;
 
     local procedure SelectEntry(var NewEntryNo: Integer): Boolean
@@ -122,7 +129,7 @@ page 50150 "Cost Source CS"
         EntryNo := SelectedEntryNo;
     end;
 
-    procedure SetTraceDirection(Direction: Enum "Cost Trace Direction")
+    procedure SetTraceDirection(Direction: Enum "Cost Trace Direction CS")
     begin
         TraceDirection := Direction;
     end;
@@ -140,13 +147,15 @@ page 50150 "Cost Source CS"
     local procedure ShowCostApplicationGraph()
     var
         CostSourceTrace: Codeunit "Cost Application Trace CS";
-        Nodes: JsonArray;
-        Edges: JsonArray;
     begin
+        Clear(Nodes);
+        Clear(Edges);
         EntryInfo := FormatEntryInfo(EntryNo);
         CostSourceTrace.BuildCostSourceGraph(EntryNo, TraceDirection, Nodes, Edges);
         CostViewController.SetNodesData(Nodes);
-        CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()));
+        CurrPage.GraphControl.DrawGraphWithStyles(
+            'controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()),
+            GraphViewController.GraphLayoutEnumToText(GraphLayout));
         CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
         CurrPage.GraphControl.CreateTooltips();
     end;
@@ -157,5 +166,7 @@ page 50150 "Cost Source CS"
         GraphLayout: Enum "Graph Layout Name CS";
         EntryNo: Integer;
         EntryInfo: Text;
-        TraceDirection: Enum "Cost Trace Direction";
+        TraceDirection: Enum "Cost Trace Direction CS";
+        Nodes: JsonArray;
+        Edges: JsonArray;
 }

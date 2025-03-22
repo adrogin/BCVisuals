@@ -2,7 +2,7 @@
   "id": "c409250f-2d9c-4512-982c-f92511ef9497",
   "name": "Graph View Tests",
   "publisher": "ADR",
-  "version": "2.3.0.0",
+  "version": "2.4.0.0",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -15,7 +15,7 @@
       "id": "55ab618a-8619-41bd-84b5-ea53a62ee07b",
       "name": "Graph View Control",
       "publisher": "ADR",
-      "version": "2.3.0.0"    
+      "version": "2.4.0.0"    
     },
     {
       "id": "9856ae4f-d1a7-46ef-89bb-6ef056398228",

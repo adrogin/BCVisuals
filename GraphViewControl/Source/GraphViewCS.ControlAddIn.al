@@ -16,7 +16,9 @@ controladdin "Graph View CS"
     procedure CreateTooltips();
     procedure DestroyContextMenu();
     procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray);
+    procedure DrawGraph(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; LayoutName: Text);
     procedure DrawGraphWithStyles(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; Styles: JsonArray);
+    procedure DrawGraphWithStyles(ContainerElementName: Text; Nodes: JsonArray; Edges: JsonArray; Styles: JsonArray; LayoutName: Text);
     procedure InitializeDefaultContextMenu();
     procedure InitializeEdgeHandles();
     procedure RemoveEdges(EdgesToRemove: JsonArray);

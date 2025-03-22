@@ -230,3 +230,30 @@ describe('Graph elements manipulations', () => {
         expect(getGraphElements().filter(graphEdgesFilter).size()).toBe(1);
     });
 });
+
+describe('Events on compound nodes', () => {
+    test('OnNodeClick event called once when a child of a compound node is clicked', (done) => {
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+    
+        const onClickHandler = jest.fn(() => { done() });
+        renderGraph(
+            container,
+            [
+                { data: {'id': 'A'}, position: { x: 10, y: 10 }},
+                { data: {'id': 'B', 'parent': 'A'}, position: { x: 10, y: 10 }}
+            ],
+            null,
+            null,
+            onClickHandler);
+
+        let cy = getGraphElements().cy();
+        cy.pan({ x: 0, y: 0 });
+        cy.zoom(1);
+        cy.viewport({ zoom: 1, pan: { x: 0, y: 0 }});
+
+        document.dispatchEvent(new MouseEvent("click", { clientX: 10, clientY: 10 }));
+
+        expect(onClickHandler).toHaveBeenCalledTimes(1);
+    });
+});

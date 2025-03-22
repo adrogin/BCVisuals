@@ -4,19 +4,25 @@ import edgehandles from "cytoscape-edgehandles";
 import tippy from "tippy.js";
 import contextMenus from "cytoscape-context-menus";
 import { initializeContextMenu } from "./cycontextmenu.js";
+import fcose from 'cytoscape-fcose';
 
 import '../../CSS/style.css';
 
 cytoscape.use(popper);
 cytoscape.use(edgehandles);
 cytoscape.use(contextMenus);
+cytoscape.use(fcose);
 
 var cy;  // Global Cytoscape instance
 var eh;  // EdgeHandles instance
 
-function renderGraph(containerElement, nodes, edges, styles, eventCallbacks) {
+function renderGraph(containerElement, nodes, edges, styles, layout, eventCallbacks) {
   if (cy != null) {
     cy.destroy();
+  }
+
+  if (layout == undefined) {
+    layout = 'breadthfirst';
   }
 
   const defaultStyles = getDefaultElementStyles();
@@ -33,12 +39,14 @@ function renderGraph(containerElement, nodes, edges, styles, eventCallbacks) {
     style: styles,
 
     layout: {
-      name: 'breadthfirst'
+      name: layout,
+      animate: false
     }
   });
 
   createTextElements(nodes);
   bindCytoscapeEventHandlers(eventCallbacks);
+  console.log(cy.elements()[0]._private.position);
 }
 
 function bindCytoscapeEventHandlers(eventCallbacks) {
@@ -92,6 +100,9 @@ function formatNodes(nodeData) {
 }
 
 function formatEdges(edges) {
+  if (!edges) {
+    return;
+  }
   var edgeObjects = [];
 
   edges.forEach(edge => {
