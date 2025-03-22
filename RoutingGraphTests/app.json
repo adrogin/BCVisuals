@@ -2,7 +2,7 @@
   "id": "46513f69-bf2b-46c9-b75e-cc9102da2464",
   "name": "Routing Graph - Tests",
   "publisher": "ADR",
-  "version": "2.3.0.0",
+  "version": "2.4.0.0",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -15,7 +15,7 @@
       "id": "eaf8323a-6866-4936-8d94-d1ff922306ce",
       "name": "Routing Graph",
       "publisher": "ADR",
-      "version": "2.3.0.0"  
+      "version": "2.4.0.0"  
     },
     {
       "id": "dd0be2ea-f733-4d65-bb34-a28f4624fb14",
