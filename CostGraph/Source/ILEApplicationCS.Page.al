@@ -38,11 +38,8 @@ page 50151 "ILE Application CS"
                     end;
 
                     trigger OnNodeClick(NodeId: Text)
-                    var
-                        ItemLedgerEntry: Record "Item Ledger Entry";
                     begin
-                        ItemLedgerEntry.Get(CostViewController.NodeId2ItemLedgEntryNo(NodeId));
-                        Page.Run(Page::"Item Ledger Entries", ItemLedgerEntry);
+                        CostViewController.HandleNodeClick(NodeId, Nodes);
                     end;
 
                     trigger OnEdgeDrawingDone(SourceNode: JsonObject; TargetNode: JsonObject; AddedEdge: JsonObject)
@@ -72,9 +69,9 @@ page 50151 "ILE Application CS"
                             exit;
 
                         if RemoveApplications(RemovedEdge) then begin
-                            RemoveEdgeFromCollection(RemovedEdge.AsToken());
-                            RefreshNode(GraphNodeDataMgt.GetValueFromObject(RemovedEdge.AsToken(), 'source'));
-                            RefreshNode(GraphNodeDataMgt.GetValueFromObject(RemovedEdge.AsToken(), 'target'));
+                            GraphJsonArray.RemoveEdgeFromCollection(Edges, RemovedEdge.AsToken());
+                            RefreshNode(GraphJsonObject.GetValueFromObject(RemovedEdge.AsToken(), 'source'));
+                            RefreshNode(GraphJsonObject.GetValueFromObject(RemovedEdge.AsToken(), 'target'));
                         end
                         else begin
                             EdgesArray.Add(RemovedEdge);
@@ -222,33 +219,15 @@ page 50151 "ILE Application CS"
         // If the gesture completes successfully on a real node, a new edge connecting the source and the target nodes is created, and the virtual pair is deleted.
         // All these events must be ignored and not trigger cost application actions. The vrtual node has a GUID identifier which will not be found in the cost graph data.
 
-        if not TrySelectNodeToken(Edge.AsToken(), NodeFound) then
+        if not GraphJsonArray.TrySelectNode(Nodes, GraphJsonObject.GetValueFromObject(Edge.AsToken(), 'target'), NodeFound) then
             exit(true);
 
         exit(not NodeFound);
     end;
 
-    [TryFunction]
-    local procedure TrySelectNodeToken(Edge: JsonToken; var NodeFound: Boolean)
-    var
-        SelectedNode: JsonToken;
-        NodeSelectorTok: Label '$[?(@.id==%1)].id', Comment = '%1: ID of the node to search', Locked = true;
-    begin
-        NodeFound := Nodes.SelectToken(StrSubstNo(NodeSelectorTok, GraphNodeDataMgt.GetValueFromObject(Edge, 'target')), SelectedNode);
-    end;
-
     procedure SetItemLedgEntryFilters(var ItemLedgerEntry: Record "Item Ledger Entry")
     begin
         FilteredItemLedgEntry.CopyFilters(ItemLedgerEntry);
-    end;
-
-    local procedure RemoveEdgeFromCollection(Edge: JsonToken)
-    var
-        SelectedEdge: JsonToken;
-        EdgeSelectorTok: Label '$[?(@.source=%1 && @.target=%2)]', Comment = '%1: ID of the source node, %2: ID of the target node', Locked = true;
-    begin
-        if Edges.SelectToken(StrSubstNo(EdgeSelectorTok, GraphNodeDataMgt.GetValueFromObject(Edge, 'source'), GraphNodeDataMgt.GetValueFromObject(Edge, 'target')), SelectedEdge) then
-            Edges.RemoveAt(Edges.IndexOf(SelectedEdge));
     end;
 
     local procedure RefreshNode(NodeId: Text)
@@ -258,12 +237,12 @@ page 50151 "ILE Application CS"
     begin
         Node.Add('id', NodeId);
         CostViewController.SetItemLedgEntryNodeProperties(Node, GroupNodes);
-        CurrPage.GraphControl.SetNodeData(GraphNodeDataMgt.GetValueFromObject(Node.AsToken(), 'id'), Node);
+        CurrPage.GraphControl.SetNodeData(GraphJsonObject.GetValueFromObject(Node.AsToken(), 'id'), Node);
     end;
 
     local procedure RefreshNode(Node: JsonObject)
     begin
-        RefreshNode(GraphNodeDataMgt.GetValueFromObject(Node.AsToken(), 'id'));
+        RefreshNode(GraphJsonObject.GetValueFromObject(Node.AsToken(), 'id'));
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -309,7 +288,8 @@ page 50151 "ILE Application CS"
         FilteredItemLedgEntry: Record "Item Ledger Entry";
         GraphViewController: Codeunit "Graph View Controller CS";
         CostViewController: Codeunit "Cost View Controller CS";
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphJsonArray: Codeunit "Graph Json Array";
+        GraphJsonObject: Codeunit "Graph Json Object";
         ApplnWorksheetEdit: Codeunit "Appln. Worksheet - Edit CS";
         GraphLayout: Enum "Graph Layout Name CS";
         IsEditModeEnabled: Boolean;

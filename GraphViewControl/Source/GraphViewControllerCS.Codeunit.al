@@ -1,48 +1,5 @@
 codeunit 50101 "Graph View Controller CS"
 {
-    procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Text)
-    var
-        Node: JsonObject;
-    begin
-        Node.Add('id', NodeId);
-        Nodes.Add(Node);
-    end;
-
-    procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Integer)
-    var
-        Node: JsonObject;
-    begin
-        Node.Add('id', NodeId);
-        Nodes.Add(Node);
-    end;
-
-    procedure AddCompoundNodeToArray(var Nodes: JsonArray; NodeId: Text)
-    var
-        Node: JsonObject;
-    begin
-        Node.Add('id', NodeId);
-        Node.Add('compound', true);
-        Nodes.Add(Node);
-    end;
-
-    procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Text; TargetNodeId: Text)
-    var
-        Edge: JsonObject;
-    begin
-        Edge.Add('source', Format(SourceNodeId));
-        Edge.Add('target', Format(TargetNodeId));
-        Edges.Add(Edge);
-    end;
-
-    procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Integer; TargetNodeId: Integer)
-    var
-        Edge: JsonObject;
-    begin
-        Edge.Add('source', Format(SourceNodeId));
-        Edge.Add('target', Format(TargetNodeId));
-        Edges.Add(Edge);
-    end;
-
     procedure ConvertFieldNameToJsonToken(NodeSetField: Record "Node Set Field CS") ConvertedName: Text[80]
     begin
         if (NodeSetField."Table No." <> 0) and (NodeSetField."Field No." <> 0) then
@@ -71,21 +28,6 @@ codeunit 50101 "Graph View Controller CS"
     begin
         for I := 1 to StrLen(FieldName) do
             ConvertedName := CopyStr(ConvertedName + ReplaceSymbolIfNotAllowedInPropertyName(FieldName[I]), 1, MaxStrLen(ConvertedName));
-    end;
-
-    procedure FindNodeById(NodeId: Text; Nodes: JsonArray; var SelectedNode: JsonObject): Boolean
-    var
-        NodeSelectorTok: Label '$[?(@.id==%1)]', Comment = '%1: ID of the node to search', Locked = true;
-        Node: JsonToken;
-        NodeFound: Boolean;
-    begin
-        NodeFound := Nodes.SelectToken(StrSubstNo(NodeSelectorTok, NodeId), Node);
-
-        if not NodeFound then
-            exit(false);
-
-        SelectedNode := Node.AsObject();
-        exit(true);
     end;
 
     procedure IsCompoundNode(Node: JsonObject): Boolean

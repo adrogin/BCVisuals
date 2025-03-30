@@ -1,5 +1,36 @@
 codeunit 50150 "Cost Application Trace CS"
 {
+    procedure BuildCostSourceGraph(DocumentType: Enum "Item Ledger Document Type"; DocumentNo: Code[20]; Direction: Enum "Cost Trace Direction CS"; var Nodes: JsonArray; var Edges: JsonArray)
+    var
+        ItemLedgEntry: Record "Item Ledger Entry";
+        InterimNodes, InterimEdges : JsonArray;
+    begin
+        // Handle special cases for production and assembly where applications between entries are possible within the same document.
+        if DocumentType = Enum::"Item Ledger Document Type"::"Posted Assembly" then begin
+            ItemLedgEntry.SetRange("Entry Type", Enum::"Item Ledger Entry Type"::"Assembly Output");
+            if ItemLedgEntry.IsEmpty() then
+                ItemLedgEntry.SetRange("Entry Type", Enum::"Item Ledger Entry Type"::"Assembly Consumption");
+        end
+        else
+            if DocumentType = Enum::"Item Ledger Document Type"::" " then begin
+                ItemLedgEntry.SetRange("Order Type", ItemLedgEntry."Order Type"::Production);
+                ItemLedgEntry.SetRange("Entry Type", Enum::"Item Ledger Entry Type"::Output);
+                if ItemLedgEntry.IsEmpty() then
+                    ItemLedgEntry.SetRange("Entry Type", Enum::"Item Ledger Entry Type"::Consumption);
+            end;
+
+        ItemLedgEntry.SetRange("Document Type", DocumentType);
+        ItemLedgEntry.SetRange("Document No.", DocumentNo);
+        if ItemLedgEntry.FindSet() then
+            repeat
+                if not GraphJsonArray.ContainsNode(Nodes, ItemLedgEntry."Entry No.") then begin
+                    BuildCostSourceGraph(ItemLedgEntry."Entry No.", Direction, InterimNodes, InterimEdges);
+                    GraphJsonArray.MergeNodeArrays(Nodes, InterimNodes);
+                    GraphJsonArray.MergeEdgeArrays(Edges, InterimEdges);
+                end;
+            until ItemLedgEntry.Next() = 0;
+    end;
+
     procedure BuildCostSourceGraph(ItemLedgEntryNo: Integer; var Nodes: JsonArray; var Edges: JsonArray)
     begin
         BuildCostSourceGraph(ItemLedgEntryNo, Enum::"Cost Trace Direction CS"::Backward, Nodes, Edges);
@@ -12,6 +43,8 @@ codeunit 50150 "Cost Application Trace CS"
         ItemCostFlowBuf.Reset();
         ItemCostFlowBuf.DeleteAll();
         TempVisitedItemApplnEntry.DeleteAll();
+        Clear(Nodes);
+        Clear(Edges);
 
         FromItemLedgerEntry.Get(ItemLedgEntryNo);
         TraceCost(FromItemLedgerEntry, Direction, 0);
@@ -292,20 +325,20 @@ codeunit 50150 "Cost Application Trace CS"
         if DistinctNodes.Get(NodeId) then
             exit;
 
-        GraphViewController.AddNodeToArray(Nodes, NodeId);
+        GraphJsonArray.AddNodeToArray(Nodes, NodeId);
         DistinctNodes.Number := NodeId;
         DistinctNodes.Insert();
     end;
 
     local procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Integer; TargetNodeId: Integer)
     begin
-        GraphViewController.AddEdgeToArray(Edges, SourceNodeId, TargetNodeId);
+        GraphJsonArray.AddEdgeToArray(Edges, SourceNodeId, TargetNodeId);
     end;
 
     var
         ItemCostFlowBuf: Record "Item Cost Flow Buf. CS";
         TempVisitedItemApplnEntry: Record "Item Application Entry" temporary;
-        GraphViewController: Codeunit "Graph View Controller CS";
+        GraphJsonArray: Codeunit "Graph Json Array";
         LastEntryNo: Integer;
         MaxDepth: Integer;
 }

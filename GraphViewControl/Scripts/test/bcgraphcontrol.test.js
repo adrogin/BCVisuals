@@ -2,6 +2,8 @@ import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAll
     addNodes, addEdges, removeNodes, removeEdges
 } from "../src/cytograph";
 
+import 'jest-canvas-mock';
+
 import {
     graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithData, getSampleNodeTooltipsArray, 
     getSampleGraphElementArraysWithLabels, nodeIdFilter, edgeNodesFilter
@@ -232,10 +234,16 @@ describe('Graph elements manipulations', () => {
 });
 
 describe('Events on compound nodes', () => {
-    test('OnNodeClick event called once when a child of a compound node is clicked', (done) => {
-        const container = document.createElement("div");
+    let container;
+
+    beforeAll(() => {
+        container = document.createElement("div");
+        container.style.width = '100px';
+        container.style.height = '100px';
         document.body.appendChild(container);
-    
+    });
+
+    test('OnNodeClick event called once when a child of a compound node is clicked', (done) => {    
         const onClickHandler = jest.fn(() => { done() });
         renderGraph(
             container,
@@ -243,16 +251,25 @@ describe('Events on compound nodes', () => {
                 { data: {'id': 'A'}, position: { x: 10, y: 10 }},
                 { data: {'id': 'B', 'parent': 'A'}, position: { x: 10, y: 10 }}
             ],
-            null,
-            null,
-            onClickHandler);
+            null,  // No edges
+            null,  // Use default styles
+            null,  // Use default layout
+            [onClickHandler]);
 
         let cy = getGraphElements().cy();
         cy.pan({ x: 0, y: 0 });
         cy.zoom(1);
         cy.viewport({ zoom: 1, pan: { x: 0, y: 0 }});
 
-        document.dispatchEvent(new MouseEvent("click", { clientX: 10, clientY: 10 }));
+        document.dispatchEvent(
+            new MouseEvent("click", {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                clientX: 10,
+                clientY: 10
+            })
+        );
 
         expect(onClickHandler).toHaveBeenCalledTimes(1);
     });

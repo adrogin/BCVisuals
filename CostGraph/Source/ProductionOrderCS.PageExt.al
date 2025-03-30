@@ -1,19 +1,17 @@
-pageextension 50152 "Item Ledger Entries CS" extends "Item Ledger Entries"
+pageextension 50154 "Production Order CS" extends "Finished Production Order"
 {
     actions
     {
-        addlast("Ent&ry")
+        addlast("E&ntries")
         {
             action(TraceInboundCostApplications)
             {
                 ApplicationArea = Basic, Suite;
                 Caption = 'Trace Inbound Cost Applications';
-                ToolTip = 'Trace the inbound cost applications for the selected item ledger entry and present the cost sources in a graph view.';
+                ToolTip = 'Trace the inbound cost applications for all item ledger entries in the selected production order and present the cost sources in a graph view.';
                 Image = Return;
 
                 trigger OnAction()
-                var
-                    CostSource: Page "Cost Source CS";
                 begin
                     CostSource.SetTraceStart(Rec);
                     CostSource.SetTraceDirection(Enum::"Cost Trace Direction CS"::Backward);
@@ -24,12 +22,10 @@ pageextension 50152 "Item Ledger Entries CS" extends "Item Ledger Entries"
             {
                 ApplicationArea = Basic, Suite;
                 Caption = 'Trace Outbound Cost Applications';
-                ToolTip = 'Trace the outbound cost applications for the selected item ledger entry and present the affected ledger entries in a graph view.';
+                ToolTip = 'Trace the outbound cost applications for all item ledger entries in the selected production order and present the affected ledger entries in a graph view.';
                 Image = GoTo;
 
                 trigger OnAction()
-                var
-                    CostSource: Page "Cost Source CS";
                 begin
                     CostSource.SetTraceStart(Rec);
                     CostSource.SetTraceDirection(Enum::"Cost Trace Direction CS"::Forward);
@@ -38,4 +34,6 @@ pageextension 50152 "Item Ledger Entries CS" extends "Item Ledger Entries"
             }
         }
     }
+    var
+        CostSource: Page "Cost Source CS";
 }

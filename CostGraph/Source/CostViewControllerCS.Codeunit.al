@@ -2,6 +2,7 @@ codeunit 50151 "Cost View Controller CS"
 {
     procedure SetNodesData(var Nodes: JsonArray)
     var
+        GraphJsonArray: Codeunit "Graph Json Array";
         GroupNodes: List of [Text];
         GroupNodeId: Text;
         Node: JsonToken;
@@ -10,7 +11,7 @@ codeunit 50151 "Cost View Controller CS"
             SetItemLedgEntryNodeProperties(Node, GroupNodes);
 
         foreach GroupNodeId in GroupNodes do
-            GraphViewController.AddCompoundNodeToArray(Nodes, GroupNodeId);
+            GraphJsonArray.AddCompoundNodeToArray(Nodes, GroupNodeId);
     end;
 
     procedure GetDefaultNodeSet(): Code[20]
@@ -77,6 +78,22 @@ codeunit 50151 "Cost View Controller CS"
     procedure NodeId2ItemLedgEntryNo(NodeId: Text) ItemLedgerEntryNo: Integer
     begin
         Evaluate(ItemLedgerEntryNo, NodeId);
+    end;
+
+    procedure HandleNodeClick(ClickedNodeId: Text; Nodes: JsonArray)
+    var
+        ItemLedgerEntry: Record "Item Ledger Entry";
+        GraphJsonArray: Codeunit "Graph Json Array";
+        Node: JsonObject;
+    begin
+        if not GraphJsonArray.SelectNode(ClickedNodeId, Nodes, Node) then
+            exit;
+
+        if GraphViewController.IsCompoundNode(Node) then
+            exit;
+
+        ItemLedgerEntry.Get(NodeId2ItemLedgEntryNo(ClickedNodeId));
+        Page.Run(Page::"Item Ledger Entries", ItemLedgerEntry);
     end;
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Graph View Controller CS", 'OnBeforeIsIdField', '', false, false)]

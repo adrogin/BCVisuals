@@ -13,11 +13,11 @@ codeunit 50154 "Unapply Item Ledger Entries CS"
     local procedure RemoveApplications(GraphEdge: JsonObject)
     var
         ItemLedgerEntry: Record "Item Ledger Entry";
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphJsonObject: Codeunit "Graph Json Object";
         SourceId, TargetId : Integer;
     begin
-        SourceId := ApplnWorksheetEdit.EvaluateTextToInt(GraphNodeDataMgt.GetValueFromObject(GraphEdge.AsToken(), 'source'));
-        TargetId := ApplnWorksheetEdit.EvaluateTextToInt(GraphNodeDataMgt.GetValueFromObject(GraphEdge.AsToken(), 'target'));
+        SourceId := ApplnWorksheetEdit.EvaluateTextToInt(GraphJsonObject.GetValueFromObject(GraphEdge.AsToken(), 'source'));
+        TargetId := ApplnWorksheetEdit.EvaluateTextToInt(GraphJsonObject.GetValueFromObject(GraphEdge.AsToken(), 'target'));
         ItemLedgerEntry.Get(SourceId);
 
         if ItemLedgerEntry.Positive then
