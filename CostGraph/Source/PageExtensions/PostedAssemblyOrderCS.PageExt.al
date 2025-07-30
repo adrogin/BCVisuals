@@ -1,0 +1,35 @@
+pageextension 50165 "Posted Assembly Order CS" extends "Posted Assembly Order"
+{
+    actions
+    {
+        addlast(navigation)
+        {
+            action(TraceInboundCostApplications)
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Trace Inbound Cost Applications';
+                ToolTip = 'Trace inbound cost applications for all item ledger entries in the selected assembly order and present the cost sources in a graph view.';
+                Image = Return;
+
+                trigger OnAction()
+                begin
+                    NodeSourceDocument.RunCostTrace(Rec, Enum::"Cost Trace Direction CS"::Backward);
+                end;
+            }
+            action(TraceOutboundCostApplications)
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Trace Outbound Cost Applications';
+                ToolTip = 'Trace outbound cost applications for all item ledger entries in the selected assembly order and present the affected ledger entries in a graph view.';
+                Image = GoTo;
+
+                trigger OnAction()
+                begin
+                    NodeSourceDocument.RunCostTrace(Rec, Enum::"Cost Trace Direction CS"::Forward);
+                end;
+            }
+        }
+    }
+    var
+        NodeSourceDocument: Codeunit "Node Source Document CS";
+}

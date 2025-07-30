@@ -61,5 +61,5 @@ table 50107 "Style Set CS"
     end;
 
     var
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphNodeDataMgt: Codeunit "Graph Node CS";
 }

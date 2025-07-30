@@ -12,12 +12,8 @@ pageextension 50152 "Item Ledger Entries CS" extends "Item Ledger Entries"
                 Image = Return;
 
                 trigger OnAction()
-                var
-                    CostSource: Page "Cost Source CS";
                 begin
-                    CostSource.SetTraceStart(Rec);
-                    CostSource.SetTraceDirection(Enum::"Cost Trace Direction CS"::Backward);
-                    CostSource.Run();
+                    NodeSourceDocument.RunCostTrace(Rec, Enum::"Cost Trace Direction CS"::Backward);
                 end;
             }
             action(TraceOutboundCostApplications)
@@ -28,14 +24,13 @@ pageextension 50152 "Item Ledger Entries CS" extends "Item Ledger Entries"
                 Image = GoTo;
 
                 trigger OnAction()
-                var
-                    CostSource: Page "Cost Source CS";
                 begin
-                    CostSource.SetTraceStart(Rec);
-                    CostSource.SetTraceDirection(Enum::"Cost Trace Direction CS"::Forward);
-                    CostSource.Run();
+                    NodeSourceDocument.RunCostTrace(Rec, Enum::"Cost Trace Direction CS"::Forward);
                 end;
             }
         }
     }
+
+    var
+        NodeSourceDocument: Codeunit "Node Source Document CS";
 }

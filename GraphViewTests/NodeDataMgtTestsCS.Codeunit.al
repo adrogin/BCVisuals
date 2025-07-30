@@ -418,7 +418,7 @@ codeunit 60100 "Node Data Mgt. Tests CS"
     end;
 
     var
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphNodeDataMgt: Codeunit "Graph Node CS";
         LibraryUtility: Codeunit "Library - Utility";
         LibraryAssert: Codeunit "Library Assert";
         LibraryVariableStorage: Codeunit "Library - Variable Storage";

@@ -47,11 +47,11 @@ page 50104 "Selectors CS"
                     trigger OnAssistEdit()
                     var
                         SelectorFilter: Record "Selector Filter CS";
-                        GraphViewController: Codeunit "Graph View Controller CS";
+                        GraphDataManagement: Codeunit "Graph Data Management CS";
                     begin
                         SelectorFilter.SetRange("Selector Code", Rec.Code);
                         if Page.RunModal(0, SelectorFilter) = Action::LookupOK then
-                            Rec."Selector Text" := CopyStr(GraphViewController.FormatSelectorText(Rec.Code), 1, MaxStrLen(Rec."Selector Text"));
+                            Rec."Selector Text" := CopyStr(GraphDataManagement.FormatSelectorText(Rec.Code), 1, MaxStrLen(Rec."Selector Text"));
                     end;
                 }
             }

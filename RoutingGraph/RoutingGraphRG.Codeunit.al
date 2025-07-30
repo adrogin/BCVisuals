@@ -72,7 +72,7 @@ codeunit 50250 "Routing Graph RG"
         OperationNo: Code[20];
     begin
         foreach Node in Nodes do begin
-            OperationNo := CopyStr(GraphNodeDataMgt.GetValueFromObject(Node, 'id'), 1, MaxStrLen(OperationNo));
+            OperationNo := CopyStr(GraphJsonObject.GetValueFromObject(Node, 'id'), 1, MaxStrLen(OperationNo));
 
             if not RoutingLineExists(RoutingNo, VersionCode, OperationNo) then begin
                 RoutingLine.Validate("Routing No.", RoutingNo);
@@ -100,7 +100,7 @@ codeunit 50250 "Routing Graph RG"
         RoutingLine.ModifyAll("Previous Operation No.", '');
 
         foreach Node in Nodes do begin
-            RoutingLine.Get(RoutingNo, VersionCode, GraphNodeDataMgt.GetValueFromObject(Node, 'id'));
+            RoutingLine.Get(RoutingNo, VersionCode, GraphJsonObject.GetValueFromObject(Node, 'id'));
             LineUpdated := false;
 
             if NextOperations.Get(RoutingLine."Operation No.", OperationFilter) then begin
@@ -128,8 +128,8 @@ codeunit 50250 "Routing Graph RG"
         Clear(NextOperations);
 
         foreach Edge in Edges do begin
-            SourceNodeId := GraphNodeDataMgt.GetValueFromObject(Edge, 'source');
-            TargetNodeId := GraphNodeDataMgt.GetValueFromObject(Edge, 'target');
+            SourceNodeId := GraphJsonObject.GetValueFromObject(Edge, 'source');
+            TargetNodeId := GraphJsonObject.GetValueFromObject(Edge, 'target');
             AddEdgeToSequenceDictionary(SourceNodeId, TargetNodeId, NextOperations);
             AddEdgeToSequenceDictionary(TargetNodeId, SourceNodeId, PreviousOperations);
         end;
@@ -205,9 +205,9 @@ codeunit 50250 "Routing Graph RG"
         Node: JsonToken;
     begin
         foreach Node in Nodes do begin
-            RoutingLine.Get(RoutingNo, VersionCode, GraphViewController.GetNodeIdAsText(Node.AsObject()));
+            RoutingLine.Get(RoutingNo, VersionCode, GraphDataManagement.GetNodeIdAsText(Node.AsObject()));
             RecRef.GetTable(RoutingLine);
-            TooltipsArray.Add(GraphViewController.GetNodeTooltip(RecRef, Format(RoutingLine."Operation No."), GetDefaultNodeSet()));
+            TooltipsArray.Add(GraphDataManagement.GetNodeTooltip(RecRef, Format(RoutingLine."Operation No."), GetDefaultNodeSet()));
         end;
 
         exit(TooltipsArray);
@@ -218,13 +218,13 @@ codeunit 50250 "Routing Graph RG"
         RoutingLine: Record "Routing Line";
         RecRef: RecordRef;
     begin
-        RoutingLine.Get(RoutingNo, VersionCode, GraphViewController.GetNodeIdAsText(Node.AsObject()));
+        RoutingLine.Get(RoutingNo, VersionCode, GraphDataManagement.GetNodeIdAsText(Node.AsObject()));
         RecRef.GetTable(RoutingLine);
-        GraphViewController.SetNodeProperties(Node, RecRef, GetDefaultNodeSet());
+        GraphDataManagement.SetNodeProperties(Node, RecRef, GetDefaultNodeSet());
     end;
 
     var
-        GraphViewController: Codeunit "Graph View Controller CS";
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphDataManagement: Codeunit "Graph Data Management CS";
+        GraphJsonObject: Codeunit "Graph Json Object CS";
         VisitedNodes: List of [Code[30]];
 }

@@ -1,4 +1,4 @@
-codeunit 50102 "Graph Json Array"
+codeunit 50102 "Graph Json Array CS"
 {
     procedure ContainsNode(Nodes: JsonArray; NodeId: Variant): Boolean
     var
@@ -19,16 +19,7 @@ codeunit 50102 "Graph Json Array"
     var
         Node: JsonObject;
     begin
-        Node.Add('id', NodeId);
-        Nodes.Add(Node);
-    end;
-
-    procedure AddCompoundNodeToArray(var Nodes: JsonArray; NodeId: Text)
-    var
-        Node: JsonObject;
-    begin
-        Node.Add('id', NodeId);
-        Node.Add('compound', true);
+        Node.Add('id', Format(NodeId));
         Nodes.Add(Node);
     end;
 
@@ -81,7 +72,7 @@ codeunit 50102 "Graph Json Array"
 
     procedure SelectNode(NodeId: Variant; Nodes: JsonArray; var SelectedNode: JsonObject): Boolean
     var
-        NodeSelectorTok: Label '$[?(@.id==%1)]', Comment = '%1: ID of the node to search', Locked = true;
+        NodeSelectorTok: Label '$[?(@.id==''%1'')]', Comment = '%1: ID of the node to search', Locked = true;
         Node: JsonToken;
         NodeFound: Boolean;
     begin
@@ -98,7 +89,7 @@ codeunit 50102 "Graph Json Array"
     procedure TrySelectNode(Nodes: JsonArray; NodeId: Text; var NodeFound: Boolean)
     var
         SelectedNode: JsonToken;
-        NodeSelectorTok: Label '$[?(@.id==%1)].id', Comment = '%1: ID of the node to search', Locked = true;
+        NodeSelectorTok: Label '$[?(@.id==''%1'')].id', Comment = '%1: ID of the node to search', Locked = true;
     begin
         NodeFound := Nodes.SelectToken(StrSubstNo(NodeSelectorTok, NodeId), SelectedNode);
     end;
@@ -106,12 +97,12 @@ codeunit 50102 "Graph Json Array"
     procedure RemoveEdgeFromCollection(Edges: JsonArray; EdgeToRemove: JsonToken)
     var
         SelectedEdge: JsonToken;
-        EdgeSelectorTok: Label '$[?(@.source=%1 && @.target=%2)]', Comment = '%1: ID of the source node, %2: ID of the target node', Locked = true;
+        EdgeSelectorTok: Label '$[?(@.source=''%1'' && @.target=''%2'')]', Comment = '%1: ID of the source node, %2: ID of the target node', Locked = true;
     begin
         if Edges.SelectToken(StrSubstNo(EdgeSelectorTok, GraphJsonObject.GetValueFromObject(EdgeToRemove, 'source'), GraphJsonObject.GetValueFromObject(EdgeToRemove, 'target')), SelectedEdge) then
             Edges.RemoveAt(Edges.IndexOf(SelectedEdge));
     end;
 
     var
-        GraphJsonObject: Codeunit "Graph Json Object";
+        GraphJsonObject: Codeunit "Graph Json Object CS";
 }

@@ -14,6 +14,15 @@ codeunit 60102 "Library - Graph View CS"
         NodeSetField.Insert(true);
     end;
 
+    procedure AddNodeSetGroupField(NodeSetCode: Code[20]; FieldNo: Integer)
+    var
+        NodeSetGroupField: Record "Node Set Group Field CS";
+    begin
+        NodeSetGroupField.Validate("Node Set Code", NodeSetCode);
+        NodeSetGroupField.Validate("Field No.", FieldNo);
+        NodeSetGroupField.Insert(true);
+    end;
+
     procedure AddNodeTextField(NodeSetCode: Code[20]; SequenceNo: Integer; FieldNo: Integer; FieldType: Enum "Node Text Type CS")
     var
         NodeTextField: Record "Node Text Field CS";

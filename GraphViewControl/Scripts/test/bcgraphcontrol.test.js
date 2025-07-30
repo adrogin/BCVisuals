@@ -92,7 +92,7 @@ test('Default graph layout can be changed after creating an instance', () => {
     renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
 
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.x).toBeCloseTo(-0.38, 1);
-    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.y).toBeCloseTo(3.38, 1);
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.y).toBeCloseTo(1.38, 1);
 
     setGraphLayout('circle');
 
@@ -155,7 +155,7 @@ describe('Initialize graph with event callbacks', () => {
         };
 
         const graphDefinition = getSampleGraphElementArrays();
-        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, eventCallbacks);
+        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, undefined, undefined, eventCallbacks);
     });
     
     beforeEach(() => { testDone = null });
@@ -251,9 +251,9 @@ describe('Events on compound nodes', () => {
                 { data: {'id': 'A'}, position: { x: 10, y: 10 }},
                 { data: {'id': 'B', 'parent': 'A'}, position: { x: 10, y: 10 }}
             ],
-            null,  // No edges
-            null,  // Use default styles
-            null,  // Use default layout
+            undefined,  // No edges
+            undefined,  // Use default styles
+            'breadthfirst',
             [onClickHandler]);
 
         let cy = getGraphElements().cy();

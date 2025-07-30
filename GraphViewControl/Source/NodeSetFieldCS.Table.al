@@ -22,9 +22,9 @@ table 50101 "Node Set Field CS"
 
             trigger OnValidate()
             var
-                GraphViewController: Codeunit "Graph View Controller CS";
+                GraphDataManagement: Codeunit "Graph Data Management CS";
             begin
-                "Json Property Name" := GraphViewController.ConvertFieldNameToJsonToken(Rec);
+                "Json Property Name" := GraphDataManagement.ConvertFieldNameToJsonToken(Rec);
             end;
         }
         field(6; "Field Name"; Text[80])

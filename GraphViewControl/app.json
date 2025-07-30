@@ -11,6 +11,13 @@
   "url": "",
   "logo": "",
   "dependencies": [],
+  "internalsVisibleTo": [
+    {
+      "id": "c409250f-2d9c-4512-982c-f92511ef9497",
+      "name": "Graph View Tests",
+      "publisher": "ADR"
+    }
+  ],
   "screenshots": [],
   "platform": "1.0.0.0",
   "application": "23.0.0.0",
@@ -25,7 +32,7 @@
     "allowDownloadingSource": true,
     "includeSourceInSymbolFile": true
   },
-  "runtime": "12.0",
+  "runtime": "14.0",
   "features": [
     "NoImplicitWith"
   ]

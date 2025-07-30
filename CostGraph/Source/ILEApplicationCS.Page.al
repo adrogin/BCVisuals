@@ -20,7 +20,7 @@ page 50151 "ILE Application CS"
 
                     trigger OnValidate()
                     begin
-                        CurrPage.GraphControl.SetLayout(GraphViewController.GraphLayoutEnumToText(GraphLayout));
+                        CurrPage.GraphControl.SetLayout(GraphDataManagement.GraphLayoutEnumToText(GraphLayout));
                     end;
                 }
             }
@@ -39,7 +39,7 @@ page 50151 "ILE Application CS"
 
                     trigger OnNodeClick(NodeId: Text)
                     begin
-                        CostViewController.HandleNodeClick(NodeId, Nodes);
+                        CostGraph.HandleNodeClick(NodeId, GraphNodes);
                     end;
 
                     trigger OnEdgeDrawingDone(SourceNode: JsonObject; TargetNode: JsonObject; AddedEdge: JsonObject)
@@ -200,12 +200,12 @@ page 50151 "ILE Application CS"
 
     local procedure InitializeGraph()
     begin
-        Clear(Nodes);
+        Clear(GraphNodes);
         Clear(Edges);
-        ApplnWorksheetEdit.BuildApplnWorksheetGraph(FilteredItemLedgEntry, Nodes, Edges);
-        CostViewController.SetNodesData(Nodes);
-        CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()));
-        CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
+        ApplnWorksheetEdit.BuildApplnWorksheetGraph(FilteredItemLedgEntry, GraphNodes, Edges);
+        CostGraph.SetNodesData(GraphNodes);
+        CurrPage.GraphControl.DrawGraphWithStyles('controlAddIn', GraphNodes, Edges, GraphDataManagement.GetStylesAsJson(CostGraph.GetDefaultNodeSet()));
+        CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostGraph.GetNodeTooltipsArray(GraphNodes));
         CurrPage.GraphControl.CreateTooltips();
         CurrPage.GraphControl.InitializeEdgeHandles();  // Initialize necessary components to support edit mode
         CurrPage.GraphControl.SetEditModeEnabled(IsEditModeEnabled);
@@ -219,7 +219,7 @@ page 50151 "ILE Application CS"
         // If the gesture completes successfully on a real node, a new edge connecting the source and the target nodes is created, and the virtual pair is deleted.
         // All these events must be ignored and not trigger cost application actions. The vrtual node has a GUID identifier which will not be found in the cost graph data.
 
-        if not GraphJsonArray.TrySelectNode(Nodes, GraphJsonObject.GetValueFromObject(Edge.AsToken(), 'target'), NodeFound) then
+        if not GraphJsonArray.TrySelectNode(GraphNodes, GraphJsonObject.GetValueFromObject(Edge.AsToken(), 'target'), NodeFound) then
             exit(true);
 
         exit(not NodeFound);
@@ -233,10 +233,10 @@ page 50151 "ILE Application CS"
     local procedure RefreshNode(NodeId: Text)
     var
         Node: JsonObject;
-        GroupNodes: List of [Text];
+        GroupNodes: Dictionary of [Text, JsonObject];
     begin
         Node.Add('id', NodeId);
-        CostViewController.SetItemLedgEntryNodeProperties(Node, GroupNodes);
+        CostGraph.SetItemLedgEntryNodeProperties(Node, GroupNodes, CostGraph.GetDefaultNodeSet());
         CurrPage.GraphControl.SetNodeData(GraphJsonObject.GetValueFromObject(Node.AsToken(), 'id'), Node);
     end;
 
@@ -286,14 +286,14 @@ page 50151 "ILE Application CS"
 
     var
         FilteredItemLedgEntry: Record "Item Ledger Entry";
-        GraphViewController: Codeunit "Graph View Controller CS";
-        CostViewController: Codeunit "Cost View Controller CS";
-        GraphJsonArray: Codeunit "Graph Json Array";
-        GraphJsonObject: Codeunit "Graph Json Object";
+        GraphDataManagement: Codeunit "Graph Data Management CS";
+        CostGraph: Codeunit "Cost Graph CS";
+        GraphJsonArray: Codeunit "Graph Json Array CS";
+        GraphJsonObject: Codeunit "Graph Json Object CS";
         ApplnWorksheetEdit: Codeunit "Appln. Worksheet - Edit CS";
         GraphLayout: Enum "Graph Layout Name CS";
         IsEditModeEnabled: Boolean;
-        Nodes, Edges : JsonArray;
+        GraphNodes, Edges : JsonArray;
         CloseWindowQst: Label 'After the window is closed, the system will check for and reapply open entries.\Do you want to close the window?';
         RevertAllQst: Label 'Are you sure that you want to undo all changes?';
         NothingToRevertMsg: Label 'Nothing to undo.';

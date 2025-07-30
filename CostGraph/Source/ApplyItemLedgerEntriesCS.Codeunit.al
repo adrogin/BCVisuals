@@ -4,7 +4,7 @@ codeunit 50153 "Apply Item Ledger Entries CS"
 
     trigger OnRun()
     var
-        GraphJsonObject: Codeunit "Graph Json Object";
+        GraphJsonObject: Codeunit "Graph Json Object CS";
         GraphEdge: JsonObject;
     begin
         GraphEdge.ReadFrom(Rec.GetValue());

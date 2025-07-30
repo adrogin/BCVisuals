@@ -13,9 +13,7 @@ pageextension 50153 "Posted Sales Shipment CS" extends "Posted Sales Shipment"
 
                 trigger OnAction()
                 begin
-                    CostSource.SetTraceStart(Rec);
-                    CostSource.SetTraceDirection(Enum::"Cost Trace Direction CS"::Backward);
-                    CostSource.Run();
+                    NodeSourceDocument.RunCostTrace(Rec, Enum::"Cost Trace Direction CS"::Backward);
                 end;
             }
             action(TraceOutboundCostApplications)
@@ -27,13 +25,11 @@ pageextension 50153 "Posted Sales Shipment CS" extends "Posted Sales Shipment"
 
                 trigger OnAction()
                 begin
-                    CostSource.SetTraceStart(Rec);
-                    CostSource.SetTraceDirection(Enum::"Cost Trace Direction CS"::Forward);
-                    CostSource.Run();
+                    NodeSourceDocument.RunCostTrace(Rec, Enum::"Cost Trace Direction CS"::Forward);
                 end;
             }
         }
     }
     var
-        CostSource: Page "Cost Source CS";
+        NodeSourceDocument: Codeunit "Node Source Document CS";
 }

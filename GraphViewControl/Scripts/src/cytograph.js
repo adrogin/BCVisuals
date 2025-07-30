@@ -48,7 +48,6 @@ function renderGraph(containerElement, nodes, edges, styles, layout, eventCallba
 
   createTextElements(nodes);
   bindCytoscapeEventHandlers(eventCallbacks);
-  console.log(cy.elements()[0]._private.position);
 }
 
 function bindCytoscapeEventHandlers(eventCallbacks) {

@@ -260,6 +260,41 @@ codeunit 50150 "Cost Application Trace CS"
             until ItemLedgEntry.Next() = 0;
     end;
 
+    procedure TraceFromSourceRecord(TraceSource: RecordRef; TraceDirection: Enum "Cost Trace Direction CS"; var GraphNodes: JsonArray; var GraphEdges: JsonArray)
+    var
+        CostGraph: Codeunit "Cost Graph CS";
+    begin
+        if TraceSource.Number = 0 then
+            exit;
+
+        if TraceSource.Number = Database::"Item Ledger Entry" then
+            TraceCostApplicationFromItemLedgerEntry(TraceSource, TraceDirection, GraphNodes, GraphEdges)
+        else
+            TraceCostApplicationFromDocument(TraceSource.Number, TraceSource.Field(CostGraph.FindDocumentNoField(TraceSource.Number)).Value, TraceDirection, GraphNodes, GraphEdges);
+    end;
+
+    local procedure TraceCostApplicationFromDocument(SourceTableNo: Integer; DocumentNo: Code[20]; TraceDirection: Enum "Cost Trace Direction CS"; var GraphNodes: JsonArray; var GraphEdges: JsonArray)
+    var
+        CostGraph: Codeunit "Cost Graph CS";
+    begin
+        if SourceTableNo = 0 then
+            exit;
+
+        BuildCostSourceGraph(CostGraph.TableNo2DocumentType(SourceTableNo), DocumentNo, TraceDirection, GraphNodes, GraphEdges);
+    end;
+
+    local procedure TraceCostApplicationFromItemLedgerEntry(TraceSource: RecordRef; TraceDirection: Enum "Cost Trace Direction CS"; var GraphNodes: JsonArray; var GraphEdges: JsonArray)
+    var
+        ItemLedgerEntry: Record "Item Ledger Entry";
+        EntryNo: Integer;
+    begin
+        EntryNo := TraceSource.Field(ItemLedgerEntry.FieldNo("Entry No.")).Value;
+        if EntryNo = 0 then
+            exit;
+
+        BuildCostSourceGraph(EntryNo, TraceDirection, GraphNodes, GraphEdges);
+    end;
+
     local procedure FindOrderItemLedgerEntries(var ItemLedgerEntry: Record "Item Ledger Entry"; OrderType: Enum "Inventory Order Type"; OrderNo: Code[20]; EntryType: Enum "Item Ledger Entry Type"): Boolean
     begin
         ItemLedgerEntry.SetCurrentKey("Order Type", "Order No.", "Order Line No.", "Entry Type");
@@ -338,7 +373,7 @@ codeunit 50150 "Cost Application Trace CS"
     var
         ItemCostFlowBuf: Record "Item Cost Flow Buf. CS";
         TempVisitedItemApplnEntry: Record "Item Application Entry" temporary;
-        GraphJsonArray: Codeunit "Graph Json Array";
+        GraphJsonArray: Codeunit "Graph Json Array CS";
         LastEntryNo: Integer;
         MaxDepth: Integer;
 }

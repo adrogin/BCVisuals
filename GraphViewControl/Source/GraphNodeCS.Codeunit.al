@@ -1,4 +1,4 @@
-codeunit 50100 "Graph Node Data Mgt. CS"
+codeunit 50100 "Graph Node CS"
 {
     procedure UpdateNodeSetFields(NodeSetCode: Code[20]; TableNo: Integer)
     begin
