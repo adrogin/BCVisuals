@@ -27,5 +27,6 @@ export default {
         library: {
             type: 'window',
         }
-    }
+    },
+    mode: 'production'
 };
