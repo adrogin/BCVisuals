@@ -28,8 +28,27 @@ There are two ways users can access the cost tracing functionality.
 1. Search for the **Cost Source** page and select the source item ledger entry and the cost tracing direction in page controls.
 ![CostSource2](https://github.com/adrogin/BCVisuals/assets/42849285/a6c1fb6e-66d5-43be-b3f6-a4e8a511b767)
 
-2. Navigate to the **Item Ledger Entries** page, select the source entry you want to explore, and choose one of the menu options: **Trace Inbound Cost Applications** or **Trace Outboud Cost Applications**.
+2. Navigate to the **Item Ledger Entries** page or one of the document pages that support cost tracing, select the source entry or the document you want to explore, and choose one of the menu options: **Trace Inbound Cost Applications** or **Trace Outboud Cost Applications**.
 ![image](https://github.com/user-attachments/assets/6999455f-c521-4267-ba89-47199190a0bd)
+
+Besides item ledger entries, the following document currently support cost graph functionality:
+- Posted Purchase Receipt
+- Posted Sales Shipment
+- Posted Return Receipt
+- Posted Return Shipment
+- Posted Transfer Shipment
+- Posted transfer Receipt
+- Released Production Order
+- Finished Production Order
+- Posted Assembly Order
+
+For all documents, the action can be run from document card pages as well as respective list pages.
+
+### Mouse clicks on graph nodes
+Mouse click on a node of the cost graph opens the record (entry or document) this node represents. For nodes corresponding to item ledger entries, click opens the Item Ledger Entries page with the focus on the selected entry. Click on a compound node showing a document, the respective document page will be opened.
+
+![chrome_1Nwqpcqv5a](https://github.com/user-attachments/assets/abd063ba-fef4-4d67-9fd2-7dd8a6a32b6f)
+
 
 ## Node Styles
 By default, all graph nodes are rendered with the same predefined style, while it may be useful to apply different styles to differentiate various types of entries. For example, highlighting all negative entries in a distinct colour is very helpful in understanding the positive to negative cost flow. Similarly, the cost application graph is easier to read when different entry types are drawn as different shapes. This visual differentiation can be achieved by configuring graph selectors and styles. Import the configuration package **PackageGRAPHVIEW.rapidstart** from the **Config** folder to see an example of the style configuration.
