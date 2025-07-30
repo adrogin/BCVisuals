@@ -64,6 +64,6 @@ page 50101 "Node Set Fields CS"
     end;
 
     var
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphNodeDataMgt: Codeunit "Graph Node CS";
         CanExcludeField: Boolean;
 }

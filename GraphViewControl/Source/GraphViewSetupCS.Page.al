@@ -2,7 +2,7 @@ page 50105 "Graph View Setup CS"
 {
     Caption = 'Graph View Setup';
     PageType = Card;
-    ApplicationArea = All;
+    ApplicationArea = Basic, Suite;
     UsageCategory = Administration;
     SourceTable = "Graph View Setup CS";
 

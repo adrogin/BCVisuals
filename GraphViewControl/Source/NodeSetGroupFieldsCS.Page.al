@@ -1,7 +1,7 @@
 page 50111 "Node Set Group Fields CS"
 {
     PageType = ListPart;
-    ApplicationArea = All;
+    ApplicationArea = Basic, Suite;
     UsageCategory = None;
     SourceTable = "Node Set Group Field CS";
     Caption = 'Group Fields';

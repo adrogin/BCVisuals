@@ -19,7 +19,7 @@ table 50104 "Selector Filter CS"
             var
                 Selector: Record "Selector CS";
                 Field: Record Field;
-                GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+                GraphNodeDataMgt: Codeunit "Graph Node CS";
                 FieldCannotBeFilterErr: Label 'Field %1 cannot be used for filtering.', Comment = '%1: Field No.';
             begin
                 TestField("Selector Code");
@@ -140,5 +140,5 @@ table 50104 "Selector Filter CS"
     end;
 
     var
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphNodeDataMgt: Codeunit "Graph Node CS";
 }

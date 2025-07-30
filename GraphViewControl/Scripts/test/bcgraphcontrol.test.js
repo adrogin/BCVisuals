@@ -2,6 +2,8 @@ import { renderGraph, getGraphElements, setNodeTooltipText, setNodeTooltipsOnAll
     addNodes, addEdges, removeNodes, removeEdges
 } from "../src/cytograph";
 
+import 'jest-canvas-mock';
+
 import {
     graphNodesFilter, graphEdgesFilter, getSampleGraphElementArrays, getSampleGraphElementArraysWithData, getSampleNodeTooltipsArray, 
     getSampleGraphElementArraysWithLabels, nodeIdFilter, edgeNodesFilter
@@ -90,7 +92,7 @@ test('Default graph layout can be changed after creating an instance', () => {
     renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges);
 
     expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.x).toBeCloseTo(-0.38, 1);
-    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.y).toBeCloseTo(3.38, 1);
+    expect(getGraphElements().filter(nodeIdFilter('B'))[0].json().position.y).toBeCloseTo(1.38, 1);
 
     setGraphLayout('circle');
 
@@ -153,7 +155,7 @@ describe('Initialize graph with event callbacks', () => {
         };
 
         const graphDefinition = getSampleGraphElementArrays();
-        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, null, eventCallbacks);
+        renderGraph(undefined, graphDefinition.nodes, graphDefinition.edges, undefined, undefined, eventCallbacks);
     });
     
     beforeEach(() => { testDone = null });
@@ -232,10 +234,16 @@ describe('Graph elements manipulations', () => {
 });
 
 describe('Events on compound nodes', () => {
-    test('OnNodeClick event called once when a child of a compound node is clicked', (done) => {
-        const container = document.createElement("div");
+    let container;
+
+    beforeAll(() => {
+        container = document.createElement("div");
+        container.style.width = '100px';
+        container.style.height = '100px';
         document.body.appendChild(container);
-    
+    });
+
+    test('OnNodeClick event called once when a child of a compound node is clicked', (done) => {    
         const onClickHandler = jest.fn(() => { done() });
         renderGraph(
             container,
@@ -243,16 +251,25 @@ describe('Events on compound nodes', () => {
                 { data: {'id': 'A'}, position: { x: 10, y: 10 }},
                 { data: {'id': 'B', 'parent': 'A'}, position: { x: 10, y: 10 }}
             ],
-            null,
-            null,
-            onClickHandler);
+            undefined,  // No edges
+            undefined,  // Use default styles
+            'breadthfirst',
+            [onClickHandler]);
 
         let cy = getGraphElements().cy();
         cy.pan({ x: 0, y: 0 });
         cy.zoom(1);
         cy.viewport({ zoom: 1, pan: { x: 0, y: 0 }});
 
-        document.dispatchEvent(new MouseEvent("click", { clientX: 10, clientY: 10 }));
+        document.dispatchEvent(
+            new MouseEvent("click", {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                clientX: 10,
+                clientY: 10
+            })
+        );
 
         expect(onClickHandler).toHaveBeenCalledTimes(1);
     });

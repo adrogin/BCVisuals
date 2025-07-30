@@ -1,48 +1,5 @@
-codeunit 50101 "Graph View Controller CS"
+codeunit 50101 "Graph Data Management CS"
 {
-    procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Text)
-    var
-        Node: JsonObject;
-    begin
-        Node.Add('id', NodeId);
-        Nodes.Add(Node);
-    end;
-
-    procedure AddNodeToArray(var Nodes: JsonArray; NodeId: Integer)
-    var
-        Node: JsonObject;
-    begin
-        Node.Add('id', NodeId);
-        Nodes.Add(Node);
-    end;
-
-    procedure AddCompoundNodeToArray(var Nodes: JsonArray; NodeId: Text)
-    var
-        Node: JsonObject;
-    begin
-        Node.Add('id', NodeId);
-        Node.Add('compound', true);
-        Nodes.Add(Node);
-    end;
-
-    procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Text; TargetNodeId: Text)
-    var
-        Edge: JsonObject;
-    begin
-        Edge.Add('source', Format(SourceNodeId));
-        Edge.Add('target', Format(TargetNodeId));
-        Edges.Add(Edge);
-    end;
-
-    procedure AddEdgeToArray(var Edges: JsonArray; SourceNodeId: Integer; TargetNodeId: Integer)
-    var
-        Edge: JsonObject;
-    begin
-        Edge.Add('source', Format(SourceNodeId));
-        Edge.Add('target', Format(TargetNodeId));
-        Edges.Add(Edge);
-    end;
-
     procedure ConvertFieldNameToJsonToken(NodeSetField: Record "Node Set Field CS") ConvertedName: Text[80]
     begin
         if (NodeSetField."Table No." <> 0) and (NodeSetField."Field No." <> 0) then
@@ -71,21 +28,6 @@ codeunit 50101 "Graph View Controller CS"
     begin
         for I := 1 to StrLen(FieldName) do
             ConvertedName := CopyStr(ConvertedName + ReplaceSymbolIfNotAllowedInPropertyName(FieldName[I]), 1, MaxStrLen(ConvertedName));
-    end;
-
-    procedure FindNodeById(NodeId: Text; Nodes: JsonArray; var SelectedNode: JsonObject): Boolean
-    var
-        NodeSelectorTok: Label '$[?(@.id==%1)]', Comment = '%1: ID of the node to search', Locked = true;
-        Node: JsonToken;
-        NodeFound: Boolean;
-    begin
-        NodeFound := Nodes.SelectToken(StrSubstNo(NodeSelectorTok, NodeId), Node);
-
-        if not NodeFound then
-            exit(false);
-
-        SelectedNode := Node.AsObject();
-        exit(true);
     end;
 
     procedure IsCompoundNode(Node: JsonObject): Boolean
@@ -210,7 +152,7 @@ codeunit 50101 "Graph View Controller CS"
 
     procedure IsIdField(TableNo: Integer; FieldNo: Integer): Boolean
     var
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphNodeDataMgt: Codeunit "Graph Node CS";
         IsHandled: Boolean;
         IsId: Boolean;
     begin
@@ -297,7 +239,7 @@ codeunit 50101 "Graph View Controller CS"
         exit(not NodeTextField.IsEmpty());
     end;
 
-    procedure SetNodeProperties(var Node: JsonToken; GroupNodes: List of [Text]; SourceRecRef: RecordRef; NodeSetCode: Code[20])
+    procedure SetNodeProperties(var Node: JsonToken; GroupNodes: Dictionary of [Text, JsonObject]; SourceRecRef: RecordRef; NodeSetCode: Code[20])
     var
         NodeGroupId: Text;
     begin
@@ -305,8 +247,8 @@ codeunit 50101 "Graph View Controller CS"
         NodeGroupId := GetNodeGroupId(SourceRecRef, NodeSetCode);
 
         if NodeGroupId <> '' then begin
-            if not GroupNodes.Contains(NodeGroupId) then
-                GroupNodes.Add(NodeGroupId);
+            if not GroupNodes.Keys.Contains(NodeGroupId) then
+                GroupNodes.Add(NodeGroupId, CreateCompoundNode(NodeGroupId, GetNodeCompositionProperties(SourceRecRef, NodeSetCode)));
 
             Node.AsObject().Add('parent', NodeGroupId);
         end;
@@ -333,21 +275,54 @@ codeunit 50101 "Graph View Controller CS"
         Node.AsObject().Add('label', FormatNodeText(SourceRecRef, NodeSetCode, Enum::"Node Text Type CS"::Label));
     end;
 
+    local procedure CreateCompoundNode(NodeId: Text; Properties: Dictionary of [Text, Text]): JsonObject
+    var
+        Node: JsonObject;
+        PropertyKey: Text;
+    begin
+        Node.Add('id', NodeId);
+        Node.Add('compound', true);
+
+        foreach PropertyKey in Properties.Keys do
+            Node.Add(PropertyKey, Properties.Get(PropertyKey));
+
+        exit(Node);
+    end;
+
     procedure GetNodeGroupId(SourceRecRef: RecordRef; NodeSetCode: Code[20]): Text
     var
-        NodeSetGroupField: Record "Node Set Group Field CS";
         NodeGroupId: Text;
         SeparatorChar: Char;
+        PropertyValue: Text;
     begin
         SeparatorChar := ' ';
 
+        foreach PropertyValue in GetNodeCompositionProperties(SourceRecRef, NodeSetCode).Values do
+            NodeGroupId := NodeGroupId + PropertyValue + SeparatorChar;
+
+        exit(NodeGroupId.TrimEnd(SeparatorChar));
+    end;
+
+    internal procedure GetNodeCompositionProperties(SourceRecRef: RecordRef; NodeSetCode: Code[20]): Dictionary of [Text, Text]
+    var
+        NodeSetGroupField: Record "Node Set Group Field CS";
+        Properties: Dictionary of [Text, Text];
+    begin
         NodeSetGroupField.SetRange("Node Set Code", NodeSetCode);
         if NodeSetGroupField.FindSet() then
             repeat
-                NodeGroupId := NodeGroupId + Format(SourceRecRef.Field(NodeSetGroupField."Field No.").Value) + SeparatorChar;
+                Properties.Add(ConvertFieldNameToJsonToken(GetFieldName(SourceRecRef.Number, NodeSetGroupField."Field No.")), Format(SourceRecRef.Field(NodeSetGroupField."Field No.").Value));
             until NodeSetGroupField.Next() = 0;
 
-        exit(NodeGroupId.TrimEnd(SeparatorChar));
+        exit(Properties);
+    end;
+
+    local procedure GetFieldName(TableNo: Integer; FieldNo: Integer): Text[30]
+    var
+        FieldRec: Record Field;
+    begin
+        FieldRec.Get(TableNo, FieldNo);
+        exit(FieldRec.FieldName);
     end;
 
     [IntegrationEvent(false, false)]

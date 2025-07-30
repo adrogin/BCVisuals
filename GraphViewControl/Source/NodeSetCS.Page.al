@@ -1,7 +1,7 @@
 page 50109 "Node Set CS"
 {
     PageType = Card;
-    ApplicationArea = All;
+    ApplicationArea = Basic, Suite;
     UsageCategory = None;
     SourceTable = "Node Set CS";
     Caption = 'Node Set';

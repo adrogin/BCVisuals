@@ -17,16 +17,18 @@ var cy;  // Global Cytoscape instance
 var eh;  // EdgeHandles instance
 
 function renderGraph(containerElement, nodes, edges, styles, layout, eventCallbacks) {
-  if (cy != null) {
+  if (cy) {
     cy.destroy();
   }
 
-  if (layout == undefined) {
+  if (!layout) {
     layout = 'breadthfirst';
   }
 
-  const defaultStyles = getDefaultElementStyles();
-  styles = styles === undefined ? defaultStyles : defaultStyles.concat(styles);
+  let cyStyles = getDefaultElementStyles();
+  if (styles) {
+    cyStyles = cyStyles.concat(styles);
+  }
 
   cy = cytoscape({
     container: containerElement,
@@ -36,7 +38,7 @@ function renderGraph(containerElement, nodes, edges, styles, layout, eventCallba
       edges: formatEdges(edges)
     },
 
-    style: styles,
+    style: cyStyles,
 
     layout: {
       name: layout,
@@ -46,7 +48,6 @@ function renderGraph(containerElement, nodes, edges, styles, layout, eventCallba
 
   createTextElements(nodes);
   bindCytoscapeEventHandlers(eventCallbacks);
-  console.log(cy.elements()[0]._private.position);
 }
 
 function bindCytoscapeEventHandlers(eventCallbacks) {
@@ -286,7 +287,8 @@ function initEdgeHandles(eventCallbacks) {
     // Do not allow self-loops or parallel edges
     canConnect: function(sourceNode, targetNode) {
       return !sourceNode.same(targetNode) &&
-            sourceNode.edgesTo(`[id="${ targetNode.id() }"]`).size() == 0 && targetNode.edgesTo(`[id="${ sourceNode.id() }"]`).size() == 0;
+            sourceNode.edgesTo(`[id="${ targetNode.id() }"]`).size() == 0 && targetNode.edgesTo(`[id="${ sourceNode.id() }"]`).size() == 0 &&
+            !sourceNode.isParent() && !targetNode.isParent();
         },
 
     edgeParams: function(sourceNode, targetNode) {

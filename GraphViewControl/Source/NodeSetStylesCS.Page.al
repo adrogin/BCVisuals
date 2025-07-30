@@ -60,7 +60,7 @@ page 50108 "Node Set Styles CS"
                 action(StyleCard)
                 {
                     Caption = 'Style';
-                    ApplicationArea = All;
+                    ApplicationArea = Basic, Suite;
                     ToolTip = 'Configure the selectors and the style sheet for the selected style';
                     Image = StyleSheet;
                     RunObject = page "Style Card";

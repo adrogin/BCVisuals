@@ -4,7 +4,7 @@ permissionset 50100 CostGraph
     Assignable = true;
     Permissions = tabledata "Node Set Field CS" = RIMD,
         table "Node Set Field CS" = X,
-        codeunit "Graph View Controller CS" = X,
+        codeunit "Graph Data Management CS" = X,
         page "Node Set Fields CS" = X,
         tabledata "Node Text Field CS" = RIMD,
         table "Node Text Field CS" = X,
@@ -24,7 +24,7 @@ permissionset 50100 CostGraph
         page "Styles List CS" = X,
         tabledata "Graph View Setup CS" = RIMD,
         table "Graph View Setup CS" = X,
-        codeunit "Graph Node Data Mgt. CS" = X,
+        codeunit "Graph Node CS" = X,
         tabledata "Style Set CS" = RIMD,
         table "Style Set CS" = X,
         page "Graph View Setup CS" = X,

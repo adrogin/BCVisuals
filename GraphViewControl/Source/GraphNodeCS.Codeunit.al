@@ -1,4 +1,4 @@
-codeunit 50100 "Graph Node Data Mgt. CS"
+codeunit 50100 "Graph Node CS"
 {
     procedure UpdateNodeSetFields(NodeSetCode: Code[20]; TableNo: Integer)
     begin
@@ -89,14 +89,6 @@ codeunit 50100 "Graph Node Data Mgt. CS"
 
         OnFieldIsInDefaultSet(TableNo, FieldNo, IsFieldInDefaultSet);
         exit(IsFieldInDefaultSet);
-    end;
-
-    procedure GetValueFromObject(JObj: JsonToken; KeyName: Text): Text
-    var
-        Token: JsonToken;
-    begin
-        JObj.AsObject().Get(KeyName, Token);
-        exit(Token.AsValue().AsText());
     end;
 
     procedure IsFieldRequiredInNodeText(NodeSetCode: Code[20]; FieldNo: Integer; FieldTypeToExclude: Enum "Node Text Type CS"): Boolean

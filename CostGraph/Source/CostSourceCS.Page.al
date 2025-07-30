@@ -13,15 +13,17 @@ page 50150 "Cost Source CS"
             {
                 Caption = 'Settings';
 
-                field(EntryInfoControl; EntryInfo)
+                field(EntryInfoControl; DataSourceInfo)
                 {
                     Caption = 'Item Ledger Entry';
                     ToolTip = 'Select an item ledger entry to trace its cost source.';
                     Editable = false;
 
                     trigger OnAssistEdit()
+                    var
+                        NodeSourceDocument: Codeunit "Node Source Document CS";
                     begin
-                        if SelectEntry(EntryNo) then
+                        if NodeSourceDocument.SelectSource(TraceStartRef) then
                             ShowCostApplicationGraph();
                     end;
                 }
@@ -42,7 +44,7 @@ page 50150 "Cost Source CS"
 
                     trigger OnValidate()
                     begin
-                        CurrPage.GraphControl.SetLayout(GraphViewController.GraphLayoutEnumToText(GraphLayout));
+                        CurrPage.GraphControl.SetLayout(GraphDataManagement.GraphLayoutEnumToText(GraphLayout));
                     end;
                 }
             }
@@ -56,23 +58,12 @@ page 50150 "Cost Source CS"
 
                     trigger ControlAddinReady()
                     begin
-                        if EntryNo <> 0 then
-                            ShowCostApplicationGraph();
+                        ShowCostApplicationGraph();
                     end;
 
                     trigger OnNodeClick(NodeId: Text)
-                    var
-                        ItemLedgerEntry: Record "Item Ledger Entry";
-                        Node: JsonObject;
                     begin
-                        if not GraphViewController.FindNodeById(NodeId, Nodes, Node) then
-                            exit;
-
-                        if GraphViewController.IsCompoundNode(Node) then
-                            exit;
-
-                        ItemLedgerEntry.Get(CostViewController.NodeId2ItemLedgEntryNo(NodeId));
-                        Page.Run(Page::"Item Ledger Entries", ItemLedgerEntry);
+                        CostGraph.HandleNodeClick(NodeId, GraphNodes);
                     end;
                 }
             }
@@ -99,6 +90,26 @@ page 50150 "Cost Source CS"
                 Image = Setup;
                 RunObject = page "Graph View Setup CS";
             }
+            action(DownloadGraph)
+            {
+                Caption = 'Download Graph';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Download the graph data.';
+                Image = Download;
+                trigger OnAction()
+                var
+                    TempBlob: Codeunit "Temp Blob";
+                    OutStr: OutStream;
+                    InStr: InStream;
+                    FileName: Text;
+                begin
+                    TempBlob.CreateOutStream(OutStr);
+                    GraphNodes.WriteTo(OutStr);
+
+                    TempBlob.CreateInStream(InStr);
+                    DownloadFromStream(InStr, '', '', '', FileName);
+                end;
+            }
         }
         area(Promoted)
         {
@@ -108,25 +119,14 @@ page 50150 "Cost Source CS"
 
     trigger OnInit()
     begin
-        GraphLayout := CostViewController.GetDefaultLayout();
+        GraphLayout := CostGraph.GetDefaultLayout();
         TraceDirection := Enum::"Cost Trace Direction CS"::Backward;
     end;
 
-    local procedure SelectEntry(var NewEntryNo: Integer): Boolean
-    var
-        ItemLedgerEntry: Record "Item Ledger Entry";
-    begin
-        if Page.RunModal(0, ItemLedgerEntry) = Action::LookupOK then begin
-            NewEntryNo := ItemLedgerEntry."Entry No.";
-            exit(true);
-        end;
 
-        exit(false);
-    end;
-
-    procedure SetEntryNo(SelectedEntryNo: Integer)
+    procedure SetTraceStart(TraceStart: Variant)
     begin
-        EntryNo := SelectedEntryNo;
+        TraceStartRef.GetTable(TraceStart);
     end;
 
     procedure SetTraceDirection(Direction: Enum "Cost Trace Direction CS")
@@ -134,39 +134,29 @@ page 50150 "Cost Source CS"
         TraceDirection := Direction;
     end;
 
-    local procedure FormatEntryInfo(ItemLedgEntryNo: Integer): Text
-    var
-        ItemLedgerEntry: Record "Item Ledger Entry";
-        EntryInfoFormatTok: Label '%1: %2 %3', Comment = '%1: Entry No.; %2: Document Type; %3: Document No.';
-    begin
-        ItemLedgerEntry.SetLoadFields("Document Type", "Document No.");
-        ItemLedgerEntry.Get(ItemLedgEntryNo);
-        exit(StrSubstNo(EntryInfoFormatTok, ItemLedgEntryNo, ItemLedgerEntry."Document Type", ItemLedgerEntry."Document No."));
-    end;
-
     local procedure ShowCostApplicationGraph()
     var
-        CostSourceTrace: Codeunit "Cost Application Trace CS";
+        CostApplicatinoTrace: Codeunit "Cost Application Trace CS";
     begin
-        Clear(Nodes);
-        Clear(Edges);
-        EntryInfo := FormatEntryInfo(EntryNo);
-        CostSourceTrace.BuildCostSourceGraph(EntryNo, TraceDirection, Nodes, Edges);
-        CostViewController.SetNodesData(Nodes);
+        Clear(GraphNodes);
+        Clear(GraphEdges);
+        DataSourceInfo := CostGraph.FormatDataSourceInfo(TraceStartRef);
+        CostApplicatinoTrace.TraceFromSourceRecord(TraceStartRef, TraceDirection, GraphNodes, GraphEdges);
+        CostGraph.SetNodesData(GraphNodes);
         CurrPage.GraphControl.DrawGraphWithStyles(
-            'controlAddIn', Nodes, Edges, GraphViewController.GetStylesAsJson(CostViewController.GetDefaultNodeSet()),
-            GraphViewController.GraphLayoutEnumToText(GraphLayout));
-        CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostViewController.GetNodeTooltipsArray(Nodes));
+            'controlAddIn', GraphNodes, GraphEdges, GraphDataManagement.GetStylesAsJson(CostGraph.GetDefaultNodeSet()),
+            GraphDataManagement.GraphLayoutEnumToText(GraphLayout));
+        CurrPage.GraphControl.SetTooltipTextOnMultipleNodes(CostGraph.GetNodeTooltipsArray(GraphNodes));
         CurrPage.GraphControl.CreateTooltips();
     end;
 
     var
-        GraphViewController: Codeunit "Graph View Controller CS";
-        CostViewController: Codeunit "Cost View Controller CS";
+        GraphDataManagement: Codeunit "Graph Data Management CS";
+        CostGraph: Codeunit "Cost Graph CS";
+        TraceStartRef: RecordRef;
         GraphLayout: Enum "Graph Layout Name CS";
-        EntryNo: Integer;
-        EntryInfo: Text;
+        DataSourceInfo: Text;
         TraceDirection: Enum "Cost Trace Direction CS";
-        Nodes: JsonArray;
-        Edges: JsonArray;
+        GraphNodes: JsonArray;
+        GraphEdges: JsonArray;
 }

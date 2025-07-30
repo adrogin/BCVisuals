@@ -83,5 +83,5 @@ table 50102 "Node Text Field CS"
     end;
 
     var
-        GraphNodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphNodeDataMgt: Codeunit "Graph Node CS";
 }

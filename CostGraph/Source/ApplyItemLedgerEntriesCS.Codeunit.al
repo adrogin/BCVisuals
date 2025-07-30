@@ -4,13 +4,13 @@ codeunit 50153 "Apply Item Ledger Entries CS"
 
     trigger OnRun()
     var
-        GraphnodeDataMgt: Codeunit "Graph Node Data Mgt. CS";
+        GraphJsonObject: Codeunit "Graph Json Object CS";
         GraphEdge: JsonObject;
     begin
         GraphEdge.ReadFrom(Rec.GetValue());
         ApplnWorksheetEdit.ApplyRec(
-            ApplnWorksheetEdit.EvaluateTextToInt(GraphNodeDataMgt.GetValueFromObject(GraphEdge.AsToken(), 'source')),
-            ApplnWorksheetEdit.EvaluateTextToInt(GraphNodeDataMgt.GetValueFromObject(GraphEdge.AsToken(), 'target')));
+            ApplnWorksheetEdit.EvaluateTextToInt(GraphJsonObject.GetValueFromObject(GraphEdge.AsToken(), 'source')),
+            ApplnWorksheetEdit.EvaluateTextToInt(GraphJsonObject.GetValueFromObject(GraphEdge.AsToken(), 'target')));
     end;
 
     procedure GetContext(var ApplnWorksheetEditInstance: Codeunit "Appln. Worksheet - Edit CS")

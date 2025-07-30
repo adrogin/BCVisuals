@@ -1,4 +1,4 @@
-codeunit 60151 "Library - Data Mocks"
+codeunit 60151 "Library - Data Mocks CS"
 {
     Permissions = tabledata "Item Ledger Entry" = i;
 

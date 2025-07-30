@@ -8,12 +8,13 @@ codeunit 60150 "Cost Trace Tests CS"
         LibraryInventory: Codeunit "Library - Inventory";
         LibraryWarehouse: Codeunit "Library - Warehouse";
         LibraryManufacturing: Codeunit "Library - Manufacturing";
-        LibraryDataMocks: Codeunit "Library - Data Mocks";
+        LibraryDataMocks: Codeunit "Library - Data Mocks CS";
         LibraryAssembly: Codeunit "Library - Assembly";
         LibraryPatterns: Codeunit "Library - Patterns";
         LibraryUtility: Codeunit "Library - Utility";
         LibraryRandom: Codeunit "Library - Random";
         LibraryAssert: Codeunit "Library Assert";
+        LibraryGraphView: Codeunit "Library - Graph View CS";
         IncorrectNodeCountErr: Label 'Incorrect number of nodes in the graph.';
         IncorrectEdgeCountErr: Label 'Incorrect number of edges in the graph.';
         IncorrectNodeNoErr: Label 'Incorrect item ledger entry No. in the edge.';
@@ -354,13 +355,19 @@ codeunit 60150 "Cost Trace Tests CS"
     [Test]
     procedure BuildCostGraphGroupByDocumentNo()
     var
-        GraphViewController: Codeunit "Graph View Controller CS";
-        CostViewController: Codeunit "Cost View Controller CS";
+        NodeSet: Record "Node Set CS";
+        ItemLedgerEntry: Record "Item Ledger Entry";
+        GraphJsonArray: Codeunit "Graph Json Array CS";
+        CostGraph: Codeunit "Cost Graph CS";
         DocumentNos: array[2] of Code[20];
         EntryNos: array[5] of Integer;
         Nodes: JsonArray;
         I: Integer;
     begin
+        LibraryGraphView.CreateNodeSet(NodeSet);
+        LibraryGraphView.UpdateNodeSetTableNo(NodeSet, Database::"Item Ledger Entry");
+        LibraryGraphView.AddNodeSetGroupField(NodeSet.Code, ItemLedgerEntry.FieldNo("Document No."));
+
         DocumentNos[1] := LibraryUtility.GenerateGUID();
         DocumentNos[2] := LibraryUtility.GenerateGUID();
 
@@ -375,9 +382,9 @@ codeunit 60150 "Cost Trace Tests CS"
         LibraryDataMocks.MockItemLedgerEntry(EntryNos[5], '');
 
         for I := 1 to ArrayLen(EntryNos) do
-            GraphViewController.AddNodeToArray(Nodes, EntryNos[I]);
+            GraphJsonArray.AddNodeToArray(Nodes, EntryNos[I]);
 
-        CostViewController.SetNodesData(Nodes);
+        CostGraph.SetNodesData(Nodes, NodeSet.Code);
 
         LibraryAssert.AreEqual(7, Nodes.Count, ItemLedgEntryMissingInNodeListErr);
         VerifyNodeParent(Nodes, 0, Format(EntryNos[1]), DocumentNos[1]);
