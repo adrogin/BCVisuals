@@ -17,8 +17,11 @@ page 50250 "Routing Graph RG"
                     ApplicationArea = Manufacturing;
 
                     trigger OnGraphDataReceived(Nodes: JsonArray; Edges: JsonArray)
+                    var
+                        RoutingWasUpdatedMsg: Label 'Routing has been updated.';
                     begin
                         RoutingGraph.UpdatRoutingFromGraph(Nodes, Edges, RoutingNo, VersionCode);
+                        Message(RoutingWasUpdatedMsg);
                     end;
                 }
             }
